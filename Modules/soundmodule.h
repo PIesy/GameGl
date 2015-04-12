@@ -1,9 +1,9 @@
 #ifndef SOUNDMODULE_H
 #define SOUNDMODULE_H
 
-#include "moduleinterface.h"
+#include "module.h"
 
-class SoundModule: public IModule
+class SoundModule: public Module
 {
 public:
     SoundModule();

@@ -13,13 +13,13 @@ struct Event
     std::condition_variable newEvent;
 };
 
-class Action
+class ActionOld
 {
-    void (*f)(void* arg, void* output);
+    void (*function)(void* arg, void* output);
     void* output;
     int bindpoint;
 public:
-    Action(void (*action)(void* event, void* output), void* output);
+    ActionOld(void (*action)(void* event, void* output), void* output);
     void Invoke(void* event);
     int getBindpoint();
     void setBindpoint(int bindpoint);
@@ -32,26 +32,25 @@ struct EventStorage
     bool terminate = false;
     std::mutex mutex;
     Event event;
-    std::list<Action> actions;
+    std::list<ActionOld> actions;
 };
 
 class EventsHandler
 {
+    static const int handlersCount = 3;
     bool terminate = false;
-    EventStorage eventStorage[3];
-    Worker workers[3];
+    EventStorage eventStorage[handlersCount];
+    Worker hostThread;
+    Worker workers[handlersCount];
 public:
     EventsHandler();
-    void BindAction(Action action, int eventType, int category);
+    void BindAction(ActionOld action, int eventType, int category);
+    void UnbindAction(ActionOld action, int eventType, int category);
+    void Start();
     void Terminate();
+    void WaitEnd();
 
     friend void EventPoller(EventsHandler* handler);
 };
-
-void windowHandler(EventStorage *storage);
-void keyboardHandler(EventStorage* eventStorage);
-void mouseHandler(EventStorage* eventStorage);
-
-void EventPoller(EventsHandler* handler);
 
 #endif // EVENTSHANDLER_H

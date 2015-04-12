@@ -40,7 +40,7 @@ void glDropShader(GLuint* shader)
 GlShader::~GlShader()
 {
     GLuint* sh = new GLuint(shader);
-    context->setTask((void (*)(void*))glDropShader, sh);
+    context->setTask((ActionFun)glDropShader, sh);
 }
 
 void glShaderCreate(ShaderData* data)
@@ -61,7 +61,7 @@ void GlShader::Create(std::string source, unsigned int type)
     data.type = type;
     data.shader = &shader;
     prepareShader(source);
-    context->setTask((void (*)(void*))glShaderCreate, &data);
+    context->setTask((ActionFun)glShaderCreate, &data);
     data.finish.wait(lock);
     cleanup();
 }
@@ -75,7 +75,7 @@ void glDestroyShader(GLuint* shader)
 void GlShader::Destroy()
 {
     GLuint* sh = new GLuint(shader);
-    context->setTask((void (*)(void*))glDestroyShader, sh);
+    context->setTask((ActionFun)glDestroyShader, sh);
     shader = 0;
 }
 

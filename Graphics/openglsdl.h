@@ -43,7 +43,7 @@ class SdlWrapper
     void initGlContext();
 public:
     SdlWrapper(GraphicsData* data);
-    void *CreateWindow(std::string title, int x, int y);
+    void* CreateWindow(std::string title, int x, int y);
     friend class OpenGlSdl;
 };
 

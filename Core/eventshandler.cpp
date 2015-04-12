@@ -1,50 +1,65 @@
 #include "eventshandler.h"
-#include <iostream>
+#include "Logger/logger.h"
 
 void inputHandler(EventStorage* eventStorage, Uint8* compareWith);
+void windowHandler(EventStorage *storage);
+void keyboardHandler(EventStorage* eventStorage);
+void mouseHandler(EventStorage* eventStorage);
+void EventPoller(EventsHandler* handler);
 
-Action::Action(void (*action)(void *, void *), void *output)
+ActionOld::ActionOld(void (*fun)(void *, void *), void *output)
 {
-    f = action;
+    function = fun;
     this->output = output;
 }
 
-void Action::Invoke(void *event)
+void ActionOld::Invoke(void *event)
 {
-    f(event, output);
+    function(event, output);
 }
 
-int Action::getBindpoint()
+int ActionOld::getBindpoint()
 {
     return bindpoint;
 }
 
-void Action::setBindpoint(int bindpoint)
+void ActionOld::setBindpoint(int bindpoint)
 {
     this->bindpoint = bindpoint;
 }
 
 EventsHandler::EventsHandler()
 {
-    workers[0].setWork((void (*)(void*))windowHandler, &eventStorage[0]);
-    workers[1].setWork((void (*)(void*))keyboardHandler, &eventStorage[1]);
-    workers[2].setWork((void (*)(void*))mouseHandler, &eventStorage[2]);
+    workers[0].setTask((ActionFun)windowHandler, &eventStorage[0]);
+    workers[1].setTask((ActionFun)keyboardHandler, &eventStorage[1]);
+    workers[2].setTask((ActionFun)mouseHandler, &eventStorage[2]);
 }
 
-void EventsHandler::BindAction(Action action, int eventType, int category)
+void EventsHandler::BindAction(ActionOld action, int eventType, int category)
 {
     action.bindpoint = eventType;
     eventStorage[category].actions.push_front(action);
 }
 
+void EventsHandler::Start()
+{
+    hostThread.setTask((ActionFun)EventPoller, this);
+}
+
 void EventsHandler::Terminate()
 {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < handlersCount; i++)
     {
         eventStorage[i].terminate = true;
         eventStorage[i].event.newEvent.notify_all();
     }
     terminate = true;
+    hostThread.Terminate();
+}
+
+void EventsHandler::WaitEnd()
+{
+    hostThread.Join();
 }
 
 void windowHandler(EventStorage* eventStorage)
@@ -68,7 +83,7 @@ void inputHandler(EventStorage *eventStorage, Uint8* compareWith)
 
     while(!eventStorage->terminate)
     {
-        for(Action& action : eventStorage->actions)
+        for(ActionOld& action : eventStorage->actions)
             if((*compareWith == action.getBindpoint()) || (action.getBindpoint() == -1))
                 action.Invoke(new SDL_Event(eventStorage->event.event));
         eventStorage->event.newEvent.wait(lock);
@@ -77,7 +92,7 @@ void inputHandler(EventStorage *eventStorage, Uint8* compareWith)
 
 void EventPoller(EventsHandler *handler)
 {
-    std::cout << "event poller started\n";
+    Logger::Log("event poller started");
     SDL_Event event;
     int newEvent = 0;
 
@@ -107,5 +122,5 @@ void EventPoller(EventsHandler *handler)
         }
         SDL_Delay(1);
     }
-    std::cout << "event poller stopped\n";
+    Logger::Log("event poller stopped");
 }

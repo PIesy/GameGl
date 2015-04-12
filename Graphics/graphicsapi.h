@@ -2,6 +2,7 @@
 #define GRAPHICSAPI_H
 
 #include <string>
+#include "Api/apibase.h"
 
 class Shader
 {
@@ -75,7 +76,7 @@ struct Scene
     short passes = 0;
 };
 
-class GraphicsApi
+class GraphicsApi: public ApiBase
 {
 public:
     virtual void* CreateWindow(std::string title, int x, int y) = 0;

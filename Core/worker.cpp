@@ -1,14 +1,33 @@
-#include "worker.h"
+﻿#include "worker.h"
+#include "Logger/logger.h"
+#include <sstream>
 
-void SetupData(void(*f)(void*), void* arg, WorkerData *data);
+void setupData(Action fun, void* arg, WorkerData *data);
 void workerController(WorkerData *data);
+void logStatus(std::string message);
 
-Worker::Worker(void (*f)(void*), void* arg)
+Worker::Worker()
 {
-    SetupData(f, arg, &data);
-
-    workerThread = new std::thread(workerController, &data);
+    data = new WorkerData();
+    workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
+}
+
+Worker::Worker(Action fun, void* arg)
+{
+    data = new WorkerData();
+    data->tasks.push({fun, arg});
+    workerThread = new std::thread(workerController, data);
+    workerId = workerThread->get_id();
+}
+
+Worker::Worker(Worker&& arg)
+{
+    workerId = arg.workerId;
+    workerThread = arg.workerThread;
+    arg.workerThread = nullptr;
+    data = arg.data;
+    arg.data = nullptr;
 }
 
 Worker::~Worker()
@@ -18,65 +37,64 @@ Worker::~Worker()
         workerThread->detach();
         workerThread->~thread();
     }
+    delete workerThread;
+    delete data;
 }
 
-void Worker::setWork(void (*f)(void*), void* arg)
+bool Worker::isBusy()
 {
-    if(!workerThread)
-    {
-        SetupData(f, arg, &data);
-
-        workerThread = new std::thread(workerController, &data);
-        workerId = workerThread->get_id();
-    }
+    return !data->mutex.try_lock();
 }
 
 void Worker::Join()
 {
-    workerThread->join();
+    if(workerThread->joinable())
+        workerThread->join();
+}
+
+void Worker::Wake()
+{
+    data->mutex.lock();
+    data->hasWork.notify_all();
+    data->mutex.unlock();
 }
 
 void Worker::Terminate()
 {
-    data.terminate = true;
-    data.hasWork.notify_all();
+    data->terminate = true;
+    Wake();
 }
 
-void Worker::setTask(void (*f)(void*), void* arg)
+void Worker::setTask(Action fun, void* arg)
 {
-    TaskData* t = new TaskData;
-
-    t->fun = f;
-    t->arg = arg;
-    data.tasks.push(*t);
-    data.hasWork.notify_all();
+    data->tasks.push({fun, arg});
+    Wake();
 }
 
 void workerController(WorkerData *data)
 {
     TaskData task;
-    std::unique_lock<std::mutex> lock(data->mutex);
+    std::unique_lock<std::mutex> lock(data->mutex, std::defer_lock);
 
+    logStatus("Thread started id:");
     while(!data->terminate)
     {
-        if(data->tasks.empty())
+        while(data->tasks.empty())
         {
+            lock.lock();
             data->hasWork.wait(lock);
+            lock.unlock();
         }
         task = data->tasks.front();
         data->tasks.pop();
         task.fun(task.arg);
     }
+    logStatus("Thread stopped id:");
 }
 
-void SetupData(void (*f)(void *), void *arg, WorkerData* data)
+void logStatus(std::string message)
 {
-    TaskData* t = new TaskData;
-
-    if(f)
-    {
-        t->fun = f;
-        t->arg = arg;
-        data->tasks.push(*t);
-    }
+    std::stringstream str;
+    str << message + " " << std::this_thread::get_id();
+    Logger::Log(str.str());
 }

@@ -85,7 +85,8 @@ void Item::setState(int x, int y, bool click)
         invokeActions();
     }
     else
-    {   if(hover)
+    {
+        if(hover)
             lastEvent = Events::onExit;
         else
             lastEvent = Events::None;
@@ -96,14 +97,14 @@ void Item::setState(int x, int y, bool click)
 
 void Item::invokeActions()
 {
-    for (Action& action : actions)
+    for (ActionOld& action : actions)
     {
         if (action.getBindpoint() == integral(lastEvent))
             action.Invoke(this);
     }
 }
 
-void Item::setAction(Events event, Action action)
+void Item::setAction(Events event, ActionOld action)
 {
     action.setBindpoint(integral(event));
     actions.push_back(action);

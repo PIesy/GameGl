@@ -19,7 +19,7 @@ void* SdlWrapper::CreateWindow(std::string title, int x, int y)
 
 void SdlWrapper::initGlContext()
 {
-    data->worker.setWork((void (*)(void*))createGlContext, data);
+    data->worker.setTask((ActionFun)createGlContext, data);
 }
 
 void createGlContext(GraphicsData *data)

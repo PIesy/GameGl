@@ -1,5 +1,5 @@
 #include "enginecore.h"
-#include <iostream>
+#include "Helpers/helpers.h"
 
 EngineCore::EngineCore(EngineInitializer initializer)
 {
@@ -15,7 +15,7 @@ EngineCore::~EngineCore()
 
 void EngineCore::initApis(EngineInitializer initializer)
 {
-    IModule* module;
+    ModuleInterface* module;
     for (ModuleApiPair& pair : initializer.apis)
     {
         module = GetModule(pair.module);
@@ -29,18 +29,18 @@ void EngineCore::initModules()
     AttachModule(Modules::Video, g);
 }
 
-IModule* EngineCore::GetModule(Modules name)
+ModuleInterface* EngineCore::GetModule(Modules name)
 {
     return modules.at(static_cast<int>(name));
 }
 
-void EngineCore::AttachModule(Modules name, IModule* module)
+void EngineCore::AttachModule(Modules name, ModuleInterface* module)
 {
-    std::pair<int, IModule*> pair(static_cast<int>(name), module);
-    modules.insert(pair);
+    module->setEngine(this);
+    modules.insert({integral(name), module});
 }
 
-void EngineCore::BindAction(Action action, int type, int category)
+void EngineCore::BindAction(ActionOld action, int type, int category)
 {
     handler.BindAction(action, type, category);
 }
@@ -53,16 +53,16 @@ void EngineCore::Start()
 void EngineCore::Terminate()
 {
     data->terminate = true;
+    GlobalBroadcaster::NotifyAll(0);
     handler.Terminate();
-    worker.Terminate();
 }
 
 void EngineCore::WaitEnd()
 {
-    worker.Join();
+    handler.WaitEnd();
 }
 
 void EngineCore::startCoreThread()
 {
-    worker.setWork((void (*)(void*))EventPoller, &handler);
+    handler.Start();
 }

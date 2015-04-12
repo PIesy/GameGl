@@ -15,7 +15,7 @@ public:
     ~CoreInterface();
     GraphicsApi* Video();
     EngineInterface* getCore();
-    void BindAction(Action action, int eventType, int eventCategory);
+    void BindAction(ActionOld action, int eventType, int eventCategory);
     void Start();
     void Stop();
     int WaitEnd();

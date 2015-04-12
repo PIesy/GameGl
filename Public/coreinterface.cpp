@@ -16,7 +16,7 @@ CoreInterface::~CoreInterface()
     delete core;
 }
 
-void CoreInterface::BindAction(Action action, int eventType, int eventCategory)
+void CoreInterface::BindAction(ActionOld action, int eventType, int eventCategory)
 {
     core->BindAction(action, eventType, eventCategory);
 }

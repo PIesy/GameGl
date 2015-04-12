@@ -1,31 +1,33 @@
 #include <iostream>
 #include "Public/coreinterface.h"
 #include "Public/ui.h"
-#include "Game/gamecore.h"
+#include "Logger/logger.h"
+#include "Tests/tests.h"
 
 using namespace std;
 
 void updateViewport(void*e, void* core);
 void closeApp(void*, void* o);
 void drawTriangle(CoreInterface* engine, UiLayer* ui);
+void test();
 
 int main()
 {
-    //CoreInterface engine;
-    GameCore game;
-    game.Start();
-//    SDL_Window** window = new SDL_Window*;
-//    Action setViewport(updateViewport, &engine);
-//    Action endGame(closeApp, &engine);
+    CoreInterface engine;
+    SDL_Window** window = new SDL_Window*;
+    ActionOld setViewport(updateViewport, &engine);
+    ActionOld endGame(closeApp, &engine);
 
-//    engine.Start();
-//    engine.BindAction(setViewport, SDL_WINDOWEVENT_RESIZED, 0);
-//    engine.BindAction(endGame, SDL_SCANCODE_Q, 1);
-//    engine.BindAction(endGame, SDL_WINDOWEVENT_CLOSE, 0);
-    //*window = (SDL_Window*)(engine.Video()->CreateWindow("Hello", 1000, 600));
-    //UiLayer ui(engine.getCore(), *window);
-    //drawTriangle(&engine, &ui);
-    return  game.WaitEnd();
+    eventsHandlerTest();
+    engine.Start();
+    engine.BindAction(setViewport, SDL_WINDOWEVENT_RESIZED, 0);
+    engine.BindAction(endGame, SDL_SCANCODE_Q, 1);
+    engine.BindAction(endGame, SDL_WINDOWEVENT_CLOSE, 0);
+    *window = (SDL_Window*)(engine.Video()->CreateWindow("Hello", 1000, 600));
+    UiLayer ui(engine.getCore(), *window);
+    drawTriangle(&engine, &ui);
+    Logger::Log("Hello");
+    return  engine.WaitEnd();
 }
 
 void closeApp(void*, void *o)
@@ -49,9 +51,8 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui)
     Program* program;
     Button* box = new Button(200, 50);
     Button* box2 = new Button(200, 50, {0,1,1,1});
-    Action endGame(closeApp, engine);
+    ActionOld endGame(closeApp, engine);
     VertexObject* frame = new VertexObject(Shapes::Triangle());
-    frame->Append(Shapes::Hexagon());
 
     ui->AddElement(box);
     ui->AddElement(box2);

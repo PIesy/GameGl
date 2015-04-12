@@ -1,18 +1,16 @@
 #ifndef RESOURCESMODULE_H
 #define RESOURCESMODULE_H
 
-#include "moduleinterface.h"
+#include "module.h"
 #include "Resources/resourcesapi.h"
 
-class ResourcesModule: public IModule
+class ResourcesModule: public Module
 {
-    ModuleApi<ResourcesApi>* api;
-    const EngineInterface* core;
+    ModuleApi<ResourcesApi>* api = nullptr;
 public:
-    void* getApi();
+    const void* getApi();
     ~ResourcesModule();
     void setApi(void* api);
-    void setData(void* data);
 };
 
 #endif // RESOURCESMODULE_H

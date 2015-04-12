@@ -2,20 +2,20 @@
 #define RESOURCESAPI_H
 
 #include <string>
+#include "Api/apibase.h"
 
 class Scanner
 {
 public:
     virtual ~Scanner(){}
-    virtual void Analyze(std::string){}
-    virtual void* Fill(){ return nullptr;}
+    virtual void Analyze(std::string) {}
+    virtual void* Fill(){ return nullptr; }
 };
 
-class ResourcesApi
+class ResourcesApi: public ApiBase
 {
 public:
-    virtual ~ResourcesApi(){}
-
+    virtual ~ResourcesApi() {}
     virtual void* ReadByTemplate(std::string source, Scanner* scanner) = 0;
 };
 

@@ -5,8 +5,8 @@ void ButtonOnExit(void*, Button* btn);
 
 Button::Button(int width, int height, RGBA_Color color)
 {
-    Action onHover((void (*)(void*, void*))ButtonOnHover, this);
-    Action onExit((void (*)(void*, void*))ButtonOnExit, this);
+    ActionOld onHover((void (*)(void*, void*))ButtonOnHover, this);
+    ActionOld onExit((void (*)(void*, void*))ButtonOnExit, this);
     size[0] = width;
     size[1] = height;
     initShape();

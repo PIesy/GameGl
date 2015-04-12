@@ -7,6 +7,7 @@
 #include "worker.h"
 #include "enginedatastructures.h"
 #include "engineinitializer.h"
+#include "broadcaster.h"
 
 #include "../Modules/graphicsmodule.h"
 #include "../Modules/resourcesmodule.h"

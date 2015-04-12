@@ -1,18 +1,16 @@
 #ifndef GRAPHICSMODULE_H
 #define GRAPHICSMODULE_H
 
-#include "moduleinterface.h"
+#include "module.h"
 #include "Graphics/graphicsapi.h"
 
-class GraphicsModule: public IModule
+class GraphicsModule: public Module
 {
-    ModuleApi<GraphicsApi>* api;
-    const EngineInterface* core;
+    ModuleApi<GraphicsApi>* api = nullptr;
 public:
-    void* getApi();
+    const void* getApi();
     ~GraphicsModule();
     void setApi(void* api);
-    void setData(void* data);
 };
 
 #endif // GRAPHICSMODULE_H

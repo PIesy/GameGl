@@ -15,7 +15,7 @@ protected:
     int position[2] = {0,0};
     VertexObject base;
     VertexObject graphics;
-    std::list<Action> actions;
+    std::list<ActionOld> actions;
     void setFactor();
     void setData();
     void rescale();
@@ -29,7 +29,7 @@ public:
     VertexObject* getGraphics();
     void setPosition(int x, int y);
     void setState(int x, int y, bool click);
-    void setAction(Events event, Action action);
+    void setAction(Events event, ActionOld action);
     void Bind(WindowState* window);
 };
 

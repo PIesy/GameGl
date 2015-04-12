@@ -5,10 +5,11 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include "invokable.h"
 
 struct TaskData
 {
-    void (*fun)(void* arg);
+    Action fun;
     void* arg;
 };
 
@@ -23,16 +24,18 @@ struct WorkerData
 class Worker
 {
     std::thread::id workerId;
-    WorkerData data;
+    WorkerData* data;
     std::thread* workerThread = nullptr;
 public:
-    Worker(){}
-    Worker(void (*f)(void*), void* arg);
+    Worker();
+    Worker(Action fun, void* arg);
+    Worker(const Worker& arg) = delete;
+    Worker(Worker&& arg);
     ~Worker();
-    void setWork(void (*f)(void*), void* arg);
-    void setTask(void (*f)(void*), void* arg);
+    void setTask(Action fun, void* arg);
     void Join();
-    void getId();
+    bool isBusy();
+    void Wake();
     void Terminate();
 };
 

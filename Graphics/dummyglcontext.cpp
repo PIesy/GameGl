@@ -10,7 +10,7 @@ DummyGlContext::DummyGlContext(SDL_GLContext context, SDL_Window* window)
 
     data.context = context;
     data.window = window;
-    worker.setWork(initContext, &data);
+    worker.setTask((ActionFun)initContext, &data);
     data.finish.wait(lock);
     ready = true;
 }

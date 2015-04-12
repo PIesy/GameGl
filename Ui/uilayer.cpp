@@ -5,8 +5,8 @@ void ResolutionNotifier(SDL_Event *event, UiLayer *ui);
 
 UiLayer::UiLayer(EngineInterface* core, SDL_Window* window)
 {
-    Action listener((void (*)(void*, void*))UiListener, this);
-    Action resnotifier((void (*)(void*, void*))ResolutionNotifier, this);
+    ActionOld listener((void (*)(void*, void*))UiListener, this);
+    ActionOld resnotifier((void (*)(void*, void*))ResolutionNotifier, this);
     core->BindAction(listener, -1, 2);
     core->BindAction(resnotifier, SDL_WINDOWEVENT_RESIZED, 0);
     this->window = window;

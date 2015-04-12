@@ -29,9 +29,14 @@ SOURCES += main.cpp \
     Ui/uilayer.cpp \
     Ui/uielements.cpp \
     Graphics/vertexobject.cpp \
-    Game/gamecore.cpp \
-    Game/mainmenu.cpp \
-    Game/game.cpp
+    Logger/logger.cpp \
+    Core/broadcaster.cpp \
+    Core/invokable.cpp \
+    Core/threadpool.cpp \
+    Core/eventshandler_new.cpp \
+    Tests/tests.cpp \
+    Modules/iomodule.cpp \
+    Modules/module.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -61,10 +66,21 @@ HEADERS += \
     Public/ui.h \
     Ui/uilayer.h \
     Ui/uielements.h \
-    Game/gamecore.h \
-    Game/gamestates.h \
-    Game/gamecoreinterface.h \
-    Game/game.h
+    Logger/logger.h \
+    Core/broadcaster.h \
+    Core/invokable.h \
+    Core/threadpool.h \
+    Core/eventshandler_new.h \
+    Core/eventshandler_interfaces.h \
+    Tests/tests.h \
+    Core/executable.h \
+    IO/ioapi.h \
+    Modules/iomodule.h \
+    Modules/module.h \
+    IO/ioevents.h \
+    IO/devid.h \
+    Core/service.h \
+    Api/apibase.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

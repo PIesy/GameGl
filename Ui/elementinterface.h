@@ -20,7 +20,7 @@ public:
     virtual void Update() = 0;
     virtual VertexObject* getGraphics() = 0;
     virtual void setState(int x, int y, bool click) = 0;
-    virtual void setAction(Events event, Action action) = 0;
+    virtual void setAction(Events event, ActionOld action) = 0;
     virtual void setPosition(int x, int y) = 0;
     virtual void Bind(WindowState* window) = 0;
 };
