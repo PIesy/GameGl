@@ -2,6 +2,7 @@
 #define APIBASE
 
 #include "Core/engineinterface.h"
+#include "Core/service.h"
 
 class ApiBase
 {
@@ -10,7 +11,7 @@ protected:
 public:
     virtual ~ApiBase() {}
     void AttachEngine(EngineInterface* engine) { this->engine = engine; }
-    virtual Service* getService() {}
+    virtual Service* getService() { return nullptr; }
 };
 
 #endif // APIBASE

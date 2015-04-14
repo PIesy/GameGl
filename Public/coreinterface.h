@@ -2,8 +2,8 @@
 #define COREINTERFACE_H
 
 #include "apis.h"
-#include "../Core/engineinterface.h"
-#include "../Graphics/renderdefs.h"
+#include "Core/engineinterface.h"
+#include "Graphics/renderdefs.h"
 
 class CoreInterface
 {
@@ -15,7 +15,7 @@ public:
     ~CoreInterface();
     GraphicsApi* Video();
     EngineInterface* getCore();
-    void BindAction(ActionOld action, int eventType, int eventCategory);
+    EventHandler& getEventHandler();
     void Start();
     void Stop();
     int WaitEnd();

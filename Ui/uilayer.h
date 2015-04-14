@@ -1,9 +1,11 @@
 #ifndef UILAYER_H
 #define UILAYER_H
 
-#include "../Core/engineinterface.h"
+#include "Core/engineinterface.h"
 #include "elementinterface.h"
 #include <unordered_set>
+#include "IO/ioevents.h"
+#include "SDL2/SDL.h"
 
 class UiLayer
 {
@@ -16,7 +18,7 @@ public:
     UiLayer(EngineInterface* core, SDL_Window* window);
     void AddElement(Element* element);
     void RemoveElement(Element* element);
-    void UiHandler(SDL_Event* event);
+    void UiHandler(MouseEvent* event);
     void UpdateResolution(int width, int height);
     VertexObject** getGraphics();
     int getCount();

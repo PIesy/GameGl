@@ -1,14 +1,15 @@
 #include "uilayer.h"
+#include "IO/ioevents.h"
 
-void UiListener(SDL_Event* event, UiLayer* ui);
-void ResolutionNotifier(SDL_Event *event, UiLayer *ui);
+void UiListener(MouseEvent* event, UiLayer* ui);
+void ResolutionNotifier(WindowEvent* event, UiLayer* ui);
 
 UiLayer::UiLayer(EngineInterface* core, SDL_Window* window)
 {
-    ActionOld listener((void (*)(void*, void*))UiListener, this);
-    ActionOld resnotifier((void (*)(void*, void*))ResolutionNotifier, this);
-    core->BindAction(listener, -1, 2);
-    core->BindAction(resnotifier, SDL_WINDOWEVENT_RESIZED, 0);
+    Action<MouseEvent*> listener(std::bind(UiListener, std::placeholders::_1, this));
+    Action<WindowEvent*> resnotifier(std::bind(ResolutionNotifier, std::placeholders::_1, this));
+    core->getEventHandler().setListener<MouseEvent>(listener);
+    core->getEventHandler().setListener<WindowEvent>(resnotifier);
     this->window = window;
     initState();
 }
@@ -30,19 +31,21 @@ void UiLayer::initState()
     SDL_GetWindowSize(window, &state.resolution[0], &state.resolution[1]);
 }
 
-void UiLayer::UiHandler(SDL_Event *event)
+void UiLayer::UiHandler(MouseEvent* event)
 {
-    switch (event->type) {
-    case SDL_MOUSEMOTION:
-        updateAll(event->motion.x, event->motion.y);
+    MouseData data = event->getPayload();
+
+    switch(data.eventType) {
+    case MouseData::Type::Motion:
+        updateAll(data.coordinates[0], data.coordinates[1]);
         break;
-    case SDL_MOUSEBUTTONDOWN:
+    default:
         break;
-    case SDL_MOUSEBUTTONUP:
-        updateAll(event->button.x, event->button.y, true);
+    case MouseData::Type::Button:
+        if(data.state == false)
+            updateAll(data.coordinates[0], data.coordinates[1], true);
         break;
     }
-    delete event;
 }
 
 void UiLayer::UpdateResolution(int width, int height)
@@ -55,7 +58,7 @@ void UiLayer::UpdateResolution(int width, int height)
 
 void UiLayer::updateAll(int x, int y, bool click)
 {
-    for (Element* el : elements)
+    for(Element* el : elements)
         el->setState(x, y, click);
 }
 
@@ -65,7 +68,7 @@ VertexObject** UiLayer::getGraphics()
     VertexObject** objects;
 
     objects = new VertexObject*[elements.size()];
-    for (Element* obj : elements)
+    for(Element* obj : elements)
     {
         objects[i] = obj->getGraphics();
         i++;
@@ -78,12 +81,15 @@ int UiLayer::getCount()
     return elements.size();
 }
 
-void UiListener(SDL_Event *event, UiLayer *ui)
+void UiListener(MouseEvent* event, UiLayer *ui)
 {
     ui->UiHandler(event);
 }
 
-void ResolutionNotifier(SDL_Event *event, UiLayer *ui)
+void ResolutionNotifier(WindowEvent* event, UiLayer *ui)
 {
-    ui->UpdateResolution(event->window.data1, event->window.data2);
+    WindowData data = event->getPayload();
+
+    if(data.eventType == WindowData::Type::Resize)
+        ui->UpdateResolution(data.coordinates[0], data.coordinates[1]);
 }

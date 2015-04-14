@@ -16,9 +16,9 @@ CoreInterface::~CoreInterface()
     delete core;
 }
 
-void CoreInterface::BindAction(ActionOld action, int eventType, int eventCategory)
+EventHandler& CoreInterface::getEventHandler()
 {
-    core->BindAction(action, eventType, eventCategory);
+    return core->getEventHandler();
 }
 
 GraphicsApi* CoreInterface::Video()

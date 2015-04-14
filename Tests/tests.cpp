@@ -10,22 +10,30 @@ public:
     TestEvent(int val):Event(val) {}
 };
 
-void testFunction(TestEvent* event);
+void testCc(EventHandler* handler);
+
+void testFunction(TestEvent* event, int* val);
 
 void eventsHandlerTest()
 {
     EventHandler* handler = new EventHandler();
     EventListener listener;
-    Action test;
-    test.bind((ActionFun)testFunction);
+    Action<TestEvent*> test(100000);
+    int x;
+    test.Bind(std::bind(testFunction, std::placeholders::_1, &x));
 
     listener.listenFor<TestEvent>();
     listener.setHandler(test);
     handler->setListener(listener);
+    testCc(handler);
+}
+
+void testCc(EventHandler *handler)
+{
     handler->ThrowEvent(new TestEvent(25));
 }
 
-void testFunction(TestEvent* event)
+void testFunction(TestEvent* event, int* val)
 {
     Logger::Log("Test event cought " + std::to_string(event->getPayload()));
 }

@@ -13,8 +13,9 @@ struct CoreData
 class EngineCore: public EngineInterface
 {
     std::unordered_map<int, ModuleInterface*> modules;
+    Worker worker;
     CoreData* data;
-    EventsHandler handler;
+    EventHandler eventHandler;
     void initModules();
     void initApis(EngineInitializer initializer);
     void startCoreThread();
@@ -23,7 +24,7 @@ public:
     ~EngineCore();
     void AttachModule(Modules name, ModuleInterface *module);
     ModuleInterface* GetModule(Modules name);
-    void BindAction(ActionOld action, int type, int category);
+    EventHandler& getEventHandler();
     void Start();
     void Terminate();
     void WaitEnd();

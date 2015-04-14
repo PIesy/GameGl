@@ -6,19 +6,14 @@
 #include <mutex>
 #include <condition_variable>
 #include "invokable.h"
-
-struct TaskData
-{
-    Action fun;
-    void* arg;
-};
+#include "workerqueueproxy.h"
 
 struct WorkerData
 {
     std::mutex mutex;
     std::condition_variable hasWork;
     bool terminate = false;
-    std::queue<TaskData> tasks;
+    WorkerQueueProxy tasks;
 };
 
 class Worker
@@ -27,12 +22,12 @@ class Worker
     WorkerData* data;
     std::thread* workerThread = nullptr;
 public:
-    Worker();
-    Worker(Action fun, void* arg);
+    Worker(TaskList* tasks = nullptr);
+    Worker(Invokable& fun, void* arg, TaskList* tasks = nullptr);
     Worker(const Worker& arg) = delete;
     Worker(Worker&& arg);
     ~Worker();
-    void setTask(Action fun, void* arg);
+    void setTask(Invokable& fun, void* arg);
     void Join();
     bool isBusy();
     void Wake();

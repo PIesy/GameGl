@@ -36,7 +36,8 @@ SOURCES += main.cpp \
     Core/eventshandler_new.cpp \
     Tests/tests.cpp \
     Modules/iomodule.cpp \
-    Modules/module.cpp
+    Modules/module.cpp \
+    Core/workerqueueproxy.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -80,7 +81,8 @@ HEADERS += \
     IO/ioevents.h \
     IO/devid.h \
     Core/service.h \
-    Api/apibase.h
+    Api/apibase.h \
+    Core/workerqueueproxy.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

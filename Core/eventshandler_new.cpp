@@ -1,7 +1,18 @@
 #include "eventshandler_new.h"
 #include "Helpers/helpers.h"
+#include "Logger/logger.h"
 
 using namespace std;
+
+EventListener::~EventListener()
+{
+    //delete handler;
+}
+
+void EventListener::listenFor(type_index type)
+{
+    this->type = type;
+}
 
 type_index EventListener::getEventType()
 {
@@ -10,12 +21,12 @@ type_index EventListener::getEventType()
 
 void EventListener::Process(EventInterface* event)
 {
-    handler.invoke(event);
+    handler->Invoke(event);
 }
 
-void EventListener::setHandler(Action handler)
+void EventListener::setHandler(Invokable& handler)
 {
-    this->handler = handler;
+    this->handler = handler.copy();
 }
 
 int EventHandler::setListener(EventListener listener)
@@ -59,4 +70,13 @@ void EventHandler::ThrowEvent(EventInterface *event)
             listener.second.Process(event);
     }
     catch(out_of_range) {}
+}
+
+int EventHandler::createListener(type_index type, Invokable& action)
+{
+    EventListener listener;
+
+    listener.listenFor(type);
+    listener.setHandler(action);
+    return setListener(listener);
 }

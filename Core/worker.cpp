@@ -2,21 +2,24 @@
 #include "Logger/logger.h"
 #include <sstream>
 
-void setupData(Action fun, void* arg, WorkerData *data);
 void workerController(WorkerData *data);
 void logStatus(std::string message);
 
-Worker::Worker()
+Worker::Worker(TaskList* tasks)
 {
     data = new WorkerData();
+    if(tasks)
+        data->tasks.ReplaceTaskSource(tasks);
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
 
-Worker::Worker(Action fun, void* arg)
+Worker::Worker(Invokable& fun, void* arg, TaskList* tasks)
 {
     data = new WorkerData();
-    data->tasks.push({fun, arg});
+    if(tasks)
+        data->tasks.ReplaceTaskSource(tasks);
+    data->tasks.Push({std::shared_ptr<Invokable>(fun.copy()), arg});
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
@@ -65,9 +68,12 @@ void Worker::Terminate()
     Wake();
 }
 
-void Worker::setTask(Action fun, void* arg)
+void Worker::setTask(Invokable& fun, void* arg)
 {
-    data->tasks.push({fun, arg});
+    TaskData d;
+    d.arg = arg;
+    d.fun = std::shared_ptr<Invokable>(fun.copy());
+    data->tasks.Push(d);
     Wake();
 }
 
@@ -79,15 +85,15 @@ void workerController(WorkerData *data)
     logStatus("Thread started id:");
     while(!data->terminate)
     {
-        while(data->tasks.empty())
+        while(data->tasks.IsEmpty())
         {
             lock.lock();
-            data->hasWork.wait(lock);
+            if(data->tasks.IsEmpty())
+                data->hasWork.wait(lock);
             lock.unlock();
         }
-        task = data->tasks.front();
-        data->tasks.pop();
-        task.fun(task.arg);
+        task = data->tasks.Pop();
+        task.fun->operator ()(task.arg);
     }
     logStatus("Thread stopped id:");
 }

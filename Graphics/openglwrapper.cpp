@@ -19,7 +19,8 @@ OpenGlWrapper::~OpenGlWrapper()
 
 void OpenGlWrapper::initGlew()
 {
-    data->worker.setTask((ActionFun)setGlew, nullptr);
+    Action<void*> action(setGlew);
+    data->worker.setTask(action, nullptr);
 }
 
 Shader* OpenGlWrapper::CreateShader(std::string source, unsigned int type)
@@ -47,8 +48,10 @@ void OpenGlWrapper::startRenderer()
     queue = new RenderQueue;
     RenderInitializer* i = new RenderInitializer{queue, data};
 
-    data->worker.setTask((ActionFun)setDummy, this);
-    data->worker.setTask((ActionFun)StartRenderer, i);
+    Action<OpenGlWrapper*> dummy(setDummy);
+    Action<RenderInitializer*> render(StartRenderer);
+    data->worker.setTask(dummy, (void*)this);
+    data->worker.setTask(render, (void*)i);
 }
 
 void OpenGlWrapper::SetData(Scene *scene)

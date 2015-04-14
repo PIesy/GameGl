@@ -97,17 +97,18 @@ void Item::setState(int x, int y, bool click)
 
 void Item::invokeActions()
 {
-    for (ActionOld& action : actions)
+    for (auto& action : actions)
     {
-        if (action.getBindpoint() == integral(lastEvent))
-            action.Invoke(this);
+        if (action->getId() == integral(lastEvent))
+            action->Invoke(this);
     }
 }
 
-void Item::setAction(Events event, ActionOld action)
+void Item::setAction(Events event, Invokable& action)
 {
-    action.setBindpoint(integral(event));
-    actions.push_back(action);
+    auto s = action.copy();
+    s->setId(integral(event));
+    actions.push_back(std::shared_ptr<Invokable>(s));
 }
 
 void Item::Bind(WindowState* window)

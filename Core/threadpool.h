@@ -2,6 +2,7 @@
 #define THREADPOOL_H
 
 #include <thread>
+#include <list>
 #include <vector>
 #include "invokable.h"
 #include "worker.h"
@@ -12,26 +13,36 @@ struct ThreadPoolParams
     int maxThreads;
 };
 
-class ThreadSubset
-{
-    Worker* mainWorkers;
-    int subsetId;
-    ThreadSubset(Worker* mainWorker);
-public:
-    friend class ThreadPool;
-};
+class ThreadSubset;
 
 class ThreadPool
 {
-    Worker* workers;
+    std::mutex mutex;
+    int currentId = 0;
+    std::vector<Worker> workers;
     ThreadPoolParams params;
-    std::vector<Worker*> freeWorkers;
-    std::vector<Worker*> busyWorkers;
+    std::list<Worker*> freeWorkers;
+    std::list<Worker*> busyWorkers;
+    TaskList* poolTaskList;
 public:
+    ~ThreadPool();
     ThreadPool(int minThreads, int maxThreads);
     ThreadSubset getSubset(int minThreads, int maxThreads);
     void ReleaseSubset(ThreadSubset subset);
-    void Execute(Action action);
+    void Execute(Invokable& action, void* arg);
+};
+
+class ThreadSubset
+{
+    std::vector<Worker*> workers;
+    int subsetId;
+    TaskList* poolTaskList = nullptr;
+    ThreadSubset();
+    void init();
+public:
+    ~ThreadSubset();
+    void Execute(Invokable& action, void* arg);
+    friend class ThreadPool;
 };
 
 #endif // THREADPOOL_H
