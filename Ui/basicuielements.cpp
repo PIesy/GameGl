@@ -104,9 +104,9 @@ void Item::invokeActions()
     }
 }
 
-void Item::setAction(Events event, Invokable& action)
+void Item::setAction(Events event, const ActionPack& action)
 {
-    auto s = action.copy();
+    auto s = action.Copy();
     s->setId(integral(event));
     actions.push_back(std::shared_ptr<Invokable>(s));
 }

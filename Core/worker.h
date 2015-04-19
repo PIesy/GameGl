@@ -23,11 +23,11 @@ class Worker
     std::thread* workerThread = nullptr;
 public:
     Worker(TaskList* tasks = nullptr);
-    Worker(Invokable& fun, void* arg, TaskList* tasks = nullptr);
+    Worker(const ActionPack& fun, void* arg, TaskList* tasks = nullptr);
     Worker(const Worker& arg) = delete;
     Worker(Worker&& arg);
     ~Worker();
-    void setTask(Invokable& fun, void* arg);
+    void setTask(const ActionPack& fun, void* arg);
     void Join();
     bool isBusy();
     void Wake();

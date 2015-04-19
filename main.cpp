@@ -50,14 +50,14 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui)
     Program* program;
     Button* box = new Button(200, 50);
     Button* box2 = new Button(200, 50, {0,1,1,1});
-    Action<WindowEvent*> endGame(std::bind(closeApp, std::placeholders::_1, engine), 5000);
+    Action<WindowEvent*> endGame(std::bind(closeApp, std::placeholders::_1, engine));
     VertexObject* frame = new VertexObject(Shapes::Triangle());
 
     ui->AddElement(box);
     ui->AddElement(box2);
     box->setPosition(400, 275);
     box2->setPosition(400, 200);
-    box->setAction(Events::onClick, endGame);
+    box->setAction(Events::onClick, getAction<WindowEvent*>(std::bind(closeApp, std::placeholders::_1, engine)));
     program = engine->Video()->CreateProgram();
     shaders[0] = engine->Video()->CreateShader("VertexShader.glsl", GL_VERTEX_SHADER);
     shaders[1] = engine->Video()->CreateShader("FragmentShader.glsl", GL_FRAGMENT_SHADER);

@@ -14,12 +14,12 @@ Worker::Worker(TaskList* tasks)
     workerId = workerThread->get_id();
 }
 
-Worker::Worker(Invokable& fun, void* arg, TaskList* tasks)
+Worker::Worker(const ActionPack& fun, void* arg, TaskList* tasks)
 {
     data = new WorkerData();
     if(tasks)
         data->tasks.ReplaceTaskSource(tasks);
-    data->tasks.Push({std::shared_ptr<Invokable>(fun.copy()), arg});
+    data->tasks.Push({fun, arg});
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
@@ -36,10 +36,7 @@ Worker::Worker(Worker&& arg)
 Worker::~Worker()
 {
     if(workerThread->joinable())
-    {
         workerThread->detach();
-        workerThread->~thread();
-    }
     delete workerThread;
     delete data;
 }
@@ -68,12 +65,9 @@ void Worker::Terminate()
     Wake();
 }
 
-void Worker::setTask(Invokable& fun, void* arg)
+void Worker::setTask(const ActionPack& fun, void* arg)
 {
-    TaskData d;
-    d.arg = arg;
-    d.fun = std::shared_ptr<Invokable>(fun.copy());
-    data->tasks.Push(d);
+    data->tasks.Push({fun, arg});
     Wake();
 }
 
@@ -93,7 +87,7 @@ void workerController(WorkerData *data)
             lock.unlock();
         }
         task = data->tasks.Pop();
-        task.fun->operator ()(task.arg);
+        task.fun(task.arg);
     }
     logStatus("Thread stopped id:");
 }

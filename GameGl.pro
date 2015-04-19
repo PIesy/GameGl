@@ -37,7 +37,8 @@ SOURCES += main.cpp \
     Tests/tests.cpp \
     Modules/iomodule.cpp \
     Modules/module.cpp \
-    Core/workerqueueproxy.cpp
+    Core/workerqueueproxy.cpp \
+    Core/actionpack.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -82,7 +83,8 @@ HEADERS += \
     IO/devid.h \
     Core/service.h \
     Api/apibase.h \
-    Core/workerqueueproxy.h
+    Core/workerqueueproxy.h \
+    Core/actionpack.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

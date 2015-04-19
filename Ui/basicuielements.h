@@ -29,7 +29,7 @@ public:
     VertexObject* getGraphics();
     void setPosition(int x, int y);
     void setState(int x, int y, bool click);
-    void setAction(Events event, Invokable& action);
+    void setAction(Events event, const ActionPack& action);
     void Bind(WindowState* window);
 };
 

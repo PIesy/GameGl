@@ -3,7 +3,7 @@
 
 #include <list>
 #include <mutex>
-#include "invokable.h"
+#include "actionpack.h"
 #include <memory>
 
 struct TaskData;
@@ -12,7 +12,7 @@ using TaskList = std::list<TaskData>;
 
 struct TaskData
 {
-    std::shared_ptr<Invokable> fun;
+    ActionPack fun;
     void* arg;
 };
 

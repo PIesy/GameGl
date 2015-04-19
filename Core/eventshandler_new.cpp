@@ -26,7 +26,7 @@ void EventListener::Process(EventInterface* event)
 
 void EventListener::setHandler(Invokable& handler)
 {
-    this->handler = handler.copy();
+    this->handler = handler.Copy();
 }
 
 int EventHandler::setListener(EventListener listener)
@@ -62,7 +62,7 @@ bool EventHandler::removeListener(int listenerId)
     return false;
 }
 
-void EventHandler::ThrowEvent(EventInterface *event)
+void EventHandler::ThrowEvent(EventInterface* event)
 {
     try
     {
