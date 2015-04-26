@@ -4,11 +4,12 @@
 struct MouseData
 {
     enum class Type {Motion, Button, Wheel};
+    enum class Button {Left, Middle, Right, X1, X2, None};
     Type eventType;
-    int windowId;
+    unsigned int windowId;
     int coordinates[2];
     int relativeCoordinates[2];
-    short button;
+    Button button;
     bool state;
 };
 
@@ -16,14 +17,14 @@ struct WindowData
 {
     enum class Type {Close, Hide, Show, Move, Resize};
     Type eventType;
-    int windowId;
+    unsigned int windowId;
     int coordinates[2];
 };
 
 struct KeyboardData
 {
     bool isPressed = false;
-    int windowId;
+    unsigned int windowId;
     int scancode = -1;
 };
 

@@ -8,6 +8,7 @@
 
 void updateViewport(WindowEvent* e, CoreInterface* core);
 void closeApp(WindowEvent* e, CoreInterface* core);
+void buttonClose(void*, CoreInterface* core);
 void drawTriangle(CoreInterface* engine, UiLayer* ui);
 void test();
 
@@ -26,25 +27,28 @@ int main()
     UiLayer ui(engine.getCore(), window);
     drawTriangle(&engine, &ui);
     Logger::Log("Hello");
-    return  engine.WaitEnd();
+    return engine.WaitEnd();
 }
 
 void closeApp(WindowEvent* e, CoreInterface* core)
 {
     if(e->getPayload().eventType == WindowData::Type::Close)
     {
-        std::cout << "The end is comming\n";
+        Logger::Log("The end is comming");
         core->Stop();
     }
 }
 
+void buttonClose(void*, CoreInterface* core)
+{
+    Logger::Log("This land shall fall under my knees!");
+    core->Stop();
+}
+
 void updateViewport(WindowEvent* e, CoreInterface* core)
 {
-//    if(e->getPayload().eventType == WindowData::Type::Resize)
-//    {
-//        std::cout << "Resized\n";
-//        core->Video()->setViewport(0, 0, e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
-//    }
+    if(e->getPayload().eventType == WindowData::Type::Resize)
+        core->Video()->setViewport(0, 0, e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
 }
 
 void drawTriangle(CoreInterface* engine, UiLayer* ui)
@@ -54,14 +58,14 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui)
     Program* program;
     Button* box = new Button(200, 50);
     Button* box2 = new Button(200, 50, {0,1,1,1});
-    //GenericInvokable<WindowEvent*> endGame(closeApp, std::placeholders::_1, engine);
+    Action<MouseEvent*> endGame(buttonClose, std::placeholders::_1, engine);
     VertexObject* frame = new VertexObject(Shapes::Triangle());
 
     ui->AddElement(box);
     ui->AddElement(box2);
     box->setPosition(400, 275);
     box2->setPosition(400, 200);
-    //box->setAction(Events::onClick, endGame);
+    box->setAction(Events::onClick, endGame);
     program = engine->Video()->CreateProgram();
     shaders[0] = engine->Video()->CreateShader("VertexShader.glsl", GL_VERTEX_SHADER);
     shaders[1] = engine->Video()->CreateShader("FragmentShader.glsl", GL_FRAGMENT_SHADER);

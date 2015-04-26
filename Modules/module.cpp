@@ -1,6 +1,6 @@
 #include "module.h"
 
-void Module::setEngine(const EngineInterface *engine)
+void Module::setEngine(EngineInterface *engine)
 {
     this->engine = engine;
 }

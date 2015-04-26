@@ -9,7 +9,8 @@
 #include "engineinitializer.h"
 #include "broadcaster.h"
 
-#include "../Modules/graphicsmodule.h"
-#include "../Modules/resourcesmodule.h"
+#include "Modules/graphicsmodule.h"
+#include "Modules/resourcesmodule.h"
+#include "Modules/inputmodule.h"
 
 #endif // ENGINECOREINCLUDES_H

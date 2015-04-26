@@ -1,6 +1,6 @@
 #include "graphicsmodule.h"
 
-const void* GraphicsModule::getApi()
+GraphicsApi* GraphicsModule::getApi()
 {
     return api->operator ->();
 }
@@ -10,8 +10,9 @@ GraphicsModule::~GraphicsModule()
     delete api;
 }
 
-void GraphicsModule::setApi(void* api)
+void GraphicsModule::setApi(ApiBase* api)
 {
     ModuleApi<GraphicsApi>* p = new ModuleApi<GraphicsApi>((GraphicsApi*)api);
+    api->AttachEngine(engine);
     this->api = p;
 }

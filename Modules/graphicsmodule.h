@@ -8,9 +8,9 @@ class GraphicsModule: public Module
 {
     ModuleApi<GraphicsApi>* api = nullptr;
 public:
-    const void* getApi();
+    GraphicsApi* getApi();
     ~GraphicsModule();
-    void setApi(void* api);
+    void setApi(ApiBase* api);
 };
 
 #endif // GRAPHICSMODULE_H

@@ -8,9 +8,9 @@ class InputModule: public Module
 {
     ModuleApi<InputApi>* api = nullptr;
 public:
-    const void* getApi();
+    InputApi* getApi();
     ~InputModule();
-    void setApi(void* api);
+    void setApi(ApiBase* api);
 };
 
 #endif // IOMODULE

@@ -8,9 +8,9 @@ class ResourcesModule: public Module
 {
     ModuleApi<ResourcesApi>* api = nullptr;
 public:
-    const void* getApi();
+    ResourcesApi* getApi();
     ~ResourcesModule();
-    void setApi(void* api);
+    void setApi(ApiBase* api);
 };
 
 #endif // RESOURCESMODULE_H

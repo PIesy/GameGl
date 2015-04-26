@@ -42,7 +42,7 @@ inline void waitIf(bool condition, std::mutex& mutex, std::condition_variable& v
     if(condition)
     {
         std::unique_lock<std::mutex> lock(mutex);
-        if(condition)
+        while(condition)
             var.wait(lock);
     }
 }

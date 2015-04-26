@@ -2,11 +2,12 @@
 #define ENGINEINITIALIZER_H
 
 #include "enginedatastructures.h"
+#include "Api/apibase.h"
 #include <vector>
 
 struct ModuleApiPair
 {
-    void* api;
+    ApiBase* api;
     Modules module;
 };
 

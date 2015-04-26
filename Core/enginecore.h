@@ -7,7 +7,8 @@
 struct CoreData
 {
     EngineInterface* core;
-    bool terminate = false;
+    bool started = false;
+    std::forward_list<Service*> services;
 };
 
 class EngineCore: public EngineInterface
@@ -26,7 +27,7 @@ public:
     ModuleInterface* GetModule(Modules name);
     EventHandler& getEventHandler();
     void Start();
-    void Terminate();
+    void Terminate(bool wait);
     void WaitEnd();
 };
 

@@ -20,23 +20,34 @@ EngineCore::~EngineCore()
 
 void EngineCore::initApis(EngineInitializer initializer)
 {
+    Service* service;
     ModuleInterface* module;
+
     for (ModuleApiPair& pair : initializer.apis)
     {
         module = GetModule(pair.module);
         module->setApi(pair.api);
+        service = pair.api->getService();
+        if(service)
+        {
+            data->services.push_front(service);
+            if(data->started)
+                service->Start();
+        }
     }
 }
 
 void EngineCore::initModules()
 {
     GraphicsModule* g = new GraphicsModule;
+    InputModule* i = new InputModule;
     AttachModule(Modules::Video, g);
+    AttachModule(Modules::Input, i);
 }
 
 ModuleInterface* EngineCore::GetModule(Modules name)
 {
-    return modules.at(static_cast<int>(name));
+    return modules.at(integral(name));
 }
 
 void EngineCore::AttachModule(Modules name, ModuleInterface* module)
@@ -52,19 +63,26 @@ EventHandler& EngineCore::getEventHandler()
 
 void EngineCore::Start()
 {
-    startCoreThread();
+    data->started = true;
+    for(Service*& service: data->services)
+        service->Start();
 }
 
-void EngineCore::Terminate()
+void EngineCore::Terminate(bool wait)
 {
-    data->terminate = true;
     GlobalBroadcaster::NotifyAll(0);
-    worker.Terminate();
+    for(Service*& service: data->services)
+        service->Stop();
+    if(wait)
+        for(Service*& service: data->services)
+            service->Wait();
+
 }
 
 void EngineCore::WaitEnd()
 {
-    worker.Join();
+    for(Service*& service: data->services)
+        service->Wait();
 }
 
 void EngineCore::startCoreThread()

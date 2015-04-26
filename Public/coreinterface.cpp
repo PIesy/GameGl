@@ -1,6 +1,7 @@
 #include "coreinterface.h"
-#include "../Core/enginecore.h"
-#include "../Graphics/openglsdl.h"
+#include "Core/enginecore.h"
+#include "Graphics/openglsdl.h"
+#include "Input/sdlinput.h"
 
 EngineInitializer makeInit();
 
@@ -45,7 +46,7 @@ int CoreInterface::WaitEnd()
 void CoreInterface::initVideo()
 {
     GraphicsModule* graphics = (GraphicsModule*)core->GetModule(Modules::Video);
-    video = (GraphicsApi*)graphics->getApi();
+    video = graphics->getApi();
 }
 
 EngineInterface* CoreInterface::getCore()
@@ -56,9 +57,7 @@ EngineInterface* CoreInterface::getCore()
 EngineInitializer makeInit()
 {
     EngineInitializer i;
-    ModuleApiPair pair;
-    pair.api = new OpenGlSdl();
-    pair.module = Modules::Video;
-    i.apis.push_back(pair);
+    i.apis.push_back({new OpenGlSdl(), Modules::Video});
+    i.apis.push_back({new SDLInput(), Modules::Input});
     return i;
 }
