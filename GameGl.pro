@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -std=c++1y
+QMAKE_CXXFLAGS += -std=c++11
 QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2
 
 SOURCES += main.cpp \
@@ -31,14 +31,17 @@ SOURCES += main.cpp \
     Graphics/vertexobject.cpp \
     Logger/logger.cpp \
     Core/broadcaster.cpp \
-    Core/invokable.cpp \
     Core/threadpool.cpp \
     Core/eventshandler_new.cpp \
     Tests/tests.cpp \
-    Modules/iomodule.cpp \
     Modules/module.cpp \
     Core/workerqueueproxy.cpp \
-    Core/actionpack.cpp
+    Core/actionpack.cpp \
+    Input/sdlinput.cpp \
+    Modules/inputmodule.cpp \
+    Helpers/action.cpp \
+    Helpers/generic_invokable.cpp \
+    Helpers/task.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -76,15 +79,21 @@ HEADERS += \
     Core/eventshandler_interfaces.h \
     Tests/tests.h \
     Core/executable.h \
-    IO/ioapi.h \
-    Modules/iomodule.h \
     Modules/module.h \
-    IO/ioevents.h \
-    IO/devid.h \
     Core/service.h \
     Api/apibase.h \
     Core/workerqueueproxy.h \
-    Core/actionpack.h
+    Core/actionpack.h \
+    Input/inputapi.h \
+    Input/inputevents.h \
+    Input/inputdata.h \
+    Input/sdlinput.h \
+    Modules/inputmodule.h \
+    Helpers/task.h \
+    Helpers/invokable.h \
+    Helpers/action.h \
+    Helpers/function_traits.h \
+    Helpers/generic_invokable.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

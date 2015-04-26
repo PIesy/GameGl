@@ -26,8 +26,7 @@ GlProgram::GlProgram(Worker *context)
 
     data.program = &program;
     this->context = context;
-    Action<CompileData*> newProg(glNewProgram);
-    this->context->setTask(newProg, (void*)&data);
+    this->context->setTask(Task(glNewProgram, &data));
     data.var.wait(wait);
 }
 
@@ -40,8 +39,7 @@ void glDropProgram(GLuint* program)
 GlProgram::~GlProgram()
 {
     GLuint* prog = new GLuint(program);
-    Action<GLuint*> drop(glDropProgram);
-    context->setTask(drop, (void*)prog);
+    context->setTask(Task(glDropProgram, prog));
 }
 
 void glShaderAttach(ShaderProgram* prog)
@@ -55,8 +53,7 @@ void GlProgram::Attach(Shader* shader)
     ShaderProgram* prog = new ShaderProgram;
     prog->shader = shader;
     prog->program = program;
-    Action<ShaderProgram*> attach(glShaderAttach);
-    context->setTask(attach, (void*)prog);
+    context->setTask(Task(glShaderAttach, prog));
 }
 
 void glShaderDetach(ShaderProgram* prog)
@@ -70,8 +67,7 @@ void GlProgram::Detach(Shader* shader)
     ShaderProgram* prog = new ShaderProgram;
     prog->shader = shader;
     prog->program = program;
-    Action<ShaderProgram*> detach(glShaderDetach);
-    context->setTask(detach, (void*)&prog);
+    context->setTask(Task(glShaderDetach, prog));
 }
 
 GlProgram::operator GLuint()
@@ -90,8 +86,7 @@ void GlProgram::Compile()
     CompileData data;
     std::unique_lock<std::mutex> wait(lock);
     data.program = &program;
-    Action<CompileData*> compile(glProgramLink);
-    context->setTask(compile, (void*)&data);
+    context->setTask(Task(glProgramLink, &data));
     data.var.wait(wait);
 }
 

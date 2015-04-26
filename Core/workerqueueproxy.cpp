@@ -42,10 +42,10 @@ TaskData WorkerQueueProxy::Pop()
     return result;
 }
 
-void WorkerQueueProxy::Push(const TaskData& data)
+void WorkerQueueProxy::Push(const Invokable& data)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    tasks->push_back(data);
+    tasks->emplace_back(data.Copy());
 }
 
 bool WorkerQueueProxy::IsEmpty()

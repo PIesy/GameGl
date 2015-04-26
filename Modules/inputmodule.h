@@ -2,14 +2,14 @@
 #define IOMODULE
 
 #include "module.h"
-#include "IO/ioapi.h"
+#include "Input/inputapi.h"
 
-class IoModule: public Module
+class InputModule: public Module
 {
-    ModuleApi<IoApi>* api = nullptr;
+    ModuleApi<InputApi>* api = nullptr;
 public:
     const void* getApi();
-    ~IoModule();
+    ~InputModule();
     void setApi(void* api);
 };
 

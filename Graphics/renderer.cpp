@@ -1,6 +1,6 @@
 #include "renderer.h"
 
-void StartRenderer(RenderInitializer* initializer)
+void startRenderer(RenderInitializer* initializer)
 {
     Renderer renderer(initializer->queue, initializer->data);
     renderer.Start();

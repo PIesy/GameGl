@@ -27,6 +27,6 @@ public:
     void Start();
 };
 
-void StartRenderer(RenderInitializer* initializer);
+void startRenderer(RenderInitializer* initializer);
 
 #endif // RENDERER_H

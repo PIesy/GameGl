@@ -99,16 +99,14 @@ void Item::invokeActions()
 {
     for (auto& action : actions)
     {
-        if (action->getId() == integral(lastEvent))
-            action->Invoke(this);
+        if (action.first == integral(lastEvent))
+            action.second.InvokeWithArgs(this);
     }
 }
 
-void Item::setAction(Events event, const ActionPack& action)
+void Item::setAction(Events event, const GenericInvokable& action)
 {
-    auto s = action.Copy();
-    s->setId(integral(event));
-    actions.push_back(std::shared_ptr<Invokable>(s));
+    actions.emplace(integral(event), action);
 }
 
 void Item::Bind(WindowState* window)

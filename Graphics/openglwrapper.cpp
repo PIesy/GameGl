@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <iostream>
 
-void setGlew(void*);
+void setGlew();
 
 void setDummy(OpenGlWrapper* context);
 
@@ -19,8 +19,7 @@ OpenGlWrapper::~OpenGlWrapper()
 
 void OpenGlWrapper::initGlew()
 {
-    Action<void*> action(setGlew);
-    data->worker.setTask(action, nullptr);
+    data->worker.setTask(Task(setGlew));
 }
 
 Shader* OpenGlWrapper::CreateShader(std::string source, unsigned int type)
@@ -48,10 +47,8 @@ void OpenGlWrapper::startRenderer()
     queue = new RenderQueue;
     RenderInitializer* i = new RenderInitializer{queue, data};
 
-    Action<OpenGlWrapper*> dummy(setDummy);
-    Action<RenderInitializer*> render(StartRenderer);
-    data->worker.setTask(dummy, (void*)this);
-    data->worker.setTask(render, (void*)i);
+    data->worker.setTask(Task(setDummy, this));
+    data->worker.setTask(Task(::startRenderer, i));
 }
 
 void OpenGlWrapper::SetData(Scene *scene)
@@ -73,7 +70,7 @@ void setDummy(OpenGlWrapper* context)
    context->context = new DummyGlContext(context->data->dummyContext, context->data->window);
 }
 
-void setGlew(void*)
+void setGlew()
 {
     GLenum glew_err;
 

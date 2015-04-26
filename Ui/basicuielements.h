@@ -2,7 +2,7 @@
 #define BASICUIELEMENTS_H
 
 #include "elementinterface.h"
-#include <list>
+#include <unordered_map>
 
 class Item: public Element
 {
@@ -15,7 +15,7 @@ protected:
     int position[2] = {0,0};
     VertexObject base;
     VertexObject graphics;
-    std::list<std::shared_ptr<Invokable>> actions;
+    std::unordered_multimap<typename std::underlying_type<Events>::type, GenericInvokable> actions;
     void setFactor();
     void setData();
     void rescale();
@@ -29,7 +29,7 @@ public:
     VertexObject* getGraphics();
     void setPosition(int x, int y);
     void setState(int x, int y, bool click);
-    void setAction(Events event, const ActionPack& action);
+    void setAction(Events event, const GenericInvokable& action);
     void Bind(WindowState* window);
 };
 

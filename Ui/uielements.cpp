@@ -5,8 +5,8 @@ void ButtonOnExit(void*, Button* btn);
 
 Button::Button(int width, int height, RGBA_Color color)
 {
-    Action<void*> onHover(std::bind(ButtonOnHover, std::placeholders::_1, this));
-    Action<void*> onExit(std::bind(ButtonOnExit, std::placeholders::_1, this));
+    Action<void*> onHover(ButtonOnHover, std::placeholders::_1, this);
+    Action<void*> onExit(ButtonOnExit, std::placeholders::_1, this);
     size[0] = width;
     size[1] = height;
     initShape();

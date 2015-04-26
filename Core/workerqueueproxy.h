@@ -6,15 +6,9 @@
 #include "actionpack.h"
 #include <memory>
 
-struct TaskData;
+using TaskData = std::shared_ptr<Invokable>;
 
 using TaskList = std::list<TaskData>;
-
-struct TaskData
-{
-    ActionPack fun;
-    void* arg;
-};
 
 class WorkerQueueProxy
 {
@@ -28,7 +22,7 @@ public:
     WorkerQueueProxy(WorkerQueueProxy&& arg);
     void ReplaceTaskSource(TaskList* source);
     TaskData Pop();
-    void Push(const TaskData& data);
+    void Push(const Invokable& data);
     bool IsEmpty();
 };
 

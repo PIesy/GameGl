@@ -57,7 +57,7 @@ EngineInitializer makeInit()
 {
     EngineInitializer i;
     ModuleApiPair pair;
-    pair.api = new OpenGlSdl;
+    pair.api = new OpenGlSdl();
     pair.module = Modules::Video;
     i.apis.push_back(pair);
     return i;

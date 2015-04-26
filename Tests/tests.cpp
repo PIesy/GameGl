@@ -18,9 +18,9 @@ void eventsHandlerTest()
 {
     EventHandler* handler = new EventHandler();
     EventListener listener;
-    Action<TestEvent*> test(100000);
+    Action<TestEvent*> test;
     int x;
-    test.Bind(std::bind(testFunction, std::placeholders::_1, &x));
+    test.Bind(testFunction, std::placeholders::_1, &x);
 
     listener.listenFor<TestEvent>();
     listener.setHandler(test);

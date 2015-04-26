@@ -5,8 +5,8 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include "invokable.h"
 #include "workerqueueproxy.h"
+#include "Helpers/helpers.h"
 
 struct WorkerData
 {
@@ -23,11 +23,11 @@ class Worker
     std::thread* workerThread = nullptr;
 public:
     Worker(TaskList* tasks = nullptr);
-    Worker(const ActionPack& fun, void* arg, TaskList* tasks = nullptr);
+    Worker(const Invokable& fun, TaskList* tasks = nullptr);
     Worker(const Worker& arg) = delete;
     Worker(Worker&& arg);
     ~Worker();
-    void setTask(const ActionPack& fun, void* arg);
+    void setTask(const Invokable& fun);
     void Join();
     bool isBusy();
     void Wake();

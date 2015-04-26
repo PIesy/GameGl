@@ -1,7 +1,7 @@
 #include "enginecore.h"
 #include "Helpers/helpers.h"
 #include <SDL2/SDL.h>
-#include "IO/ioevents.h"
+#include "Input/inputevents.h"
 #include "Logger/logger.h"
 
 void SDLpoller(EventHandler* handler);
@@ -69,8 +69,8 @@ void EngineCore::WaitEnd()
 
 void EngineCore::startCoreThread()
 {
-    Action<EventHandler*> action(std::bind(SDLpoller, std::placeholders::_1));
-    worker.setTask(action, (void*)&eventHandler);
+    Task task(SDLpoller, &eventHandler);
+    worker.setTask(task);
 }
 
 void SDLpoller(EventHandler* handler)

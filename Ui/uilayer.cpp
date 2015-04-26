@@ -1,13 +1,14 @@
 #include "uilayer.h"
-#include "IO/ioevents.h"
+#include "Input/inputevents.h"
+#include "Helpers/helpers.h"
 
 void UiListener(MouseEvent* event, UiLayer* ui);
 void ResolutionNotifier(WindowEvent* event, UiLayer* ui);
 
 UiLayer::UiLayer(EngineInterface* core, SDL_Window* window)
 {
-    Action<MouseEvent*> listener(std::bind(UiListener, std::placeholders::_1, this));
-    Action<WindowEvent*> resnotifier(std::bind(ResolutionNotifier, std::placeholders::_1, this));
+    Action<MouseEvent*> listener(UiListener, std::placeholders::_1, this);
+    Action<WindowEvent*> resnotifier(ResolutionNotifier, std::placeholders::_1, this);
     core->getEventHandler().setListener<MouseEvent>(listener);
     core->getEventHandler().setListener<WindowEvent>(resnotifier);
     this->window = window;

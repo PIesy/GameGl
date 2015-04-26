@@ -4,11 +4,6 @@
 
 using namespace std;
 
-EventListener::~EventListener()
-{
-    //delete handler;
-}
-
 void EventListener::listenFor(type_index type)
 {
     this->type = type;
@@ -21,12 +16,12 @@ type_index EventListener::getEventType()
 
 void EventListener::Process(EventInterface* event)
 {
-    handler->Invoke(event);
+    handler.InvokeWithArgs(event);
 }
 
-void EventListener::setHandler(Invokable& handler)
+void EventListener::setHandler(const EventInvokable& handler)
 {
-    this->handler = handler.Copy();
+    this->handler = handler;
 }
 
 int EventHandler::setListener(EventListener listener)
@@ -72,7 +67,7 @@ void EventHandler::ThrowEvent(EventInterface* event)
     catch(out_of_range) {}
 }
 
-int EventHandler::createListener(type_index type, Invokable& action)
+int EventHandler::createListener(type_index type, const EventInvokable& action)
 {
     EventListener listener;
 
