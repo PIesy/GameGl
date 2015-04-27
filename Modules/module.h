@@ -9,7 +9,7 @@ protected:
     EngineInterface* engine;
 public:
     virtual ~Module() {}
-    void setEngine(EngineInterface* engine);
+    void setEngine(EngineInterface& engine);
     virtual void setApi(ApiBase* api) = 0;
     virtual ApiBase* getApi() = 0;
 };

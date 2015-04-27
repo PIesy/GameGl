@@ -1,62 +1,71 @@
 #ifndef ACTIONPACK
 #define ACTIONPACK
 
-#include "Helpers/action.h"
+#include "Helpers/invokable.h"
 #include <forward_list>
 
 template<class... Args>
-class ActionPack: public TypedInvokable<Args...>
+class InvokablePack: public TypedInvokable<Args...>
 {
     std::forward_list<std::shared_ptr<TypedInvokable<Args...>>> actions;
     int id = 0;
 public:
-    ActionPack() {}
-    ActionPack(const TypedInvokable<Args...>& source);
+    InvokablePack() {}
+    InvokablePack(const TypedInvokable<Args...>& source);
     void Invoke() {}
     void InvokeWithArgs(Args&&... args);
-    void operator()() {}
+    void operator()();
     void AddAction(const TypedInvokable<Args...>& action);
-    ActionPack<Args...>* Copy() const;
+    InvokablePack<Args...>* Copy() const;
     int getId();
     void setId(int id);
 };
 
 template<class... Args>
-ActionPack<Args...>::ActionPack(const TypedInvokable<Args...>& source)
+InvokablePack<Args...>::InvokablePack(const TypedInvokable<Args...>& source)
 {
     actions.emplace_front(source.Copy());
 }
 
 template<class... Args>
-void ActionPack<Args...>::AddAction(const TypedInvokable<Args...>& action)
+void InvokablePack<Args...>::AddAction(const TypedInvokable<Args...>& action)
 {
     actions.emplace_front(action.Copy());
 }
 
 template<class... Args>
-void ActionPack<Args...>::InvokeWithArgs(Args&&... args)
+void InvokablePack<Args...>::InvokeWithArgs(Args&&... args)
 {
     for(auto& action: actions)
         action->InvokeWithArgs(std::forward<Args>(args)...);
 }
 
 template<class... Args>
-void ActionPack<Args...>::setId(int id)
+void InvokablePack<Args...>::setId(int id)
 {
     this->id = id;
 }
 
 template<class... Args>
-int ActionPack<Args...>::getId()
+int InvokablePack<Args...>::getId()
 {
     return id;
 }
 
 template<class... Args>
-ActionPack<Args...>* ActionPack<Args...>::Copy() const
+InvokablePack<Args...>* InvokablePack<Args...>::Copy() const
 {
-    return new ActionPack<Args...>(*this);
+    return new InvokablePack<Args...>(*this);
 }
+
+template<class... Args>
+void InvokablePack<Args...>::operator()()
+{
+    Invoke();
+}
+
+template<>
+void InvokablePack<>::Invoke();
 
 #endif // ACTIONPACK
 

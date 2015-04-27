@@ -1,5 +1,5 @@
 #include "tests.h"
-#include "Core/eventshandler_new.h"
+#include "Core/eventshandler.h"
 #include "Logger/logger.h"
 #include <iostream>
 #include <functional>
@@ -7,7 +7,7 @@
 class TestEvent: public Event<int>
 {
 public:
-    TestEvent(int val):Event(val) {}
+    TestEvent(int val, int hint = -1):Event(val, hint) {}
 };
 
 void testCc(EventHandler* handler);
@@ -19,7 +19,7 @@ void eventsHandlerTest()
     EventHandler* handler = new EventHandler();
     EventListener listener;
     Action<TestEvent*> test;
-    int x;
+    int x = 13;
     test.Bind(testFunction, std::placeholders::_1, &x);
 
     listener.listenFor<TestEvent>();
@@ -35,5 +35,5 @@ void testCc(EventHandler *handler)
 
 void testFunction(TestEvent* event, int* val)
 {
-    Logger::Log("Test event cought " + std::to_string(event->getPayload()));
+    Logger::Log("Test event cought " + std::to_string(event->getPayload()) + std::to_string(*val));
 }

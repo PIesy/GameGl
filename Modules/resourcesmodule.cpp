@@ -13,6 +13,6 @@ ResourcesModule::~ResourcesModule()
 void ResourcesModule::setApi(ApiBase* api)
 {
     ModuleApi<ResourcesApi>* p = new ModuleApi<ResourcesApi>((ResourcesApi*)api);
-    api->AttachEngine(engine);
+    api->AttachEngine(*engine);
     this->api = p;
 }

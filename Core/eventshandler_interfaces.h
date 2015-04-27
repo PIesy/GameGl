@@ -6,7 +6,10 @@
  */
 class EventInterface
 {
+    int hint;
 public:
+    virtual void setHint(int hint) { this->hint = hint; }
+    virtual int getHint() { return hint; }
     virtual ~EventInterface() {}
 };
 

@@ -84,7 +84,7 @@ RenderObject* VertexObject::data()
 void VertexObject::Append(const VertexObject& src, float offset_x, float offset_y)
 {
     RenderObject tmp;
-    int i;
+    unsigned int i;
 
     tmp.vertexCount = object.vertexCount + src.object.vertexCount;
     tmp.indices.count = object.indices.count + src.object.indices.count;
@@ -108,7 +108,7 @@ void VertexObject::Append(const VertexObject& src, float offset_x, float offset_
 void VertexObject::Append(const RenderObject &src, float offset_x, float offset_y)
 {
     RenderObject tmp;
-    int i;
+    unsigned int i;
 
     tmp.vertexCount = object.vertexCount + src.vertexCount;
     tmp.indices.count = object.indices.count + src.indices.count;

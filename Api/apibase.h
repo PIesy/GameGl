@@ -10,7 +10,7 @@ protected:
     EngineInterface* engine;
 public:
     virtual ~ApiBase() {}
-    void AttachEngine(EngineInterface* engine) { this->engine = engine; }
+    void AttachEngine(EngineInterface& engine) { this->engine = &engine; }
     virtual Service* getService() { return nullptr; }
 };
 

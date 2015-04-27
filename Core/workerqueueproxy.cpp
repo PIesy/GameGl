@@ -28,6 +28,7 @@ WorkerQueueProxy::~WorkerQueueProxy()
 void WorkerQueueProxy::ReplaceTaskSource(TaskList* source)
 {
     std::lock_guard<std::mutex> lock(mutex);
+
     if(!externalSource)
         delete tasks;
     tasks = source;
@@ -45,11 +46,13 @@ TaskData WorkerQueueProxy::Pop()
 void WorkerQueueProxy::Push(const Invokable& data)
 {
     std::lock_guard<std::mutex> lock(mutex);
+
     tasks->emplace_back(data.Copy());
 }
 
 bool WorkerQueueProxy::IsEmpty()
 {
     std::lock_guard<std::mutex> lock(mutex);
+
     return tasks->empty();
 }

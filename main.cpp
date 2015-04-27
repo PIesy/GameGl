@@ -7,8 +7,7 @@
 #include <memory>
 
 void updateViewport(WindowEvent* e, CoreInterface* core);
-void closeApp(WindowEvent* e, CoreInterface* core);
-void buttonClose(void*, CoreInterface* core);
+void closeApp(void*, CoreInterface* core);
 void drawTriangle(CoreInterface* engine, UiLayer* ui);
 void test();
 
@@ -21,8 +20,8 @@ int main()
 
     eventsHandlerTest();
     engine.Start();
-    engine.getEventHandler().setListener<WindowEvent>(setViewport);
-    engine.getEventHandler().setListener<WindowEvent>(endGame);
+    engine.getEventHandler().setListener<WindowEvent>(setViewport, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Resize); });
+    engine.getEventHandler().setListener<WindowEvent>(endGame, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Close); });
     window = (SDL_Window*)(engine.Video()->CreateWindow("Hello", 1000, 600));
     UiLayer ui(engine.getCore(), window);
     drawTriangle(&engine, &ui);
@@ -30,25 +29,15 @@ int main()
     return engine.WaitEnd();
 }
 
-void closeApp(WindowEvent* e, CoreInterface* core)
+void closeApp(void*, CoreInterface* core)
 {
-    if(e->getPayload().eventType == WindowData::Type::Close)
-    {
-        Logger::Log("The end is comming");
-        core->Stop();
-    }
-}
-
-void buttonClose(void*, CoreInterface* core)
-{
-    Logger::Log("This land shall fall under my knees!");
+    Logger::Log("The end is comming");
     core->Stop();
 }
 
 void updateViewport(WindowEvent* e, CoreInterface* core)
 {
-    if(e->getPayload().eventType == WindowData::Type::Resize)
-        core->Video()->setViewport(0, 0, e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
+    core->Video()->setViewport(0, 0, e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
 }
 
 void drawTriangle(CoreInterface* engine, UiLayer* ui)
@@ -58,7 +47,7 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui)
     Program* program;
     Button* box = new Button(200, 50);
     Button* box2 = new Button(200, 50, {0,1,1,1});
-    Action<MouseEvent*> endGame(buttonClose, std::placeholders::_1, engine);
+    Action<MouseEvent*> endGame(closeApp, std::placeholders::_1, engine);
     VertexObject* frame = new VertexObject(Shapes::Triangle());
 
     ui->AddElement(box);

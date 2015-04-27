@@ -11,7 +11,6 @@ SOURCES += main.cpp \
     Modules/soundmodule.cpp \
     Modules/resourcesmodule.cpp \
     Core/enginecore.cpp \
-    Core/eventshandler.cpp \
     Graphics/sdlwrapper.cpp \
     Graphics/openglsdl.cpp \
     Helpers/helpers.cpp \
@@ -32,16 +31,16 @@ SOURCES += main.cpp \
     Logger/logger.cpp \
     Core/broadcaster.cpp \
     Core/threadpool.cpp \
-    Core/eventshandler_new.cpp \
     Tests/tests.cpp \
     Modules/module.cpp \
     Core/workerqueueproxy.cpp \
-    Core/actionpack.cpp \
     Input/sdlinput.cpp \
     Modules/inputmodule.cpp \
     Helpers/action.cpp \
     Helpers/generic_invokable.cpp \
-    Helpers/task.cpp
+    Helpers/task.cpp \
+    Core/eventshandler.cpp \
+    Helpers/invokablepack.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -50,7 +49,6 @@ HEADERS += \
     Modules/resourcesmodule.h \
     Core/enginecore.h \
     Core/enginecoreincludes.h \
-    Core/eventshandler.h \
     Graphics/graphicsapi.h \
     Graphics/openglsdl.h \
     Helpers/helpers.h \
@@ -73,9 +71,7 @@ HEADERS += \
     Ui/uielements.h \
     Logger/logger.h \
     Core/broadcaster.h \
-    Core/invokable.h \
     Core/threadpool.h \
-    Core/eventshandler_new.h \
     Core/eventshandler_interfaces.h \
     Tests/tests.h \
     Core/executable.h \
@@ -83,7 +79,6 @@ HEADERS += \
     Core/service.h \
     Api/apibase.h \
     Core/workerqueueproxy.h \
-    Core/actionpack.h \
     Input/inputapi.h \
     Input/inputevents.h \
     Input/inputdata.h \
@@ -93,7 +88,9 @@ HEADERS += \
     Helpers/invokable.h \
     Helpers/action.h \
     Helpers/function_traits.h \
-    Helpers/generic_invokable.h
+    Helpers/generic_invokable.h \
+    Core/eventshandler.h \
+    Helpers/invokablepack.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

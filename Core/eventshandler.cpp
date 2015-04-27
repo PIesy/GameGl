@@ -1,126 +1,77 @@
-//#include "eventshandler.h"
-//#include "Logger/logger.h"
+#include "eventshandler.h"
+#include "Logger/logger.h"
 
-//void inputHandler(EventStorage* eventStorage, Uint8* compareWith);
-//void windowHandler(EventStorage *storage);
-//void keyboardHandler(EventStorage* eventStorage);
-//void mouseHandler(EventStorage* eventStorage);
-//void EventPoller(EventsHandler* handler);
+void EventListener::listenFor(std::type_index type)
+{
+    this->type = type;
+}
 
-//ActionOld::ActionOld(void (*fun)(void *, void *), void *output)
-//{
-//    function = fun;
-//    this->output = output;
-//}
+std::type_index EventListener::getEventType()
+{
+    return type;
+}
 
-//void ActionOld::Invoke(void *event)
-//{
-//    function(event, output);
-//}
+void EventListener::Process(EventInterface* event)
+{
+    if(filter(event))
+        handler.InvokeWithArgs(event);
+}
 
-//int ActionOld::getBindpoint()
-//{
-//    return bindpoint;
-//}
+void EventListener::setHandler(const EventInvokable& handler, const EventFilter& filter)
+{
+    this->handler = handler;
+    this->filter = filter;
+}
 
-//void ActionOld::setBindpoint(int bindpoint)
-//{
-//    this->bindpoint = bindpoint;
-//}
+int EventHandler::setListener(EventListener listener)
+{
+    std::type_index type = listener.getEventType();
 
-//EventsHandler::EventsHandler()
-//{
-//    workers[0].setTask((ActionFun)windowHandler, &eventStorage[0]);
-//    workers[1].setTask((ActionFun)keyboardHandler, &eventStorage[1]);
-//    workers[2].setTask((ActionFun)mouseHandler, &eventStorage[2]);
-//}
+    if(checkListenerType(listener))
+        return -1;
+    listener_ids.insert({currentId, type});
+    if(!listeners.count(type))
+    {
+        std::unordered_map<int, EventListener> inner;
+        listeners.insert({type, inner});
+    }
+    listeners.at(type).insert({currentId, listener});
+    return currentId++;
+}
 
-//void EventsHandler::BindAction(ActionOld action, int eventType, int category)
-//{
-//    action.bindpoint = eventType;
-//    eventStorage[category].actions.push_front(action);
-//}
+bool EventHandler::checkListenerType(EventListener listener)
+{
+    return invalidType == listener.getEventType();
+}
 
-//void EventsHandler::Start()
-//{
-//    hostThread.setTask((ActionFun)EventPoller, this);
-//}
+bool EventHandler::removeListener(int listenerId)
+{
+    if(listener_ids.count(listenerId))
+    {
+        std::type_index type = listener_ids.at(listenerId);
+        listeners.at(type).erase(listenerId);
+        listener_ids.erase(listenerId);
+        return true;
+    }
+    return false;
+}
 
-//void EventsHandler::Terminate()
-//{
-//    for (int i = 0; i < handlersCount; i++)
-//    {
-//        eventStorage[i].terminate = true;
-//        eventStorage[i].event.newEvent.notify_all();
-//    }
-//    terminate = true;
-//    hostThread.Terminate();
-//}
+void EventHandler::ThrowEvent(EventInterface* event)
+{
+    std::unique_ptr<EventInterface> packedEvent(event);
+    try
+    {
+        for(std::pair<const int, EventListener>& listener: listeners.at(getType(*event)))
+            listener.second.Process(packedEvent.get());
+    }
+    catch(std::out_of_range) {}
+}
 
-//void EventsHandler::WaitEnd()
-//{
-//    hostThread.Join();
-//}
+int EventHandler::createListener(std::type_index type, const EventInvokable& action, const EventFilter& filter)
+{
+    EventListener listener;
 
-//void windowHandler(EventStorage* eventStorage)
-//{
-//    inputHandler(eventStorage, (Uint8*)&eventStorage->event.event.window.event);
-//}
-
-//void keyboardHandler(EventStorage* eventStorage)
-//{
-//    inputHandler(eventStorage, (Uint8*)&eventStorage->event.event.key.keysym.scancode);
-//}
-
-//void mouseHandler(EventStorage* eventStorage)
-//{
-//    inputHandler(eventStorage, (Uint8*)&eventStorage->event.event.button.button);
-//}
-
-//void inputHandler(EventStorage *eventStorage, Uint8* compareWith)
-//{
-//    std::unique_lock<std::mutex> lock(eventStorage->mutex);
-
-//    while(!eventStorage->terminate)
-//    {
-//        for(ActionOld& action : eventStorage->actions)
-//            if((*compareWith == action.getBindpoint()) || (action.getBindpoint() == -1))
-//                action.Invoke(new SDL_Event(eventStorage->event.event));
-//        eventStorage->event.newEvent.wait(lock);
-//    }
-//}
-
-//void EventPoller(EventsHandler *handler)
-//{
-//    Logger::Log("event poller started");
-//    SDL_Event event;
-//    int newEvent = 0;
-
-//    while(!handler->terminate)
-//    {
-//        newEvent = SDL_PollEvent(&event);
-//        if (newEvent)
-//        {
-//            switch(event.type) {
-//            case SDL_WINDOWEVENT:
-//                handler->eventStorage[0].event.event = event;
-//                handler->eventStorage[0].event.newEvent.notify_all();
-//                break;
-//            case SDL_KEYDOWN:
-//            case SDL_KEYUP:
-//                handler->eventStorage[1].event.event = event;
-//                handler->eventStorage[1].event.newEvent.notify_all();
-//                break;
-//            case SDL_MOUSEBUTTONDOWN:
-//            case SDL_MOUSEBUTTONUP:
-//            case SDL_MOUSEMOTION:
-//            case SDL_MOUSEWHEEL:
-//                handler->eventStorage[2].event.event = event;
-//                handler->eventStorage[2].event.newEvent.notify_all();
-//                break;
-//            }
-//        }
-//        SDL_Delay(1);
-//    }
-//    Logger::Log("event poller stopped");
-//}
+    listener.listenFor(type);
+    listener.setHandler(action, filter);
+    return setListener(listener);
+}

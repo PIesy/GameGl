@@ -15,6 +15,9 @@ void SDLInputService::sdlInputRoutine()
 {
     Logger::Log("Input service started");
     SDL_Event event;
+    WindowData w;
+    KeyboardData k;
+    MouseData m;
 
     while(!stop)
     {
@@ -23,17 +26,20 @@ void SDLInputService::sdlInputRoutine()
             switch(event.type)
             {
             case SDL_WINDOWEVENT:
-                handler.ThrowEvent(new WindowEvent(parseWindowEvent(event)));
+                w = parseWindowEvent(event);
+                handler.ThrowEvent(new WindowEvent(w, integral(w.eventType)));
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                handler.ThrowEvent(new KeyboardEvent(parseKeyboardEvent(event)));
+                k = parseKeyboardEvent(event);
+                handler.ThrowEvent(new KeyboardEvent(k, k.scancode));
                 break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
             case SDL_MOUSEMOTION:
             case SDL_MOUSEWHEEL:
-                handler.ThrowEvent(new MouseEvent(parseMouseEvent(event)));
+                m = parseMouseEvent(event);
+                handler.ThrowEvent(new MouseEvent(m, integral(m.eventType)));
                 break;
             }
     }
@@ -99,7 +105,12 @@ MouseData SDLInputService::parseMouseEvent(SDL_Event& event)
 
 void SDLInputService::Start()
 {
-    serviceThread.setTask(Task(&SDLInputService::sdlInputRoutine, this));
+    std::lock_guard<std::mutex> lock(mutex);
+    if(stop)
+    {
+        stop = false;
+        serviceThread.setTask(Task(&SDLInputService::sdlInputRoutine, this));
+    }
 }
 
 void SDLInputService::Stop()

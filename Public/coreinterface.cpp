@@ -45,8 +45,8 @@ int CoreInterface::WaitEnd()
 
 void CoreInterface::initVideo()
 {
-    GraphicsModule* graphics = (GraphicsModule*)core->GetModule(Modules::Video);
-    video = graphics->getApi();
+    GraphicsModule& graphics = (GraphicsModule&)core->GetModule(Modules::Video);
+    video = graphics.getApi();
 }
 
 EngineInterface* CoreInterface::getCore()

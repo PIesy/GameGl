@@ -13,6 +13,6 @@ InputModule::~InputModule()
 void InputModule::setApi(ApiBase* api)
 {
     ModuleApi<InputApi>* p = new ModuleApi<InputApi>((InputApi*)api);
-    api->AttachEngine(engine);
+    api->AttachEngine(*engine);
     this->api = p;
 }

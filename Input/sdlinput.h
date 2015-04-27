@@ -7,7 +7,7 @@
 class SDLInputService: public Service
 {
     EventHandler& handler;
-    bool stop = false;
+    bool stop = true;
     bool pause = false;
     std::mutex mutex;
     std::condition_variable suspension;

@@ -15,19 +15,18 @@ class EngineCore: public EngineInterface
 {
     std::unordered_map<int, ModuleInterface*> modules;
     Worker worker;
-    CoreData* data;
+    CoreData data;
     EventHandler eventHandler;
     void initModules();
     void initApis(EngineInitializer initializer);
-    void startCoreThread();
 public:
     EngineCore(EngineInitializer initializer);
     ~EngineCore();
     void AttachModule(Modules name, ModuleInterface *module);
-    ModuleInterface* GetModule(Modules name);
+    ModuleInterface& GetModule(Modules name);
     EventHandler& getEventHandler();
     void Start();
-    void Terminate(bool wait);
+    void Terminate();
     void WaitEnd();
 };
 

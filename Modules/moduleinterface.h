@@ -17,7 +17,7 @@ class ModuleInterface
 {
 public:
     virtual ~ModuleInterface(){}
-    virtual void setEngine(EngineInterface* engine) = 0;
+    virtual void setEngine(EngineInterface& engine) = 0;
     virtual void setApi(ApiBase* api) = 0;
     virtual ApiBase* getApi() = 0;
 };
