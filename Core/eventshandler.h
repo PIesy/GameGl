@@ -5,6 +5,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include "Helpers/helpers.h"
+#include "worker.h"
 
 using EventInvokable = GenericInvokable;
 using EventFilter = std::function<bool(EventInterface*)>;
@@ -38,6 +39,7 @@ public:
 
 class EventHandler
 {
+    Worker worker;
     std::type_index invalidType = typeid(Invalid);
     int currentId = 0;
     std::unordered_map<std::type_index, std::unordered_map<int, EventListener>> listeners;

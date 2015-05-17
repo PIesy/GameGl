@@ -20,7 +20,7 @@ public:
     ~WorkerQueueProxy();
     WorkerQueueProxy(const WorkerQueueProxy& arg) = delete;
     WorkerQueueProxy(WorkerQueueProxy&& arg);
-    void ReplaceTaskSource(TaskList* source);
+    void ReplaceTaskSource(TaskList& source);
     TaskData Pop();
     void Push(const Invokable& data);
     bool IsEmpty();

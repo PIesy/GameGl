@@ -32,7 +32,7 @@ public:
     ~SDLInput() {}
     KeyboardData GetKeyboardState();
     MouseData GetMouseState();
-    Service* getService();
+    ServiceContainer getService();
 };
 
 #endif // SDLINPUT_H

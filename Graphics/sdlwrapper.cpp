@@ -5,7 +5,8 @@ void createGlContext(GraphicsData* data);
 SdlWrapper::SdlWrapper(GraphicsData* data)
 {
     this->data = data;
-    SDL_Init(SDL_INIT_VIDEO);
+    if(!SDL_WasInit(SDL_INIT_VIDEO))
+        SDL_Init(SDL_INIT_VIDEO);
 }
 
 void* SdlWrapper::CreateWindow(std::string title, int x, int y)
@@ -19,7 +20,9 @@ void* SdlWrapper::CreateWindow(std::string title, int x, int y)
 
 void SdlWrapper::initGlContext()
 {
-    data->worker.setTask(Task(createGlContext, data));
+    Task init(createGlContext, data);
+    data->worker.setTask(init);
+    init.WaitTillFinished();
 }
 
 void createGlContext(GraphicsData *data)

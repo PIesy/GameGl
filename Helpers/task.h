@@ -3,6 +3,7 @@
 
 #include "invokable.h"
 #include <future>
+#include "sharedstate.h"
 
 
 class Task: public Invokable
@@ -10,6 +11,7 @@ class Task: public Invokable
     std::function<void()> task;
     bool isValid = false;
     bool hasFuture = false;
+    SharedState<bool> isInvoked = false;
 public:
     Task() {}
     template<class F>
@@ -23,6 +25,7 @@ public:
     Task* Copy() const;
     void Invoke();
     void operator()();
+    void WaitTillFinished();
 };
 
 template<class F>

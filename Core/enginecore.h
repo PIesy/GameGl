@@ -8,7 +8,7 @@ struct CoreData
 {
     EngineInterface* core;
     bool started = false;
-    std::forward_list<Service*> services;
+    std::forward_list<ServiceContainer> services;
 };
 
 class EngineCore: public EngineInterface

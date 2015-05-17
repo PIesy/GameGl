@@ -20,7 +20,7 @@ EngineCore::~EngineCore()
 
 void EngineCore::initApis(EngineInitializer initializer)
 {
-    Service* service;
+    ServiceContainer service;
 
     for (ModuleApiPair& pair : initializer.apis)
     {
@@ -30,7 +30,7 @@ void EngineCore::initApis(EngineInitializer initializer)
         {
             data.services.push_front(service);
             if(data.started)
-                service->Start();
+                service.Start();
         }
     }
 }
@@ -39,8 +39,10 @@ void EngineCore::initModules()
 {
     GraphicsModule* g = new GraphicsModule;
     InputModule* i = new InputModule;
+    ResourcesModule* r = new ResourcesModule;
     AttachModule(Modules::Video, g);
     AttachModule(Modules::Input, i);
+    AttachModule(Modules::Storage, r);
 }
 
 ModuleInterface& EngineCore::GetModule(Modules name)
@@ -62,19 +64,19 @@ EventHandler& EngineCore::getEventHandler()
 void EngineCore::Start()
 {
     data.started = true;
-    for(Service*& service: data.services)
-        service->Start();
+    for(ServiceContainer& service: data.services)
+        service.Start();
 }
 
 void EngineCore::Terminate()
 {
     GlobalBroadcaster::NotifyAll(0);
-    for(Service*& service: data.services)
-        service->Stop();
+    for(ServiceContainer& service: data.services)
+        service.Stop();
 }
 
 void EngineCore::WaitEnd()
 {
-    for(Service*& service: data.services)
-        service->Wait();
+    for(ServiceContainer& service: data.services)
+        service.Wait();
 }

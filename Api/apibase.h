@@ -11,7 +11,7 @@ protected:
 public:
     virtual ~ApiBase() {}
     void AttachEngine(EngineInterface& engine) { this->engine = &engine; }
-    virtual Service* getService() { return nullptr; }
+    virtual ServiceContainer getService() { return ServiceContainer(); }
 };
 
 #endif // APIBASE

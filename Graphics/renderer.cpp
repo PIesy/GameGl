@@ -15,12 +15,14 @@ Renderer::Renderer(RenderQueue* queue, GraphicsData* data)
 
 void Renderer::Start()
 {
+    Logger::Log("Renderer started");
     while(!terminate)
     {
         render();
         draw();
-        SDL_Delay(1);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
+    Logger::Log("Renderer stoped");
 }
 
 void Renderer::init()
@@ -35,7 +37,7 @@ void Renderer::init()
     glBindBuffer(GL_ARRAY_BUFFER, data.VBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.IBO);
     glBufferData(GL_ARRAY_BUFFER, 100 * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 100 * sizeof(int), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 100 * sizeof(unsigned int), NULL, GL_DYNAMIC_DRAW);
 }
 
 void Renderer::render()
@@ -45,6 +47,7 @@ void Renderer::render()
     {
         graphicsData->resizing.lock();
         glViewport(0, 0, graphicsData->dimensions[0], graphicsData->dimensions[1]);
+        graphicsData->resolutionChanged = false;
         graphicsData->resizing.unlock();
     }
     if (!queue->IsEmpty())
@@ -65,7 +68,7 @@ void Renderer::render()
             glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
                             currentScene->objects[i]->data()->indices.count * sizeof(int),
                             currentScene->objects[i]->data()->indices.indices);
-            currentScene->objects[i]->data()->program->Use(nullptr);
+            currentScene->objects[i]->data()->program->Use();
             glDrawElements(GL_TRIANGLES, currentScene->objects[i]->data()->indices.count, GL_UNSIGNED_INT, nullptr);
         }
 }

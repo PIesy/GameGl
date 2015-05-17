@@ -10,7 +10,7 @@ public:
     virtual ~InputApi() {}
     virtual KeyboardData GetKeyboardState() = 0;
     virtual MouseData GetMouseState() = 0;
-    virtual Service* getService() = 0;
+    virtual ServiceContainer getService() = 0;
 };
 
 #endif // INPUTAPI_H

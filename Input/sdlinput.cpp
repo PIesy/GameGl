@@ -22,7 +22,7 @@ void SDLInputService::sdlInputRoutine()
     while(!stop)
     {
         waitIf(pause, mutex, suspension);
-        if (SDL_WaitEvent(&event))
+        if (SDL_WaitEventTimeout(&event, 100))
             switch(event.type)
             {
             case SDL_WINDOWEVENT:
@@ -165,7 +165,7 @@ MouseData::Button parseMouseButton(std::uint8_t button)
     }
 }
 
-Service* SDLInput::getService()
+ServiceContainer SDLInput::getService()
 {
     service = new SDLInputService(engine->getEventHandler());
     return service;

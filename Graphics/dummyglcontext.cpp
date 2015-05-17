@@ -10,8 +10,9 @@ DummyGlContext::DummyGlContext(SDL_GLContext context, SDL_Window* window)
 
     data.context = context;
     data.window = window;
-    worker.setTask(Task(initContext, &data));
-    data.finish.wait(lock);
+    Task init([this] { SDL_GL_MakeCurrent(data.window, data.context); });
+    worker.setTask(init);
+    init.WaitTillFinished();
     ready = true;
 }
 

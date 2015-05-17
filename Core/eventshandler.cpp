@@ -58,13 +58,16 @@ bool EventHandler::removeListener(int listenerId)
 
 void EventHandler::ThrowEvent(EventInterface* event)
 {
-    std::unique_ptr<EventInterface> packedEvent(event);
-    try
+    worker.setTask(Task([event, this]()
     {
-        for(std::pair<const int, EventListener>& listener: listeners.at(getType(*event)))
-            listener.second.Process(packedEvent.get());
-    }
-    catch(std::out_of_range) {}
+        std::unique_ptr<EventInterface> packedEvent(event);
+        try
+        {
+            for(std::pair<const int, EventListener>& listener: listeners.at(getType(*event)))
+                listener.second.Process(packedEvent.get());
+        }
+        catch(std::out_of_range) {}
+    }));
 }
 
 int EventHandler::createListener(std::type_index type, const EventInvokable& action, const EventFilter& filter)

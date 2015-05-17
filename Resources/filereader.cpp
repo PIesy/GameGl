@@ -1,18 +1,21 @@
 #include "filereader.h"
 #include <iostream>
 
-void* FileReader::ReadByTemplate(std::string source, Scanner* scanner)
+bool FileReader::ReadByTemplate(std::string source, Scanner& scanner)
 {
     std::fstream file;
-    char buff[256];
-    buff[255] = '\0';
+    char buff[4096];
+    buff[4095] = '\0';
 
+    scanner.Clear();
     file.open(source);
+    if(!file.is_open())
+        return false;
 
     while(!file.eof())
     {
-        file.getline(buff,255);
-        scanner->Analyze(buff);
+        file.getline(buff,4095);
+        scanner.Analyze(buff);
     }
-    return scanner->Fill();
+    return true;
 }

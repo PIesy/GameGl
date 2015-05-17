@@ -8,7 +8,7 @@ class FileReader: public ResourcesApi
 {
 public:
     FileReader(){}
-    void* ReadByTemplate(std::string source, Scanner* scanner);
+    bool ReadByTemplate(std::string source, Scanner& scanner);
 };
 
 #endif // FILEREADER_H

@@ -9,11 +9,14 @@ class CoreInterface
 {
     EngineInterface* core;
     GraphicsApi* video;
+    ResourcesApi* resources;
     void initVideo();
+    void initResources();
 public:
     CoreInterface();
     ~CoreInterface();
     GraphicsApi* Video();
+    ResourcesApi& Resources();
     EngineInterface* getCore();
     EventHandler& getEventHandler();
     void Start();

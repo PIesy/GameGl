@@ -38,7 +38,7 @@ constexpr GenericInvokable generilizeInvokable(Action<ArgPtr> action)
     return new GenericInvokable(action);
 }
 
-inline void waitIf(bool condition, std::mutex& mutex, std::condition_variable& var)
+inline void waitIf(const bool& condition, std::mutex& mutex, std::condition_variable& var)
 {
     if(condition)
     {

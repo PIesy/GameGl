@@ -16,6 +16,7 @@ public:
     GlShader* getShader();
     GlProgram* getProgram();
     bool Ready();
+    void WaitReady();
 };
 
 class OpenGlWrapper
@@ -28,10 +29,10 @@ class OpenGlWrapper
 public:
     OpenGlWrapper(GraphicsData* data);
     ~OpenGlWrapper();
-    Shader* CreateShader(std::string source, unsigned int type);
-    GlProgram* CreateProgram();
+    Shader& CreateShader(std::string source, ShaderType type);
+    GlProgram& CreateProgram();
     void SetData(Scene* scene);
-    void setViewport(int x, int y, int width, int height);
+    void setViewport(int, int, int width, int height);
 
     friend class OpenGlSdl;
     friend void setDummy(OpenGlWrapper* context);
@@ -56,8 +57,8 @@ public:
     OpenGlSdl();
     ~OpenGlSdl();
     void* CreateWindow(std::string title, int x, int y);
-    Shader* CreateShader(std::string source, unsigned int type);
-    Program* CreateProgram();
+    Shader& CreateShader(std::string source, ShaderType type);
+    Program& CreateProgram();
     void SendScene(void* scene);
     void setViewport(int x, int y, int width, int height);
 };

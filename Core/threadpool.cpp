@@ -1,35 +1,43 @@
 //#include "threadpool.h"
 
-
-//ThreadPool::ThreadPool(int minThreads, int maxThreads)
+//ThreadPool::ThreadPool(const ThreadPoolParams& params)
 //{
+//    this->params = params;
 //    for (int i = 0; i < minThreads; i++)
 //        workers.emplace_back();
 //    freeWorkers.insert(freeWorkers.begin(), workers.begin(), workers.end());
-//    params.minThreads = minThreads;
-//    params.maxThreads = maxThreads;
 //}
 
 //ThreadSubset ThreadPool::getSubset(int minThreads, int maxThreads)
 //{
-//    ThreadSubset subset;
+//    std::lock_guard<std::mutex> lock(mutex);
+//    std::vector<Worker*> workers;
 //    int count = 0;
-//    std::unique_lock<std::mutex> lock(mutex);
 
-//    subset.subsetId = currentId;
-//    currentId++;
 //    count = freeWorkers.size() < maxThreads ? freeWorkers.size() : maxThreads;
-//    subset.workers.insert(workers.begin(), freeWorkers.begin(), freeWorkers.begin() += freeWorkers.size());
-//    busyWorkers.insert(busyWorkers.begin(), freeWorkers.begin(), freeWorkers.begin() += freeWorkers.size());
-//    freeWorkers.erase(freeWorkers.begin(), freeWorkers.begin() += freeWorkers.size());
-//    lock.unlock();
-//    subset.init();
-//    return subset;
+//    workers.insert(workers.begin(), freeWorkers.begin(), std::advance(freeWorkers.begin(), count));
+//    reservedWorkers.insert(reservedWorkers.begin(), freeWorkers.begin(), std::advance(freeWorkers.begin(), count));
+//    freeWorkers.erase(freeWorkers.begin(), std::advance(freeWorkers.begin(), count));
+//    return ThreadSubset(workers);
 //}
 
-//void ThreadPool::Execute(Invokable& action, void* arg)
+//void ThreadPool::Execute(Invokable& action)
 //{
-//    poolTaskList->push_back({action.copy(), arg});
+//    poolTaskList->emplace_back(action.Copy());
 //}
 
+//void ThreadPool::releaseSubset(std::vector<Workers*>& subset)
+//{
+//    std::lock_guard<std::mutex> lock(mutex);
+//    reservedWorkers.erase(reservedWorkers.begin(), std::advance(reservedWorkers.begin(), count));
+//}
 
+//ThreadSubset::ThreadSubset(std::vector<Worker*>&& source, ThreadPool& parent):parentPool(parent)
+//{
+//    workers = source;
+//}
+
+//void ThreadSubset::Release()
+//{
+//    parentPool.releaseSubset(workers);
+//}

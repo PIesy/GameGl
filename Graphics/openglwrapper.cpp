@@ -19,10 +19,12 @@ OpenGlWrapper::~OpenGlWrapper()
 
 void OpenGlWrapper::initGlew()
 {
-    data->worker.setTask(Task(setGlew));
+    Task init(setGlew);
+    data->worker.setTask(init);
+    init.WaitTillFinished();
 }
 
-Shader* OpenGlWrapper::CreateShader(std::string source, unsigned int type)
+Shader& OpenGlWrapper::CreateShader(std::string source, ShaderType type)
 {
     if(!context->Ready())
         while(!context->Ready())
@@ -30,16 +32,16 @@ Shader* OpenGlWrapper::CreateShader(std::string source, unsigned int type)
 
     GlShader* sh = context->getShader();
     sh->Create(source, type);
-    return sh;
+    return *sh;
 }
 
-GlProgram* OpenGlWrapper::CreateProgram()
+GlProgram& OpenGlWrapper::CreateProgram()
 {
     if(!context->Ready())
         while(!context->Ready())
             SDL_Delay(1);
 
-    return context->getProgram();
+    return *context->getProgram();
 }
 
 void OpenGlWrapper::startRenderer()
@@ -56,12 +58,12 @@ void OpenGlWrapper::SetData(Scene *scene)
     queue->Push(scene);
 }
 
-void OpenGlWrapper::setViewport(int x, int y, int width, int height)
+void OpenGlWrapper::setViewport(int, int, int width, int height)
 {
     data->resizing.lock();
-    data->resolutionChanged = true;
     data->dimensions[0] = width;
     data->dimensions[1] = height;
+    data->resolutionChanged = true;
     data->resizing.unlock();
 }
 
@@ -77,6 +79,6 @@ void setGlew()
     glewExperimental = 1;
     glew_err = glewInit();
     if(glew_err != GLEW_OK)
-        fprintf(stderr, "%s\n", glewGetErrorString(glew_err));
+        Logger::Log((const char*)glewGetErrorString(glew_err));
     glew_err = glGetError();
 }

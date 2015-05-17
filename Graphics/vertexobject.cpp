@@ -60,7 +60,7 @@ VertexObject::operator RenderObject&()
     return object;
 }
 
-VertexObject& VertexObject::operator =(const VertexObject& src)
+VertexObject& VertexObject::operator=(const VertexObject& src)
 {
     delete object.indices.indices;
     delete object.vertices;
@@ -68,7 +68,7 @@ VertexObject& VertexObject::operator =(const VertexObject& src)
     return *this;
 }
 
-VertexObject& VertexObject::operator =(const RenderObject& src)
+VertexObject& VertexObject::operator=(const RenderObject& src)
 {
     delete object.indices.indices;
     delete object.vertices;

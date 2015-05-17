@@ -1,5 +1,6 @@
 #include "openglsdl.h"
 #include <cstdio>
+#include "Logger/logger.h"
 
 struct ShaderProgram
 {
@@ -13,84 +14,50 @@ struct CompileData
     GLuint* program;
 };
 
-void glNewProgram(CompileData* program)
-{
-    *program->program = glCreateProgram();
-    program->var.notify_all();
-}
-
 GlProgram::GlProgram(Worker *context)
 {
-    CompileData data;
-    std::unique_lock<std::mutex> wait(lock);
-
-    data.program = &program;
+    Task create([this] { program = glCreateProgram(); });
     this->context = context;
-    this->context->setTask(Task(glNewProgram, &data));
-    data.var.wait(wait);
+    this->context->setTask(create);
+    create.WaitTillFinished();
 }
 
-void glDropProgram(GLuint* program)
+//GlProgram::~GlProgram()
+//{
+//    Task remove([this] { glDeleteProgram(program); });
+//    context->setTask(remove);
+//    remove.WaitTillFinished();
+//}
+
+void GlProgram::Attach(const Shader& shader)
 {
-    glDeleteProgram(*program);
-    delete program;
+    const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
+    Task attach([&glShader, this] { glAttachShader(program, glShader); });
+    context->setTask(attach);
+    attach.WaitTillFinished();
 }
 
-GlProgram::~GlProgram()
+void GlProgram::Detach(const Shader& shader)
 {
-    GLuint* prog = new GLuint(program);
-    context->setTask(Task(glDropProgram, prog));
+    const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
+    Task detach([&glShader, this] { glDetachShader(program, glShader); });
+    context->setTask(detach);
+    detach.WaitTillFinished();
 }
 
-void glShaderAttach(ShaderProgram* prog)
-{
-    glAttachShader(prog->program, *prog->shader);
-    delete prog;
-}
-
-void GlProgram::Attach(Shader* shader)
-{
-    ShaderProgram* prog = new ShaderProgram;
-    prog->shader = shader;
-    prog->program = program;
-    context->setTask(Task(glShaderAttach, prog));
-}
-
-void glShaderDetach(ShaderProgram* prog)
-{
-    glDetachShader(prog->program, *prog->shader);
-    delete prog;
-}
-
-void GlProgram::Detach(Shader* shader)
-{
-    ShaderProgram* prog = new ShaderProgram;
-    prog->shader = shader;
-    prog->program = program;
-    context->setTask(Task(glShaderDetach, prog));
-}
-
-GlProgram::operator GLuint()
+GlProgram::operator GLuint() const
 {
     return program;
 }
 
-void glProgramLink(CompileData* program)
-{
-    glLinkProgram(*program->program);
-    program->var.notify_all();
-}
-
 void GlProgram::Compile()
 {
-    CompileData data;
-    std::unique_lock<std::mutex> wait(lock);
-    data.program = &program;
-    context->setTask(Task(glProgramLink, &data));
-    data.var.wait(wait);
+    Task task([this] { glLinkProgram(program); });
+    context->setTask(task);
+    task.WaitTillFinished();
 }
 
-void GlProgram::Use(void*)
+void GlProgram::Use()
 {
     glUseProgram(program);
 }

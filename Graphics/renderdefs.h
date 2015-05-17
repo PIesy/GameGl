@@ -7,6 +7,8 @@
 #include "../Core/worker.h"
 #include "graphicsapi.h"
 
+GLuint convertToGlShaderType(ShaderType type);
+
 struct DummyData
 {
     std::mutex lock;
@@ -17,20 +19,14 @@ struct DummyData
 
 class GlShader: public Shader
 {
-    std::mutex lock;
     Worker* context;
     GLuint shader = 0;
-    std::string* str = nullptr;
-    const char* src = nullptr;
-    int length = 0;
-    void prepareShader(std::string source);
-    void cleanup();
+    ShaderType type;
 public:
     GlShader(Worker* context);
-    ~GlShader();
-    void Destroy();
-    void Create(std::string source, unsigned int type);
-    operator unsigned int();
+    void Create(std::string source, ShaderType type);
+    ShaderType getType() const;
+    operator GLuint() const;
 };
 
 class GlProgram: public Program
@@ -40,12 +36,11 @@ class GlProgram: public Program
     GLuint program = 0;
 public:
     GlProgram(Worker* context);
-    ~GlProgram();
-    void Attach(Shader* shader);
-    void Detach(Shader* shader);
+    void Attach(const Shader& shader);
+    void Detach(const Shader& shader);
     void Compile();
-    void Use(void * attr = nullptr);
-    operator unsigned int();
+    void Use();
+    operator GLuint() const;
 };
 
 struct GraphicsData

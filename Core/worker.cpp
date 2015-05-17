@@ -5,20 +5,33 @@
 void workerController(WorkerData *data);
 void logStatus(std::string message);
 
-Worker::Worker(TaskList* tasks)
+Worker::Worker()
 {
     data = new WorkerData();
-    if(tasks)
-        data->tasks.ReplaceTaskSource(tasks);
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
 
-Worker::Worker(const Invokable& fun, TaskList* tasks)
+Worker::Worker(TaskList& tasks)
 {
     data = new WorkerData();
-    if(tasks)
-        data->tasks.ReplaceTaskSource(tasks);
+    data->tasks.ReplaceTaskSource(tasks);
+    workerThread = new std::thread(workerController, data);
+    workerId = workerThread->get_id();
+}
+
+Worker::Worker(const Invokable &fun)
+{
+    data = new WorkerData();
+    data->tasks.Push(fun);
+    workerThread = new std::thread(workerController, data);
+    workerId = workerThread->get_id();
+}
+
+Worker::Worker(const Invokable& fun, TaskList& tasks)
+{
+    data = new WorkerData();
+    data->tasks.ReplaceTaskSource(tasks);
     data->tasks.Push(fun);
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();

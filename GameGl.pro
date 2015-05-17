@@ -40,7 +40,12 @@ SOURCES += main.cpp \
     Helpers/generic_invokable.cpp \
     Helpers/task.cpp \
     Core/eventshandler.cpp \
-    Helpers/invokablepack.cpp
+    Helpers/invokablepack.cpp \
+    Core/service_cluster.cpp \
+    Core/service.cpp \
+    Helpers/repeteadfuture.cpp \
+    Graphics/renderdefs.cpp \
+    Public/shaderreader.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -90,7 +95,17 @@ HEADERS += \
     Helpers/function_traits.h \
     Helpers/generic_invokable.h \
     Core/eventshandler.h \
-    Helpers/invokablepack.h
+    Helpers/invokablepack.h \
+    Helpers/executor.h \
+    Core/service_cluster.h \
+    Helpers/repeteadfuture.h \
+    Helpers/repeatedpromise.h \
+    Helpers/dataobject.h \
+    Math/matrix.h \
+    Helpers/sharedstate.h \
+    Graphics/graphicsclasses.h \
+    Public/shaderreader.h \
+    Graphics/sdlclasses.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

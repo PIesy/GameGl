@@ -22,8 +22,10 @@ class Worker
     WorkerData* data;
     std::thread* workerThread = nullptr;
 public:
-    Worker(TaskList* tasks = nullptr);
-    Worker(const Invokable& fun, TaskList* tasks = nullptr);
+    Worker();
+    Worker(TaskList& tasks);
+    Worker(const Invokable& fun);
+    Worker(const Invokable& fun, TaskList& tasks);
     Worker(const Worker& arg) = delete;
     Worker(Worker&& arg);
     ~Worker();

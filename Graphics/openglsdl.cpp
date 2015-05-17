@@ -21,12 +21,12 @@ void* OpenGlSdl::CreateWindow(std::string title, int x, int y)
     return data.window;
 }
 
-Shader* OpenGlSdl::CreateShader(std::string source, unsigned int type)
+Shader& OpenGlSdl::CreateShader(std::string source, ShaderType type)
 {
     return ogl->CreateShader(source, type);
 }
 
-Program* OpenGlSdl::CreateProgram()
+Program& OpenGlSdl::CreateProgram()
 {
     return ogl->CreateProgram();
 }

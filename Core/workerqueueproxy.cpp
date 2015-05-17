@@ -25,13 +25,13 @@ WorkerQueueProxy::~WorkerQueueProxy()
         delete tasks;
 }
 
-void WorkerQueueProxy::ReplaceTaskSource(TaskList* source)
+void WorkerQueueProxy::ReplaceTaskSource(TaskList& source)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
     if(!externalSource)
         delete tasks;
-    tasks = source;
+    tasks = &source;
 }
 
 TaskData WorkerQueueProxy::Pop()

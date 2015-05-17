@@ -17,5 +17,21 @@ public:
     virtual void Wait() = 0;
 };
 
+class ServiceContainer
+{
+    std::shared_ptr<Service> service;
+    bool isEmpty = true;
+public:
+    ServiceContainer(Service* service);
+    ServiceContainer() {}
+    void Start();
+    void Stop();
+    void Pause();
+    void Resume();
+    void Restart();
+    void Wait();
+    operator bool();
+};
+
 #endif // SERVICE
 

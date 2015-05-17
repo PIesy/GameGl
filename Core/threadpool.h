@@ -1,48 +1,50 @@
-#ifndef THREADPOOL_H
-#define THREADPOOL_H
+//#ifndef THREADPOOL_H
+//#define THREADPOOL_H
 
-#include <thread>
-#include <list>
-#include <vector>
-#include "invokable.h"
-#include "worker.h"
+//#include <thread>
+//#include <list>
+//#include <vector>
+//#include "worker.h"
 
-struct ThreadPoolParams
-{
-    int minThreads;
-    int maxThreads;
-};
+//struct ThreadPoolParams
+//{
+//    int minThreads;
+//    int maxThreads;
+//    int reserveFactor;
+//};
 
-class ThreadSubset;
+//class ThreadSubset;
 
-class ThreadPool
-{
-    std::mutex mutex;
-    int currentId = 0;
-    std::vector<Worker> workers;
-    ThreadPoolParams params;
-    std::list<Worker*> freeWorkers;
-    std::list<Worker*> busyWorkers;
-    TaskList* poolTaskList;
-public:
-    ~ThreadPool();
-    ThreadPool(int minThreads, int maxThreads);
-    ThreadSubset getSubset(int minThreads, int maxThreads);
-    void ReleaseSubset(ThreadSubset subset);
-    void Execute(Invokable& action, void* arg);
-};
+//class ThreadPool
+//{
+//    std::mutex mutex;
+//    std::vector<Worker> workers;
+//    ThreadPoolParams params;
+//    std::list<Worker*> freeWorkers;
+//    std::list<Worker*> reservedWorkers;
+//    TaskList* poolTaskList;
+//    ThreadPool(const ThreadPool& pool) = delete;
+//    void releaseSubset(std::vector<Workers*>& subset);
+//public:
+//    ~ThreadPool();
+//    ThreadPool(const ThreadPoolParams& params);
+//    ThreadSubset getSubset(int minThreads, int maxThreads);
+//    void Execute(Invokable& action);
+//    friend class ThreadSubset;
+//};
 
-class ThreadSubset
-{
-    std::vector<Worker*> workers;
-    int subsetId;
-    TaskList* poolTaskList = nullptr;
-    ThreadSubset();
-    void init();
-public:
-    ~ThreadSubset();
-    void Execute(Invokable& action, void* arg);
-    friend class ThreadPool;
-};
+//class ThreadSubset
+//{
+//    std::vector<Worker*> workers;
+//    ThreadPool& parentPool;
+//    TaskList* poolTaskList = nullptr;
+//    ThreadSubset(std::vector<Worker*>&& source, ThreadPool& parent);
+//    ThreadSubset(const ThreadSubset& subset) = delete;
+//public:
+//    ThreadSubset(ThreadSubset&& subset);
+//    ~ThreadSubset();
+//    void Release();
+//    void Execute(Invokable& action);
+//};
 
-#endif // THREADPOOL_H
+//#endif // THREADPOOL_H

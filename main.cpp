@@ -3,6 +3,7 @@
 #include "Public/ui.h"
 #include "Logger/logger.h"
 #include "Tests/tests.h"
+#include "Public/shaderreader.h"
 #include <functional>
 #include <memory>
 
@@ -42,9 +43,15 @@ void updateViewport(WindowEvent* e, CoreInterface* core)
 
 void drawTriangle(CoreInterface* engine, UiLayer* ui)
 {
+    ShaderReader reader;
     Scene* scene = new Scene();
-    Shader* shaders[2];
-    Program* program;
+    engine->Resources().ReadByTemplate("VertexShader.glsl", reader);
+    std::string vertexsrc = reader.getResult();
+    engine->Resources().ReadByTemplate("FragmentShader.glsl", reader);
+    std::string fragsrc = reader.getResult();
+    Shader& shader1 = engine->Video()->CreateShader(vertexsrc, ShaderType::VertexShader);
+    Shader& shader2 = engine->Video()->CreateShader(fragsrc, ShaderType::FragmentShader);
+    Program& program = engine->Video()->CreateProgram();
     Button* box = new Button(200, 50);
     Button* box2 = new Button(200, 50, {0,1,1,1});
     Action<MouseEvent*> endGame(closeApp, std::placeholders::_1, engine);
@@ -55,17 +62,14 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui)
     box->setPosition(400, 275);
     box2->setPosition(400, 200);
     box->setAction(Events::onClick, endGame);
-    program = engine->Video()->CreateProgram();
-    shaders[0] = engine->Video()->CreateShader("VertexShader.glsl", GL_VERTEX_SHADER);
-    shaders[1] = engine->Video()->CreateShader("FragmentShader.glsl", GL_FRAGMENT_SHADER);
-    program->Attach(shaders[0]);
-    program->Attach(shaders[1]);
-    program->Compile();
+    program.Attach(shader1);
+    program.Attach(shader2);
+    program.Compile();
     scene->passes = 1;
     scene->objects = new VertexObject*[2];
     scene->objects[0] = box->getGraphics();
-    scene->objects[0]->data()->program = program;
+    scene->objects[0]->data()->program = &program;
     scene->objects[1] = frame;
-    scene->objects[1]->data()->program = program;
+    scene->objects[1]->data()->program = &program;
     engine->Video()->SendScene(scene);
 }
