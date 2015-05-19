@@ -14,6 +14,8 @@ struct WorkerData
     std::condition_variable hasWork;
     bool terminate = false;
     WorkerQueueProxy tasks;
+    bool isRunning = false;
+    std::string name = "";
 };
 
 class Worker
@@ -34,6 +36,7 @@ public:
     bool isBusy();
     void Wake();
     void Terminate();
+    void setName(std::string name);
 };
 
 #endif // WORKER_H

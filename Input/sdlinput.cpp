@@ -7,6 +7,7 @@ MouseData::Button parseMouseButton(std::uint8_t button);
 
 SDLInputService::SDLInputService(EventHandler& handler):handler(handler)
 {
+    serviceThread.setName("sdl input");
     if(!SDL_WasInit(SDL_INIT_EVENTS))
         SDL_Init(SDL_INIT_EVENTS);
 }

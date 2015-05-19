@@ -2,14 +2,22 @@
 #define GRAPHICSCLASSES_H
 
 #include "Helpers/invokable.h"
+#include "Core/service.h"
 
 enum class ShaderType { VertexShader, FragmentShader };
+
+struct WindowSize
+{
+    int width;
+    int height;
+};
 
 class Window
 {
 public:
     virtual ~Window() {}
     virtual void Close() = 0;
+    virtual WindowSize getSize() = 0;
 };
 
 class Shader
@@ -82,20 +90,23 @@ struct Scene
     short passes = 0;
 };
 
-class BasicRenderer
-{
-public:
-    virtual void Draw(const Scene& scene) = 0;
-};
-
 class RenderingContext
 {
 public:
     virtual ~RenderingContext() {}
     virtual void Execute(const Invokable& invokable) = 0;
-    virtual void AttachRenderer(const BasicRenderer& renderer) = 0;
+    virtual void Destroy() = 0;
     virtual void SetWindow(const Window& window) = 0;
+    virtual void MakeCurrent() = 0;
+    virtual Window& getWindow() = 0;
 };
 
+class Renderer: public Service
+{
+public:
+    virtual void SetWindow(const Window& window) = 0;
+    virtual void Draw(const Scene& scene) = 0;
+    virtual void SetViewport(int width, int height) = 0;
+};
 #endif // GRAPHICSCLASSES_H
 

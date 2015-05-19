@@ -1,23 +1,74 @@
 #include "renderer.h"
 
-void startRenderer(RenderInitializer* initializer)
+GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 {
-    Renderer renderer(initializer->queue, initializer->data);
-    renderer.Start();
+    context.Execute(Task(&GlRenderer::init, this));
 }
 
-Renderer::Renderer(RenderQueue* queue, GraphicsData* data)
+void GlRenderer::Start()
 {
-    this->queue = queue;
-    this->graphicsData = data;
-    init();
+    if(terminate)
+    {
+        terminate = false;
+        renderTask = Task(&GlRenderer::renderLoop, this);
+        context.Execute(renderTask);
+    }
 }
 
-void Renderer::Start()
+void GlRenderer::Stop()
+{
+    terminate = true;
+}
+
+void GlRenderer::Restart()
+{
+    Stop();
+    Wait();
+    Start();
+}
+
+void GlRenderer::Wait()
+{
+    renderTask.WaitTillFinished();
+}
+
+void GlRenderer::Pause()
+{
+    pause.setValue(true);
+}
+
+void GlRenderer::Resume()
+{
+    pause.setValue(false);
+}
+
+void GlRenderer::Draw(const Scene& scene)
+{
+    renderQueue.emplace(scene);
+}
+
+void GlRenderer::SetViewport(int width, int height)
+{
+    viewportSize = {width, height};
+}
+
+void GlRenderer::SetWindow(const Window& window)
+{
+    Stop();
+    Wait();
+    context.Execute(Task([this, &window] { context.SetWindow(window); context.MakeCurrent(); }));
+    Start();
+}
+
+void GlRenderer::renderLoop()
 {
     Logger::Log("Renderer started");
+    printContextInfo();
     while(!terminate)
     {
+        if(pause)
+            pause.WaitFor(false);
+        update();
         render();
         draw();
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -25,7 +76,15 @@ void Renderer::Start()
     Logger::Log("Renderer stoped");
 }
 
-void Renderer::init()
+void GlRenderer::update()
+{
+    WindowSize size = context.getWindow().getSize();
+    this->viewportSize = {size.width, size.height};
+    glViewport(0, 0, size.width, size.height);
+    printGlError("Viewport update error " + std::to_string(size.width) + " " + std::to_string(size.height) + " ");
+}
+
+void GlRenderer::init()
 {
     glClearColor(0,0,0,1);
     glEnable(GL_BLEND);
@@ -38,43 +97,42 @@ void Renderer::init()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.IBO);
     glBufferData(GL_ARRAY_BUFFER, 100 * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 100 * sizeof(unsigned int), NULL, GL_DYNAMIC_DRAW);
+    printGlError("Buffer error");
 }
 
-void Renderer::render()
+void GlRenderer::render()
 {
-    int i;
-    if (graphicsData->resolutionChanged)
+    int i = 0;
+
+    if (!renderQueue.empty())
     {
-        graphicsData->resizing.lock();
-        glViewport(0, 0, graphicsData->dimensions[0], graphicsData->dimensions[1]);
-        graphicsData->resolutionChanged = false;
-        graphicsData->resizing.unlock();
+        currentScene = renderQueue.front();
+        renderQueue.pop();
+        empty = false;
     }
-    if (!queue->IsEmpty())
-    {
-        if(currentScene) delete currentScene;
-        currentScene = queue->Pop();
-    }
-    if(currentScene)
-        for (i = 0; i < currentScene->passes; i ++)
+    if(!empty)
+        for (i = 0; i < currentScene.passes; i ++)
         {
             glBufferSubData(GL_ARRAY_BUFFER, 0,
-                            currentScene->objects[i]->data()->vertexCount * sizeof(Vertex),
-                            currentScene->objects[i]->data()->vertices);
+                            currentScene.objects[i]->data()->vertexCount * sizeof(Vertex),
+                            currentScene.objects[i]->data()->vertices);
+            printGlError("Buffer subdata error");
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, coords));
             glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, color));
             glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-                            currentScene->objects[i]->data()->indices.count * sizeof(int),
-                            currentScene->objects[i]->data()->indices.indices);
-            currentScene->objects[i]->data()->program->Use();
-            glDrawElements(GL_TRIANGLES, currentScene->objects[i]->data()->indices.count, GL_UNSIGNED_INT, nullptr);
+                            currentScene.objects[i]->data()->indices.count * sizeof(int),
+                            currentScene.objects[i]->data()->indices.indices);
+            currentScene.objects[i]->data()->program->Use();
+            glDrawElements(GL_TRIANGLES, currentScene.objects[i]->data()->indices.count, GL_UNSIGNED_INT, nullptr);
+            printGlError("Draw error");
         }
 }
 
-void Renderer::draw()
+void GlRenderer::draw()
 {
-    SDL_GL_SwapWindow(graphicsData->window);
+    SDL_GL_SwapWindow(context.getWindow());
     glClear(GL_COLOR_BUFFER_BIT);
+    printGlError("Clear error");
 }

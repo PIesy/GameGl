@@ -10,6 +10,7 @@ class SharedState
 {
     std::shared_ptr<T> state;
     std::shared_ptr<bool> isStateChanged = std::make_shared<bool>(false);
+    std::shared_ptr<std::mutex> ownership = std::make_shared<std::mutex>();
     std::shared_ptr<std::mutex> mutex = std::make_shared<std::mutex>();
     std::shared_ptr<std::condition_variable> stateChanged = std::make_shared<std::condition_variable>();
 public:
@@ -38,10 +39,10 @@ public:
 
     void WaitForStateChange()
     {
-        if(*isStateChanged)
+        if(!*isStateChanged)
         {
             std::unique_lock<std::mutex> lock(*mutex);
-            while(*isStateChanged)
+            while(!*isStateChanged)
                 stateChanged->wait(lock);
             *isStateChanged = false;
         }
@@ -55,6 +56,16 @@ public:
             while(*state != value)
                 stateChanged->wait(lock);
         }
+    }
+
+    void GetOwnership()
+    {
+        ownership->lock();
+    }
+
+    void ReleaseOwnership()
+    {
+        ownership->unlock();
     }
 };
 

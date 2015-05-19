@@ -49,20 +49,26 @@ Worker::Worker(Worker&& arg)
 Worker::~Worker()
 {
     if(workerThread->joinable())
+    {
+        Terminate();
         workerThread->detach();
+    }
     delete workerThread;
-    delete data;
+//    delete data;
 }
 
 bool Worker::isBusy()
 {
-    return !data->mutex.try_lock();
+    std::unique_lock<std::mutex> lock(data->mutex, std::defer_lock);
+    return !lock.try_lock();
 }
 
 void Worker::Join()
 {
-    if(workerThread->joinable())
-        workerThread->join();
+    try {
+        if(workerThread->joinable())
+            workerThread->join();
+    } catch (std::system_error){}
 }
 
 void Worker::Wake()
@@ -84,25 +90,33 @@ void Worker::setTask(const Invokable& fun)
     Wake();
 }
 
+void Worker::setName(std::string name)
+{
+    data->name = name;
+}
+
 void workerController(WorkerData *data)
 {
     TaskData task;
     std::unique_lock<std::mutex> lock(data->mutex, std::defer_lock);
 
-    logStatus("Thread started id:");
+    data->isRunning = true;
+    logStatus("Thread \"" + data->name + "\" started id:");
     while(!data->terminate)
     {
-        while(data->tasks.IsEmpty())
+        if(data->tasks.IsEmpty())
         {
             lock.lock();
-            if(data->tasks.IsEmpty())
+            while(data->tasks.IsEmpty() && !data->terminate)
                 data->hasWork.wait(lock);
             lock.unlock();
         }
+        if(data->terminate) break;
         task = data->tasks.Pop();
         task->Invoke();
     }
-    logStatus("Thread stopped id:");
+    data->isRunning = false;
+    logStatus("Thread \"" + data->name + "\" stopped id:");
 }
 
 void logStatus(std::string message)

@@ -25,5 +25,5 @@ void Task::operator()()
 
 void Task::WaitTillFinished()
 {
-    isInvoked.WaitForStateChange();
+    isInvoked.WaitForStateValue(true);
 }

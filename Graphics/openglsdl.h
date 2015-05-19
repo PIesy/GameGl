@@ -5,62 +5,44 @@
 #include "graphicsapi.h"
 #include "renderqueue.h"
 #include "renderer.h"
+#include "Core/service_cluster.h"
+#include "glprogram.h"
+#include "glshader.h"
 
-class DummyGlContext
+class GraphicsService: public Service
 {
-    DummyData data;
-    Worker worker;
-    bool ready = false;
+    Worker serviceThread;
+    SDL_GLContext parentContext;
+    SdlWindow dummyWindow;
+    void initContext();
+    std::list<SdlGLContext> contexts;
 public:
-    DummyGlContext(SDL_GLContext context, SDL_Window* window);
-    GlShader* getShader();
-    GlProgram* getProgram();
-    bool Ready();
-    void WaitReady();
-};
-
-class OpenGlWrapper
-{
-    DummyGlContext* context;
-    GraphicsData* data;
-    RenderQueue* queue;
-    void initGlew();
-    void startRenderer();
-public:
-    OpenGlWrapper(GraphicsData* data);
-    ~OpenGlWrapper();
-    Shader& CreateShader(std::string source, ShaderType type);
-    GlProgram& CreateProgram();
-    void SetData(Scene* scene);
-    void setViewport(int, int, int width, int height);
-
-    friend class OpenGlSdl;
-    friend void setDummy(OpenGlWrapper* context);
-};
-
-class SdlWrapper
-{
-    GraphicsData* data;
-    void initGlContext();
-public:
-    SdlWrapper(GraphicsData* data);
-    void* CreateWindow(std::string title, int x, int y);
-    friend class OpenGlSdl;
+    ~GraphicsService();
+    GraphicsService();
+    void Start();
+    void Stop();
+    void Restart();
+    void Pause();
+    void Resume();
+    void Wait();
+    SdlGLContext& getContext();
 };
 
 class OpenGlSdl: public GraphicsApi
 {
-    SdlWrapper* sdl;
-    OpenGlWrapper* ogl;
-    GraphicsData data;
+    SdlGLContext* dummyContext;
+    GraphicsService* mainService;
+    ServiceCluster* cluster;
+    std::list<GlShader> shaders;
+    std::list<GlProgram> programs;
 public:
     OpenGlSdl();
     ~OpenGlSdl();
-    void* CreateWindow(std::string title, int x, int y);
+    Window& CreateWindow(std::string title, int x, int y);
     Shader& CreateShader(std::string source, ShaderType type);
     Program& CreateProgram();
-    void SendScene(void* scene);
-    void setViewport(int x, int y, int width, int height);
+    Renderer& GetRenderer();
+    ServiceContainer getService();
 };
 
 #endif // OPENGLSDL_H

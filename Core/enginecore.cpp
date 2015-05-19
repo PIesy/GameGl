@@ -15,7 +15,8 @@ EngineCore::EngineCore(EngineInitializer initializer)
 EngineCore::~EngineCore()
 {
     Terminate();
-    WaitEnd();
+    for(ServiceContainer& service: data.services)
+        service.Wait();
 }
 
 void EngineCore::initApis(EngineInitializer initializer)
@@ -64,6 +65,7 @@ EventHandler& EngineCore::getEventHandler()
 void EngineCore::Start()
 {
     data.started = true;
+    Logger::Log("Core started");
     for(ServiceContainer& service: data.services)
         service.Start();
 }
@@ -79,4 +81,5 @@ void EngineCore::WaitEnd()
 {
     for(ServiceContainer& service: data.services)
         service.Wait();
+    Logger::Log("Core stopped");
 }

@@ -5,13 +5,12 @@
 void UiListener(MouseEvent* event, UiLayer* ui);
 void ResolutionNotifier(WindowEvent* event, UiLayer* ui);
 
-UiLayer::UiLayer(EngineInterface* core, SDL_Window* window)
+UiLayer::UiLayer(EngineInterface* core, Window& window):window(window)
 {
     Action<MouseEvent*> listener(UiListener, std::placeholders::_1, this);
     Action<WindowEvent*> resnotifier(ResolutionNotifier, std::placeholders::_1, this);
     core->getEventHandler().setListener<MouseEvent>(listener);
     core->getEventHandler().setListener<WindowEvent>(resnotifier);
-    this->window = window;
     initState();
 }
 
@@ -29,7 +28,9 @@ void UiLayer::RemoveElement(Element *element)
 
 void UiLayer::initState()
 {
-    SDL_GetWindowSize(window, &state.resolution[0], &state.resolution[1]);
+    WindowSize size = window.getSize();
+    state.resolution[0] = size.width;
+    state.resolution[1] = size.height;
 }
 
 void UiLayer::UiHandler(MouseEvent* event)

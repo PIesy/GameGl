@@ -1,6 +1,5 @@
-#include "openglsdl.h"
-#include <cstdio>
-#include "Logger/logger.h"
+#include "glprogram.h"
+#include "renderdefs.h"
 
 struct ShaderProgram
 {
@@ -14,11 +13,10 @@ struct CompileData
     GLuint* program;
 };
 
-GlProgram::GlProgram(Worker *context)
+GlProgram::GlProgram(RenderingContext& context):context(context)
 {
-    Task create([this] { program = glCreateProgram(); });
-    this->context = context;
-    this->context->setTask(create);
+    Task create([this] { program = glCreateProgram(); printGlError("Create prog error"); });
+    this->context.Execute(create);
     create.WaitTillFinished();
 }
 
@@ -32,8 +30,8 @@ GlProgram::GlProgram(Worker *context)
 void GlProgram::Attach(const Shader& shader)
 {
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
-    Task attach([&glShader, this] { glAttachShader(program, glShader); });
-    context->setTask(attach);
+    Task attach([&glShader, this] { glAttachShader(program, glShader); printGlError("Attach error"); });
+    context.Execute(attach);
     attach.WaitTillFinished();
 }
 
@@ -41,7 +39,7 @@ void GlProgram::Detach(const Shader& shader)
 {
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
     Task detach([&glShader, this] { glDetachShader(program, glShader); });
-    context->setTask(detach);
+    context.Execute(detach);
     detach.WaitTillFinished();
 }
 
@@ -52,12 +50,13 @@ GlProgram::operator GLuint() const
 
 void GlProgram::Compile()
 {
-    Task task([this] { glLinkProgram(program); });
-    context->setTask(task);
+    Task task([this] { glLinkProgram(program); printGlError("Compile error");});
+    context.Execute(task);
     task.WaitTillFinished();
 }
 
 void GlProgram::Use()
 {
     glUseProgram(program);
+    printGlError("Use error");
 }

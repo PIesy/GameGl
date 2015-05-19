@@ -47,6 +47,7 @@ class EventHandler
     bool checkListenerType(EventListener listener);
     int createListener(std::type_index type, const EventInvokable& action, const EventFilter& filter);
 public:
+    EventHandler();
     void ThrowEvent(EventInterface* event);
     int setListener(EventListener listener);
     template<typename T>

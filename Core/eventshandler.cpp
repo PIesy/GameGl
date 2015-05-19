@@ -23,6 +23,11 @@ void EventListener::setHandler(const EventInvokable& handler, const EventFilter&
     this->filter = filter;
 }
 
+EventHandler::EventHandler()
+{
+    worker.setName("event handler");
+}
+
 int EventHandler::setListener(EventListener listener)
 {
     std::type_index type = listener.getEventType();

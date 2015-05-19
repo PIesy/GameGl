@@ -5,9 +5,10 @@
 
 class ServiceCluster: public Service
 {
-    std::list<Service*> services;
+    ServiceContainer mainService;
+    std::list<ServiceContainer> services;
+    bool started = false;
 public:
-    ServiceCluster();
     ~ServiceCluster();
     void Start();
     void Stop();
@@ -15,8 +16,9 @@ public:
     void Resume();
     void Restart();
     void Wait();
-    void Add(Service* service);
-    void Remove(Service* service);
+    void setMainService(ServiceContainer service);
+    void Add(ServiceContainer service);
+    void Remove(ServiceContainer service);
 };
 
 #endif // SERVICECLUSTER_H

@@ -26,7 +26,7 @@ public:
 struct RenderInitializer
 {
     RenderQueue* queue;
-    GraphicsData* data;
+    SdlGLContext& context;
 };
 
 #endif // RENDERQUEUE_H

@@ -11,12 +11,10 @@ SOURCES += main.cpp \
     Modules/soundmodule.cpp \
     Modules/resourcesmodule.cpp \
     Core/enginecore.cpp \
-    Graphics/sdlwrapper.cpp \
     Graphics/openglsdl.cpp \
     Helpers/helpers.cpp \
     Public/coreinterface.cpp \
     Core/worker.cpp \
-    Graphics/openglwrapper.cpp \
     Graphics/renderqueue.cpp \
     Graphics/renderer.cpp \
     Resources/filereader.cpp \
@@ -45,7 +43,8 @@ SOURCES += main.cpp \
     Core/service.cpp \
     Helpers/repeteadfuture.cpp \
     Graphics/renderdefs.cpp \
-    Public/shaderreader.cpp
+    Public/shaderreader.cpp \
+    Graphics/sdlclasses.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -105,7 +104,10 @@ HEADERS += \
     Helpers/sharedstate.h \
     Graphics/graphicsclasses.h \
     Public/shaderreader.h \
-    Graphics/sdlclasses.h
+    Graphics/sdlclasses.h \
+    Helpers/genericcondition.h \
+    Graphics/glprogram.h \
+    Graphics/glshader.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

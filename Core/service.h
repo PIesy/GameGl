@@ -5,8 +5,6 @@
 
 class Service
 {
-protected:
-    Worker serviceThread;
 public:
     virtual ~Service() {}
     virtual void Start() = 0;
@@ -31,6 +29,7 @@ public:
     void Restart();
     void Wait();
     operator bool();
+    bool operator==(const ServiceContainer& rhs);
 };
 
 #endif // SERVICE

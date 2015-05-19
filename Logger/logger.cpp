@@ -11,8 +11,14 @@ Logger::Logger()
 
 Logger::~Logger()
 {
+    terminate = true;
+    queue.mutex.lock();
+    queue.newString.notify_all();
+    queue.mutex.unlock();
+    logThread->join();
     if(logfile.is_open())
         logfile.close();
+    delete logThread;
 }
 
 void Logger::write(std::string str)
@@ -39,6 +45,7 @@ void loggerRoutine(Logger* log, LogQueue* queue)
 {
     std::unique_lock<std::mutex> lock(queue->mutex, std::defer_lock);
 
+    log->log("Logger started");
     while(!log->terminate)
     {
         while(!queue->logQueue.empty())
@@ -50,4 +57,5 @@ void loggerRoutine(Logger* log, LogQueue* queue)
         queue->newString.wait(lock);
         lock.unlock();
     }
+    log->log("Logger stopped");
 }

@@ -7,26 +7,26 @@
 #include <functional>
 #include <memory>
 
-void updateViewport(WindowEvent* e, CoreInterface* core);
+void updateViewport(WindowEvent* e, Renderer* core);
 void closeApp(void*, CoreInterface* core);
-void drawTriangle(CoreInterface* engine, UiLayer* ui);
+void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer);
 void test();
 
 int main()
 {
     CoreInterface engine;
-    SDL_Window* window;
-    Action<WindowEvent*> setViewport(updateViewport, std::placeholders::_1, &engine);
+    Renderer& renderer = engine.Video()->GetRenderer();
+    Action<WindowEvent*> setViewport(updateViewport, std::placeholders::_1, &renderer);
     Action<WindowEvent*> endGame(closeApp, std::placeholders::_1, &engine);
 
     eventsHandlerTest();
     engine.Start();
     engine.getEventHandler().setListener<WindowEvent>(setViewport, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Resize); });
     engine.getEventHandler().setListener<WindowEvent>(endGame, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Close); });
-    window = (SDL_Window*)(engine.Video()->CreateWindow("Hello", 1000, 600));
+    Window& window = engine.Video()->CreateWindow("Hello", 1000, 600);
+    renderer.SetWindow(window);
     UiLayer ui(engine.getCore(), window);
-    drawTriangle(&engine, &ui);
-    Logger::Log("Hello");
+    drawTriangle(&engine, &ui, renderer);
     return engine.WaitEnd();
 }
 
@@ -36,12 +36,12 @@ void closeApp(void*, CoreInterface* core)
     core->Stop();
 }
 
-void updateViewport(WindowEvent* e, CoreInterface* core)
+void updateViewport(WindowEvent* e, Renderer* core)
 {
-    core->Video()->setViewport(0, 0, e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
+    core->SetViewport(e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
 }
 
-void drawTriangle(CoreInterface* engine, UiLayer* ui)
+void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)
 {
     ShaderReader reader;
     Scene* scene = new Scene();
@@ -71,5 +71,5 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui)
     scene->objects[0]->data()->program = &program;
     scene->objects[1] = frame;
     scene->objects[1]->data()->program = &program;
-    engine->Video()->SendScene(scene);
+    renderer.Draw(*scene);
 }

@@ -14,7 +14,6 @@ struct CoreData
 class EngineCore: public EngineInterface
 {
     std::unordered_map<int, ModuleInterface*> modules;
-    Worker worker;
     CoreData data;
     EventHandler eventHandler;
     void initModules();

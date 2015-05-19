@@ -41,3 +41,8 @@ ServiceContainer::operator bool()
 {
     return !isEmpty;
 }
+
+bool ServiceContainer::operator==(const ServiceContainer& rhs)
+{
+    return service == rhs.service;
+}

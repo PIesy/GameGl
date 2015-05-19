@@ -6,6 +6,7 @@
 
 class SDLInputService: public Service
 {
+    Worker serviceThread;
     EventHandler& handler;
     bool stop = true;
     bool pause = false;

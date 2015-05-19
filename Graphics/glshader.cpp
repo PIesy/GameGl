@@ -1,19 +1,7 @@
-#include "openglsdl.h"
-#include "Logger/logger.h"
+#include "glshader.h"
+#include "renderdefs.h"
 
-struct ShaderData
-{
-    const char** src;
-    int* length;
-    std::condition_variable finish;
-    GLuint* shader;
-    unsigned int type;
-};
-
-GlShader::GlShader(Worker *context)
-{
-    this->context = context;
-}
+GlShader::GlShader(RenderingContext& context):context(context) {}
 
 void GlShader::Create(std::string source, ShaderType type)
 {
@@ -27,9 +15,23 @@ void GlShader::Create(std::string source, ShaderType type)
         int size = source.length();
         glShaderSource(shader, 1, &str, &size);
         glCompileShader(shader);
+        printGlError("Comple shader error");
     });
-    context->setTask(create);
+    context.Execute(create);
     create.WaitTillFinished();
+}
+
+void GlShader::PrintInfo()
+{
+    Task print([this]
+    {
+        char buff[4096] = {0};
+        int length;
+        glGetShaderInfoLog(shader, 4095, &length, buff);
+        Logger::Log("Shader info: " + std::string(buff));
+    });
+    context.Execute(print);
+    print.WaitTillFinished();
 }
 
 ShaderType GlShader::getType() const
