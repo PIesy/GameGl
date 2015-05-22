@@ -1,24 +1,19 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "renderqueue.h"
 #include "renderdefs.h"
 #include "graphicsclasses.h"
 #include "sdlclasses.h"
 #include "Helpers/genericcondition.h"
 #include <atomic>
 
+using ViewportSize = Size;
+
 struct RenderData
 {
     GLuint VBO;
     GLuint IBO;
     GLuint VAO;
-};
-
-struct ViewportSize
-{
-    int width;
-    int height;
 };
 
 class GlRenderer: public Renderer
@@ -50,7 +45,5 @@ public:
     void Draw(const Scene& scene);
     void SetViewport(int width, int height);
 };
-
-void startRenderer(RenderInitializer* initializer);
 
 #endif // RENDERER_H

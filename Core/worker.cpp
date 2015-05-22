@@ -102,19 +102,29 @@ void workerController(WorkerData *data)
 
     data->isRunning = true;
     logStatus("Thread \"" + data->name + "\" started id:");
-    while(!data->terminate)
+    try
     {
-        if(data->tasks.IsEmpty())
+        while(!data->terminate)
         {
-            lock.lock();
-            while(data->tasks.IsEmpty() && !data->terminate)
-                data->hasWork.wait(lock);
-            lock.unlock();
+            while(!data->tasks.IsEmpty())
+            {
+                task = data->tasks.Pop();
+                task->Invoke();
+            }
+            if(data->tasks.IsEmpty())
+            {
+                lock.lock();
+                while(data->tasks.IsEmpty() && !data->terminate)
+                    data->hasWork.wait(lock);
+                lock.unlock();
+            }
         }
-        if(data->terminate) break;
-        task = data->tasks.Pop();
-        task->Invoke();
     }
+    catch (std::exception e)
+    {
+        Logger::Log(std::string("Error ") + e.what());
+    }
+
     data->isRunning = false;
     logStatus("Thread \"" + data->name + "\" stopped id:");
 }

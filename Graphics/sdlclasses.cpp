@@ -44,6 +44,13 @@ SdlGLContext::SdlGLContext(const SDL_GLContext& context, const SdlWindow& window
     worker.setTask(Task([this] { SDL_GL_MakeCurrent(this->window, this->context); }));
 }
 
+SdlGLContext::~SdlGLContext()
+{
+    worker.Terminate();
+    worker.Join();
+    SDL_GL_DeleteContext(context);
+}
+
 void SdlGLContext::Destroy()
 {
     if(isValid.getState())

@@ -9,7 +9,6 @@ void GlRenderer::Start()
 {
     if(terminate)
     {
-        terminate = false;
         renderTask = Task(&GlRenderer::renderLoop, this);
         context.Execute(renderTask);
     }
@@ -55,15 +54,16 @@ void GlRenderer::SetViewport(int width, int height)
 void GlRenderer::SetWindow(const Window& window)
 {
     Stop();
-    Wait();
     context.Execute(Task([this, &window] { context.SetWindow(window); context.MakeCurrent(); }));
     Start();
 }
 
 void GlRenderer::renderLoop()
 {
+    terminate = false;
     Logger::Log("Renderer started");
     printContextInfo();
+    viewportSize = context.getWindow().getSize();
     while(!terminate)
     {
         if(pause)
@@ -78,8 +78,7 @@ void GlRenderer::renderLoop()
 
 void GlRenderer::update()
 {
-    WindowSize size = context.getWindow().getSize();
-    this->viewportSize = {size.width, size.height};
+    ViewportSize size = viewportSize;
     glViewport(0, 0, size.width, size.height);
     printGlError("Viewport update error " + std::to_string(size.width) + " " + std::to_string(size.height) + " ");
 }

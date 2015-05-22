@@ -31,7 +31,6 @@ void GlShader::PrintInfo()
         Logger::Log("Shader info: " + std::string(buff));
     });
     context.Execute(print);
-    print.WaitTillFinished();
 }
 
 ShaderType GlShader::getType() const

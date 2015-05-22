@@ -2,15 +2,12 @@
 #define GRAPHICSCLASSES_H
 
 #include "Helpers/invokable.h"
+#include "Helpers/size.h"
 #include "Core/service.h"
 
 enum class ShaderType { VertexShader, FragmentShader };
 
-struct WindowSize
-{
-    int width;
-    int height;
-};
+using WindowSize = Size;
 
 class Window
 {

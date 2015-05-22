@@ -7,7 +7,7 @@
 #include <functional>
 #include <memory>
 
-void updateViewport(WindowEvent* e, Renderer* core);
+void updateViewport(WindowEvent* e, Renderer* renderer);
 void closeApp(void*, CoreInterface* core);
 void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer);
 void test();
@@ -19,8 +19,8 @@ int main()
     Action<WindowEvent*> setViewport(updateViewport, std::placeholders::_1, &renderer);
     Action<WindowEvent*> endGame(closeApp, std::placeholders::_1, &engine);
 
-    eventsHandlerTest();
     engine.Start();
+    eventsHandlerTest();
     engine.getEventHandler().setListener<WindowEvent>(setViewport, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Resize); });
     engine.getEventHandler().setListener<WindowEvent>(endGame, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Close); });
     Window& window = engine.Video()->CreateWindow("Hello", 1000, 600);
@@ -36,9 +36,9 @@ void closeApp(void*, CoreInterface* core)
     core->Stop();
 }
 
-void updateViewport(WindowEvent* e, Renderer* core)
+void updateViewport(WindowEvent* e, Renderer* renderer)
 {
-    core->SetViewport(e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
+    renderer->SetViewport(e->getPayload().coordinates[0], e->getPayload().coordinates[1]);
 }
 
 void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)

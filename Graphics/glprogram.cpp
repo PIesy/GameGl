@@ -17,7 +17,6 @@ GlProgram::GlProgram(RenderingContext& context):context(context)
 {
     Task create([this] { program = glCreateProgram(); printGlError("Create prog error"); });
     this->context.Execute(create);
-    create.WaitTillFinished();
 }
 
 //GlProgram::~GlProgram()
@@ -32,7 +31,6 @@ void GlProgram::Attach(const Shader& shader)
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
     Task attach([&glShader, this] { glAttachShader(program, glShader); printGlError("Attach error"); });
     context.Execute(attach);
-    attach.WaitTillFinished();
 }
 
 void GlProgram::Detach(const Shader& shader)
@@ -40,7 +38,6 @@ void GlProgram::Detach(const Shader& shader)
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
     Task detach([&glShader, this] { glDetachShader(program, glShader); });
     context.Execute(detach);
-    detach.WaitTillFinished();
 }
 
 GlProgram::operator GLuint() const

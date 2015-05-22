@@ -15,10 +15,8 @@ SOURCES += main.cpp \
     Helpers/helpers.cpp \
     Public/coreinterface.cpp \
     Core/worker.cpp \
-    Graphics/renderqueue.cpp \
     Graphics/renderer.cpp \
     Resources/filereader.cpp \
-    Graphics/dummyglcontext.cpp \
     Graphics/glshader.cpp \
     Graphics/glprogram.cpp \
     Ui/basicuielements.cpp \
@@ -59,7 +57,6 @@ HEADERS += \
     Public/coreinterface.h \
     Core/worker.h \
     Core/enginedatastructures.h \
-    Graphics/renderqueue.h \
     Graphics/renderdefs.h \
     Graphics/renderer.h \
     Resources/resourcesapi.h \
@@ -107,7 +104,8 @@ HEADERS += \
     Graphics/sdlclasses.h \
     Helpers/genericcondition.h \
     Graphics/glprogram.h \
-    Graphics/glshader.h
+    Graphics/glshader.h \
+    Helpers/size.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

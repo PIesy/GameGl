@@ -3,7 +3,6 @@
 
 #include "renderdefs.h"
 #include "graphicsapi.h"
-#include "renderqueue.h"
 #include "renderer.h"
 #include "Core/service_cluster.h"
 #include "glprogram.h"

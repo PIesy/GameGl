@@ -25,6 +25,7 @@ class SdlGLContext: public RenderingContext
     Worker worker;
 public:
     SdlGLContext(const SDL_GLContext& context, const SdlWindow& window);
+    ~SdlGLContext();
     void Destroy();
     void Execute(const Invokable& invokable);
     void SetWindow(const Window& window);
