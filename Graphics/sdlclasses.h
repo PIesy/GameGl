@@ -7,7 +7,7 @@
 #include <string>
 #include "Helpers/sharedstate.h"
 
-class SdlWindow: public Window
+class SdlWindow: public BasicWindow
 {
     SDL_Window* window;
 public:
@@ -30,7 +30,8 @@ public:
     void Execute(const Invokable& invokable);
     void SetWindow(const Window& window);
     void MakeCurrent();
-    SdlWindow& getWindow();
+    Window getWindow();
+    SdlWindow& getSdlWindow();
 };
 
 #endif // SDLCLASSES

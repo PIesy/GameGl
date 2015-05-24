@@ -71,11 +71,12 @@ OpenGlSdl::~OpenGlSdl()
     delete mainService;
 }
 
-Window& OpenGlSdl::CreateWindow(std::string title, int x, int y)
+Window OpenGlSdl::CreateWindow(std::string title, int x, int y)
 {
     SdlWindow* window = new SdlWindow();
     window->Open(title, x, y);
-    return *window;
+    Window wind(*window);
+    return wind;
 }
 
 Shader& OpenGlSdl::CreateShader(std::string source, ShaderType type)

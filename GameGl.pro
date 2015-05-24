@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     Helpers/repeteadfuture.cpp \
     Graphics/renderdefs.cpp \
     Public/shaderreader.cpp \
-    Graphics/sdlclasses.cpp
+    Graphics/sdlclasses.cpp \
+    Math/mathhelpers.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -105,7 +106,11 @@ HEADERS += \
     Helpers/genericcondition.h \
     Graphics/glprogram.h \
     Graphics/glshader.h \
-    Helpers/size.h
+    Helpers/size.h \
+    Math/mathconstants.h \
+    Math/mathdefines.h \
+    Math/mathhelpers.h \
+    Graphics/uniform.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

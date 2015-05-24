@@ -1,7 +1,7 @@
 #ifndef BASICSHAPES_H
 #define BASICSHAPES_H
 
-#include "../Graphics/graphicsapi.h"
+#include "Graphics/graphicsapi.h"
 
 
 class NestedShapes

@@ -22,7 +22,6 @@ void GlRenderer::Stop()
 void GlRenderer::Restart()
 {
     Stop();
-    Wait();
     Start();
 }
 
@@ -113,25 +112,23 @@ void GlRenderer::render()
         for (i = 0; i < currentScene.passes; i ++)
         {
             glBufferSubData(GL_ARRAY_BUFFER, 0,
-                            currentScene.objects[i]->data()->vertexCount * sizeof(Vertex),
-                            currentScene.objects[i]->data()->vertices);
-            printGlError("Buffer subdata error");
+                            currentScene.objects[i]->data().vertices.size() * sizeof(Vertex),
+                            currentScene.objects[i]->data().vertices.data());
             glEnableVertexAttribArray(0);
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, coords));
             glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, color));
             glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-                            currentScene.objects[i]->data()->indices.count * sizeof(int),
-                            currentScene.objects[i]->data()->indices.indices);
-            currentScene.objects[i]->data()->program->Use();
-            glDrawElements(GL_TRIANGLES, currentScene.objects[i]->data()->indices.count, GL_UNSIGNED_INT, nullptr);
+                            currentScene.objects[i]->data().indices.size() * sizeof(unsigned int),
+                            currentScene.objects[i]->data().indices.data());
+            currentScene.objects[i]->data().program->Use();
+            glDrawElements(GL_TRIANGLES, currentScene.objects[i]->data().indices.size(), GL_UNSIGNED_INT, nullptr);
             printGlError("Draw error");
         }
 }
 
 void GlRenderer::draw()
 {
-    SDL_GL_SwapWindow(context.getWindow());
+    SDL_GL_SwapWindow(context.getSdlWindow());
     glClear(GL_COLOR_BUFFER_BIT);
-    printGlError("Clear error");
 }

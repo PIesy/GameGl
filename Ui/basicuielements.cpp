@@ -24,10 +24,10 @@ void Item::rescale()
 {
     unsigned int i;
 
-    for(i = 0; i < graphics.data()->vertexCount; i++)
+    for(i = 0; i < graphics.data().vertices.size(); i++)
     {
-        graphics.data()->vertices[i].coords[0] = (base.data()->vertices[i].coords[0] + 1) * factor[0] - 1;
-        graphics.data()->vertices[i].coords[1] = (base.data()->vertices[i].coords[1] + 1) * factor[1] - 1;
+        graphics.data().vertices[i].coords[0] = (base.data().vertices[i].coords[0] + 1) * factor[0] - 1;
+        graphics.data().vertices[i].coords[1] = (base.data().vertices[i].coords[1] + 1) * factor[1] - 1;
     }
 }
 
@@ -35,10 +35,10 @@ void Item::reposition()
 {
     unsigned int i;
 
-    for(i = 0; i < graphics.data()->vertexCount; i++)
+    for(i = 0; i < graphics.data().vertices.size(); i++)
     {
-        graphics.data()->vertices[i].coords[0] += position[0] * 2.0 / window->resolution[0];
-        graphics.data()->vertices[i].coords[1] += position[1] * 2.0 / window->resolution[1];
+        graphics.data().vertices[i].coords[0] += position[0] * 2.0 / window->resolution[0];
+        graphics.data().vertices[i].coords[1] += position[1] * 2.0 / window->resolution[1];
     }
 }
 
@@ -46,7 +46,7 @@ void Item::setColor(RenderObject& target, RGBA_Color color)
 {
     unsigned int i, j;
 
-    for (i = 0; i < target.vertexCount; i++)
+    for (i = 0; i < target.vertices.size(); i++)
         for (j = 0; j < 4; j ++)
             target.vertices[i].color[j] = color.color[j];
 }

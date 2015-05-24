@@ -1,6 +1,8 @@
 #include "logger.h"
 #include <iostream>
 
+Logger Logger::logger;
+
 void loggerRoutine(Logger* log, LogQueue* queue);
 
 Logger::Logger()
@@ -33,11 +35,11 @@ void Logger::log(std::string str)
 {
     time_t rawTime;
     struct tm* formattedTime;
-    char buff[200];
+    char buff[21];
 
     time(&rawTime);
     formattedTime = localtime(&rawTime);
-    strftime(buff, 200, "[%x-%X]", formattedTime);
+    strftime(buff, 21, "[%x-%X]", formattedTime);
     write(buff + str);
 }
 
@@ -53,9 +55,14 @@ void loggerRoutine(Logger* log, LogQueue* queue)
             log->log(queue->logQueue.front());
             queue->logQueue.pop();
         }
-        lock.lock();
-        queue->newString.wait(lock);
-        lock.unlock();
+        if(queue->logQueue.empty())
+        {
+            lock.lock();
+            while(queue->logQueue.empty() && !log->terminate)
+                queue->newString.wait(lock);
+            lock.unlock();
+        }
     }
+
     log->log("Logger stopped");
 }

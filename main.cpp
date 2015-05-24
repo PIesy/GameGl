@@ -23,7 +23,7 @@ int main()
     eventsHandlerTest();
     engine.getEventHandler().setListener<WindowEvent>(setViewport, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Resize); });
     engine.getEventHandler().setListener<WindowEvent>(endGame, [](EventInterface* e) { return e->getHint() == integral(WindowData::Type::Close); });
-    Window& window = engine.Video()->CreateWindow("Hello", 1000, 600);
+    Window window = engine.Video()->CreateWindow("Hello", 1000, 600);
     renderer.SetWindow(window);
     UiLayer ui(engine.getCore(), window);
     drawTriangle(&engine, &ui, renderer);
@@ -65,11 +65,12 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)
     program.Attach(shader1);
     program.Attach(shader2);
     program.Compile();
+    program.SetOffset({0.2, 0.2});
+    program.SetPerspective(perspective);
     scene->passes = 1;
-    scene->objects = new VertexObject*[2];
-    scene->objects[0] = box->getGraphics();
-    scene->objects[0]->data()->program = &program;
-    scene->objects[1] = frame;
-    scene->objects[1]->data()->program = &program;
+    scene->objects.push_back(box->getGraphics());
+    scene->objects[0]->data().program = &program;
+    scene->objects.push_back(frame);
+    scene->objects[1]->data().program = &program;
     renderer.Draw(*scene);
 }

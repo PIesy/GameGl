@@ -11,7 +11,7 @@ class Button: public Item
     void hover();
     void normal();
 public:
-    Button(int width, int height, RGBA_Color color = RGBA_Color{1,1,1,1});
+    Button(int width, int height, RGBA_Color color = {1,1,1,1});
     void SetColor(RGBA_Color color);
     void SetHoverColor(RGBA_Color color);
 

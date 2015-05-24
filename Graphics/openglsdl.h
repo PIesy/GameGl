@@ -37,7 +37,7 @@ class OpenGlSdl: public GraphicsApi
 public:
     OpenGlSdl();
     ~OpenGlSdl();
-    Window& CreateWindow(std::string title, int x, int y);
+    Window CreateWindow(std::string title, int x, int y);
     Shader& CreateShader(std::string source, ShaderType type);
     Program& CreateProgram();
     Renderer& GetRenderer();

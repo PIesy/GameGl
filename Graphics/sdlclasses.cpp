@@ -73,7 +73,7 @@ void SdlGLContext::Execute(const Invokable& invokable)
 
 void SdlGLContext::SetWindow(const Window& window)
 {
-    this->window = dynamic_cast<const SdlWindow&>(window);
+    this->window = dynamic_cast<const SdlWindow&>(window.getWindow());
 }
 
 void SdlGLContext::MakeCurrent()
@@ -81,7 +81,12 @@ void SdlGLContext::MakeCurrent()
     SDL_GL_MakeCurrent(window, context);
 }
 
-SdlWindow& SdlGLContext::getWindow()
+Window SdlGLContext::getWindow()
+{
+    return window;
+}
+
+SdlWindow& SdlGLContext::getSdlWindow()
 {
     return window;
 }

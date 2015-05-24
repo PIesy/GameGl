@@ -9,7 +9,7 @@
 class GraphicsApi: public ApiBase
 {
 public:
-    virtual Window& CreateWindow(std::string title, int x, int y) = 0;
+    virtual Window CreateWindow(std::string title, int x, int y) = 0;
     virtual Shader& CreateShader(std::string source, ShaderType type) = 0;
     virtual Program& CreateProgram() = 0;
     virtual Renderer& GetRenderer() = 0;

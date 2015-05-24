@@ -20,6 +20,9 @@ struct LogQueue
 
 class Logger
 {
+#ifdef LOG_ENABLED
+    static Logger logger;
+#endif
     bool forwardToConsole = true;
     bool terminate = false;
     LogQueue queue;
@@ -33,15 +36,13 @@ public:
     static void Log(std::string str)
     {
     #ifdef LOG_ENABLED
-        static Logger log;
-        log.queue.logQueue.push(str);
-        log.queue.mutex.lock();
-        log.queue.newString.notify_all();
-        log.queue.mutex.unlock();
+        logger.queue.logQueue.push(str);
+        logger.queue.mutex.lock();
+        logger.queue.newString.notify_all();
+        logger.queue.mutex.unlock();
     #endif
     }
 
-    friend class LoggerToken;
     friend void loggerRoutine(Logger* log, LogQueue* queue);
 };
 
