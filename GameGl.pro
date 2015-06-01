@@ -43,7 +43,8 @@ SOURCES += main.cpp \
     Graphics/renderdefs.cpp \
     Public/shaderreader.cpp \
     Graphics/sdlclasses.cpp \
-    Math/mathhelpers.cpp
+    Math/mathhelpers.cpp \
+    Public/meshreader3ds.cpp
 
 HEADERS += \
     Modules/graphicsmodule.h \
@@ -110,7 +111,9 @@ HEADERS += \
     Math/mathconstants.h \
     Math/mathdefines.h \
     Math/mathhelpers.h \
-    Graphics/uniform.h
+    Graphics/uniform.h \
+    Graphics/gluniform.h \
+    Public/meshreader3ds.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

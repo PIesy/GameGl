@@ -52,7 +52,11 @@ void GlProgram::Compile()
         glLinkProgram(program);
         printGlError("Compile error");
         offsetLoc = glGetUniformLocation(program, "offset");
+        printGlError("Uniform location error");
         perspectiveLoc = glGetUniformLocation(program, "perspective");
+        rotationLoc = glGetUniformLocation(program, "rotation");
+        lightLoc = glGetUniformLocation(program, "light");
+        intensityLoc = glGetUniformLocation(program, "intensity");
     });
     context.Execute(task);
     task.WaitTillFinished();
@@ -66,6 +70,9 @@ void GlProgram::Use()
     printGlError("Uniform error");
     glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, perspective.getData());
     printGlError("Uniform error");
+    glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, rotation.getData());
+    glUniform4fv(lightLoc, 1, light.getData());
+    glUniform1f(intensityLoc, intensity);
 }
 
 void GlProgram::SetOffset(Vec2 offset)
@@ -76,4 +83,19 @@ void GlProgram::SetOffset(Vec2 offset)
 void GlProgram::SetPerspective(Mat4 perspective)
 {
     this->perspective = perspective;
+}
+
+void GlProgram::SetRotation(Mat4 rotation)
+{
+    this->rotation = rotation;
+}
+
+void GlProgram::SetLight(Vec4 light)
+{
+    this->light = light;
+}
+
+void GlProgram::SetIntensity(float intensity)
+{
+    this->intensity = intensity;
 }

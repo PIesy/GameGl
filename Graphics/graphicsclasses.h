@@ -45,6 +45,9 @@ public:
     virtual void Use() = 0;
     virtual void SetOffset(Vec2 offset) = 0;
     virtual void SetPerspective(Mat4 perspective) = 0;
+    virtual void SetRotation(Mat4 rotation) = 0;
+    virtual void SetLight(Vec4 light) = 0;
+    virtual void SetIntensity(float intensity) = 0;
 };
 
 struct RGBA_Color
@@ -56,14 +59,15 @@ struct RGBA_Color
 
 struct Vertex
 {
-    Vec4 coords = {0,0,-0.9,1};
-    Vec4 color = {1,1,1,1};
+    Vec3 coords = {0,0,0};
+    Vec3 normal = {0,0,0};
+    Vec4 color = {1,0,0,1};
 };
 
 struct RenderObject
 {
     std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<unsigned> indices;
     Program* program = nullptr;
 };
 

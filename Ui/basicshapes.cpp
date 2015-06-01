@@ -37,25 +37,31 @@ RenderObject NestedShapes::getCopy(const RenderObject &src)
 
 void NestedShapes::initBox()
 {
-    box.indices = {0,1,2, 1,3,2,
-                   1,5,7, 1,7,3,
-                   2,3,7, 2,7,6,
-                   0,4,6, 0,6,2,
-                   0,1,5, 0,5,4,
-                   4,5,7, 4,7,6};
-    int i, j;
+    box.indices = {3,2,0, 1,3,0,
+                   7,3,1, 5,7,1,
+                   2,6,7, 3,2,7,
+                   5,7,6, 5,4,6,
+                   1,0,4, 5,1,4,
+                   4,6,2, 0,4,2};
+    int i, j, c = 0;
     float z;
     Vertex tmp;
 
+    Vec4 colors[8] = {{1,0,0,1}, {0,1,0,1}, {0,0,1,1}, {1,1,1,1},
+                       {1,1,0,1}, {1,0,1,1}, {0.5,0,0,1}, {0,0.5,0,1}};
 
-    for(z = -0.7; z < 2; z += 2)
+    for(z = 1; z > -2; z -= 2)
         for (i = -1; i < 2; i += 2)
             for (j = -1; j < 2; j += 2)
             {
-                tmp.color = {(float)rand() / RAND_MAX, (float)rand() / RAND_MAX, (float)rand() / RAND_MAX, 1};
+                tmp.color = colors[c];
+                c++;
                 tmp.coords[0] = j;
                 tmp.coords[1] = i;
                 tmp.coords[2] = z;
+                tmp.normal[0] = i;
+                tmp.normal[1] = j;
+                tmp.normal[2] = -z;
                 box.vertices.push_back(tmp);
             }
 }

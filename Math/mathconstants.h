@@ -9,7 +9,13 @@ const Mat4 identity = {1, 0, 0, 0,
                        0, 0, 1, 0,
                        0, 0, 0, 1};
 
-const Mat4 perspective = PerspectiveMatrix(1.0, 1.0, 0.5, 3);
+const Mat4 perspective = PerspectiveMatrix(1, 1, 0.5, 3);
+
+const Mat4 rotation = RotationMatrix(90, RotationMatrix::Axis::X);
+
+const float pi = 3.14f;
+
+const Vec4 light = { 0.3, 0.5, 0, 0 };
 
 
 #endif // MATHCONSTANTS

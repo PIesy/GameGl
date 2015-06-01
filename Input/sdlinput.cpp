@@ -31,9 +31,10 @@ void SDLInputService::sdlInputRoutine()
                 handler.ThrowEvent(new WindowEvent(w, integral(w.eventType)));
                 break;
             case SDL_KEYDOWN:
-            case SDL_KEYUP:
                 k = parseKeyboardEvent(event);
                 handler.ThrowEvent(new KeyboardEvent(k, k.scancode));
+                break;
+            case SDL_KEYUP:
                 break;
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:

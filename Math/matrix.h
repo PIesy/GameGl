@@ -50,6 +50,11 @@ public:
         return matrix.matrix[index];
     }
 
+    const T* operator[](int index) const
+    {
+        return matrix.matrix[index];
+    }
+
     Matrix<j, i> Transpose() const
     {
         Matrix<i, j> result;

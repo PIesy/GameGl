@@ -15,7 +15,8 @@ void GlShader::Create(std::string source, ShaderType type)
         int size = source.length();
         glShaderSource(shader, 1, &str, &size);
         glCompileShader(shader);
-        printGlError("Comple shader error");
+        printGlError("Compile shader error");
+        PrintInfo();
     });
     context.Execute(create);
     create.WaitTillFinished();
