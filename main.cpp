@@ -10,6 +10,7 @@
 
 Mat4 pers;
 float aspectFactor;
+glm::fquat rot = rotation;
 
 void updateViewport(WindowEvent* e, Renderer* renderer);
 void closeApp(void*, CoreInterface* core);
@@ -19,6 +20,7 @@ void switchPerspective(void*,Program* prog);
 void shiftKeyboard(KeyboardEvent* event, Program* prog);
 void zoom(KeyboardEvent* event, Program* prog);
 void cubeSwitch(void*, VertexObject* cube, VertexObject* mesh, Renderer* renderer);
+void mouseRotate(MouseEvent* event, Program* prog);
 
 int main()
 {
@@ -85,16 +87,17 @@ void zoom(KeyboardEvent *event, Program *prog)
 
 void shiftKeyboard(KeyboardEvent *event, Program *prog)
 {
-    static Vec2 offset = {0, 0};
     if(event->getPayload().scancode == SDL_SCANCODE_LEFT)
-        offset[0] -= 0.1;
+        rotateQuat(rot, -5.0f, {0, 1, 0});
     if(event->getPayload().scancode == SDL_SCANCODE_RIGHT)
-        offset[0] += 0.1;
+        rotateQuat(rot, +5.0f, {0, 1, 0});
     if(event->getPayload().scancode == SDL_SCANCODE_UP)
-        offset[1] += 0.1;
+        rotateQuat(rot, -5.0f, {1, 0, 0});
     if(event->getPayload().scancode == SDL_SCANCODE_DOWN)
-        offset[1] -= 0.1;
-    prog->SetOffset(offset);
+        rotateQuat(rot, +5.0f, {1, 0, 0});
+    if(event->getPayload().scancode == SDL_SCANCODE_SPACE)
+        rot = rotation;
+    prog->SetRotation(glm::mat4_cast(rot));
 }
 
 void cubeSwitch(void*,VertexObject *cube, VertexObject *mesh, Renderer* renderer)
@@ -118,6 +121,15 @@ void cubeSwitch(void*,VertexObject *cube, VertexObject *mesh, Renderer* renderer
     }
 }
 
+void mouseRotate(MouseEvent *event, Program *prog)
+{
+    float degree = sqrt(pow(event->getPayload().relativeCoordinates[0], 2) + pow(event->getPayload().relativeCoordinates[1], 2));
+    Vec3 axis = {event->getPayload().relativeCoordinates[1] / degree, event->getPayload().relativeCoordinates[0] / degree, 0};
+    if(event->getPayload().state == true)
+        rotateQuat(rot, degree, axis);
+    prog->SetRotation(glm::mat4_cast(rot));
+}
+
 void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)
 {
     ShaderReader reader;
@@ -135,6 +147,7 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)
     Button* box = new Button(200, 50);
     VertexObject* frame = new VertexObject(Shapes::Box());
     Action<MouseEvent*> endGame(switchPerspective, std::placeholders::_1, &program);
+    Action<MouseEvent*> rotate(mouseRotate, std::placeholders::_1, &program);
     Action<KeyboardEvent*> zoomObj(zoom, std::placeholders::_1, &program);
     Action<KeyboardEvent*> move(shiftKeyboard, std::placeholders::_1, &program);
     Action<KeyboardEvent*> cube(cubeSwitch, std::placeholders::_1, frame, mesh, &renderer);
@@ -142,6 +155,8 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)
     engine->getEventHandler().setListener<KeyboardEvent>(zoomObj, [](EventInterface* e) { return e->getHint() == SDL_SCANCODE_EQUALS ||
                 e->getHint() == SDL_SCANCODE_MINUS; });
     engine->getEventHandler().setListener<KeyboardEvent>(cube, [](EventInterface* e) { return e->getHint() == SDL_SCANCODE_Q; });
+    engine->getEventHandler().setListener<MouseEvent>(rotate, [](EventInterface* e) { return e->getHint() == integral(MouseData::Type::Motion); });
+
 
     ui->AddElement(box);
     box->setPosition(400, 275);
@@ -151,7 +166,7 @@ void drawTriangle(CoreInterface* engine, UiLayer* ui, Renderer& renderer)
     program.Compile();
     program.SetOffset({0.0, 0.0});
     program.SetPerspective(pers);
-    program.SetRotation(rotation);
+    program.SetRotation(glm::mat4_cast(rotation));
     program.SetLight(light);
     program.SetIntensity(1);
     scene->passes = 1;

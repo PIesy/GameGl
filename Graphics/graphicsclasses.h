@@ -53,7 +53,7 @@ public:
 struct RGBA_Color
 {
     Vec4 color;
-    RGBA_Color(const std::initializer_list<float> init):color(init) {}
+    RGBA_Color(const Vec4 init):color(init) {}
     RGBA_Color() {}
 };
 

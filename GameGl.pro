@@ -113,7 +113,8 @@ HEADERS += \
     Math/mathhelpers.h \
     Graphics/uniform.h \
     Graphics/gluniform.h \
-    Public/meshreader3ds.h
+    Public/meshreader3ds.h \
+    Math/quaternion.h
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \

@@ -66,12 +66,12 @@ void GlProgram::Use()
 {
     glUseProgram(program);
     printGlError("Use error");
-    glUniform2fv(offsetLoc, 1, offset.getData());
+    glUniform2fv(offsetLoc, 1, glm::value_ptr(offset));
     printGlError("Uniform error");
-    glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, perspective.getData());
+    glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, glm::value_ptr(perspective));
     printGlError("Uniform error");
-    glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, rotation.getData());
-    glUniform4fv(lightLoc, 1, light.getData());
+    glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, glm::value_ptr(rotation));
+    glUniform4fv(lightLoc, 1, glm::value_ptr(light));
     glUniform1f(intensityLoc, intensity);
 }
 
