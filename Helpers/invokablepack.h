@@ -3,6 +3,7 @@
 
 #include "Helpers/invokable.h"
 #include <forward_list>
+#include <memory>
 
 template<class... Args>
 class InvokablePack: public TypedInvokable<Args...>

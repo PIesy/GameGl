@@ -18,7 +18,7 @@ class Element
 public:
     virtual ~Element(){}
     virtual void Update() = 0;
-    virtual VertexObject* getGraphics() = 0;
+    virtual GraphicsObject* getGraphics() = 0;
     virtual void setState(int x, int y, bool click) = 0;
     virtual void setAction(Events event, const GenericInvokable& action) = 0;
     virtual void setPosition(int x, int y) = 0;

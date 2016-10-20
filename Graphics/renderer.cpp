@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "Logger/logger.h"
 
 GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 {
@@ -42,6 +43,7 @@ void GlRenderer::Resume()
 
 void GlRenderer::Draw(const Scene& scene)
 {
+    std::lock_guard<std::mutex> lock(queueLock);
     renderQueue.emplace(scene);
 }
 
@@ -79,7 +81,7 @@ void GlRenderer::update()
 {
     ViewportSize size = viewportSize;
     glViewport(0, 0, size.width, size.height);
-    printGlError("Viewport update error " + std::to_string(size.width) + " " + std::to_string(size.height) + " ");
+    //printGlError("Viewport update error " + std::to_string(size.width) + " " + std::to_string(size.height) + " ");
 }
 
 void GlRenderer::init()
@@ -94,14 +96,7 @@ void GlRenderer::init()
     glDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glGenBuffers(1, &data.VBO);
-    glGenBuffers(1, &data.IBO);
-    glGenVertexArrays(1, &data.VAO);
-    glBindVertexArray(data.VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, data.VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.IBO);
-    glBufferData(GL_ARRAY_BUFFER, 50000 * sizeof(Vertex), NULL, GL_DYNAMIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 50000 * sizeof(unsigned), NULL, GL_DYNAMIC_DRAW);
+
     printGlError("Buffer error");
 }
 
@@ -111,28 +106,33 @@ void GlRenderer::render()
 
     if (!renderQueue.empty())
     {
-        currentScene = renderQueue.front();
-        renderQueue.pop();
-        empty = false;
+        std::unique_lock<std::mutex> lock(queueLock);
+        if (!renderQueue.empty())
+        {
+            currentScene = renderQueue.front();
+            renderQueue.pop();
+            empty = false;
+        }
     }
     if(!empty)
         for (i = 0; i < currentScene.passes; i ++)
         {
-            glBufferSubData(GL_ARRAY_BUFFER, 0,
-                            currentScene.objects[i]->data().vertices.size() * sizeof(Vertex),
-                            currentScene.objects[i]->data().vertices.data());
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
-            glEnableVertexAttribArray(2);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, coords));
-            glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-            glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-                            currentScene.objects[i]->data().indices.size() * sizeof(unsigned),
-                            currentScene.objects[i]->data().indices.data());
-            currentScene.objects[i]->data().program->Use();
-            printGlError("SubData error");
-            glDrawElements(GL_TRIANGLES, currentScene.objects[i]->data().indices.size(), GL_UNSIGNED_INT, nullptr);
+            const std::string& name = currentScene.objects[i].getAttribute("name");
+            if (data.VAOs.count(name))
+            {
+                glhelpers::updateDataBuffers(currentScene.objects[i], data.VAOs[name]);
+            }
+            else
+            {
+                data.VAOs.insert({name, glhelpers::initVAO(currentScene.objects[i])});
+            }
+            glhelpers::VertexArrayObject& VAO = data.VAOs[name];
+            glBindVertexArray(VAO.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VAO.IBO);
+            printGlError("Bind error");
+            currentScene.objects[i].data().program->Use();
+            printGlError("Shader error");
+            glDrawElements(GL_TRIANGLES, currentScene.objects[i].data().indices.size(), GL_UNSIGNED_INT, nullptr);
             printGlError("Draw error");
         }
 }
@@ -140,5 +140,5 @@ void GlRenderer::render()
 void GlRenderer::draw()
 {
     SDL_GL_SwapWindow(context.getSdlWindow());
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear((GLbitfield)(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }

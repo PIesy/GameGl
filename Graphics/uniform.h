@@ -1,20 +1,17 @@
 #ifndef UNIFORM_H
 #define UNIFORM_H
 
-class Uniform
-{
-public:
-    virtual void Use();
-};
+#include <memory>
 
-template<class T>
-class TypedUniform: public Uniform
+enum class UniformTypes: int {FLOAT = 0, INTEGER, UNSIGNED, DOUBLE};
+
+struct UniformValue
 {
-protected:
-    T value;
-public:
-    TypedUniform(const T& value);
-    virtual void Use();
+    void* value;
+    UniformTypes type;
+    unsigned count = 1;
+    short horizontalSize = 1;
+    short verticalSize = 1;
 };
 
 #endif // UNIFORM_H

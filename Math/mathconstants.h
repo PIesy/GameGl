@@ -15,7 +15,7 @@ const glm::fquat rotation = glm::fquat(1, 0, 0, 0);
 
 const float pi = 3.14f;
 
-const Vec4 light = { 0.3, 0.5, 0, 0 };
+const Vec4 light = { 0, 0, 1, 0 };
 
 
 #endif // MATHCONSTANTS

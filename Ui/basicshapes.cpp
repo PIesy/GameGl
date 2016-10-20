@@ -11,24 +11,24 @@ NestedShapes::NestedShapes()
     initHexagon();
 }
 
-RenderObject NestedShapes::Box()
+RenderData NestedShapes::Box()
 {
     return getCopy(box);
 }
 
-RenderObject NestedShapes::Triangle()
+RenderData NestedShapes::Triangle()
 {
     return getCopy(triangle);
 }
 
-RenderObject NestedShapes::Hexagon()
+RenderData NestedShapes::Hexagon()
 {
     return getCopy(hexagon);
 }
 
-RenderObject NestedShapes::getCopy(const RenderObject &src)
+RenderData NestedShapes::getCopy(const RenderData &src)
 {
-    RenderObject obj;
+    RenderData obj;
 
     obj.indices = src.indices;
     obj.vertices = src.vertices;
@@ -59,9 +59,6 @@ void NestedShapes::initBox()
                 tmp.coords[0] = j;
                 tmp.coords[1] = i;
                 tmp.coords[2] = z;
-                tmp.normal[0] = i;
-                tmp.normal[1] = j;
-                tmp.normal[2] = -z;
                 box.vertices.push_back(tmp);
             }
 }

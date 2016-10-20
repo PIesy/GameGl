@@ -1,5 +1,6 @@
 #include "glprogram.h"
 #include "renderdefs.h"
+#include "gluniform.h"
 
 struct ShaderProgram
 {
@@ -65,11 +66,11 @@ void GlProgram::Compile()
 void GlProgram::Use()
 {
     glUseProgram(program);
-    printGlError("Use error");
+    //printGlError("Use error");
     glUniform2fv(offsetLoc, 1, glm::value_ptr(offset));
-    printGlError("Uniform error");
+    //printGlError("Uniform error");
     glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, glm::value_ptr(perspective));
-    printGlError("Uniform error");
+    //printGlError("Uniform error");
     glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, glm::value_ptr(rotation));
     glUniform4fv(lightLoc, 1, glm::value_ptr(light));
     glUniform1f(intensityLoc, intensity);
@@ -98,4 +99,37 @@ void GlProgram::SetLight(Vec4 light)
 void GlProgram::SetIntensity(float intensity)
 {
     this->intensity = intensity;
+}
+
+InvokationResult GlProgram::setUniform(const std::string& name, const UniformValue& value)
+{
+    GlUniform uniform;
+
+    if (!uniforms.count(name))
+    {
+        Task uniformLoc;
+        auto futureLocation = uniformLoc.SetTask([this, &name] {
+            return glGetUniformLocation(program, name.c_str());
+        });
+        context.Execute(uniformLoc);
+        GLint loc = futureLocation.get();
+        if (loc == -1)
+            return InvokationResult::ERROR;
+        uniform.count = value.count;
+        uniform.horizontalSize = value.horizontalSize;
+        uniform.type = value.type;
+        uniform.verticalSize = value.verticalSize;
+        uniform.location = loc;
+        uniforms.insert({name, uniform});
+    }
+    else
+        uniform = uniforms[name];
+    uniform.value = value.value;
+
+    Task setUniform;
+    auto future = setUniform.SetTask([this, &uniform] {
+        return ::setUniform(program, uniform);
+    });
+    context.Execute(setUniform);
+    return future.get();
 }

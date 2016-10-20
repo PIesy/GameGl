@@ -2,7 +2,7 @@
 #define ENGINEINTERFACE_H
 
 #include "enginedatastructures.h"
-#include "eventshandler.h"
+#include "events/eventshandler.h"
 
 class ModuleInterface;
 

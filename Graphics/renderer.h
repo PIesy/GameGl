@@ -5,12 +5,18 @@
 #include "graphicsclasses.h"
 #include "sdlclasses.h"
 #include "Helpers/genericcondition.h"
+#include "glhelpers.h"
 #include <atomic>
+#include <mutex>
+#include <list>
+#include <unordered_map>
+#include <string>
 
 using ViewportSize = Size;
 
-struct RenderData
+struct RendererData
 {
+    std::unordered_map<std::string, glhelpers::VertexArrayObject> VAOs;
     GLuint VBO;
     GLuint IBO;
     GLuint VAO;
@@ -18,12 +24,13 @@ struct RenderData
 
 class GlRenderer: public Renderer
 {
+    std::mutex queueLock;
     SdlGLContext& context;
     bool terminate = true;
     bool empty = true;
     Scene currentScene;
     unsigned int index_count = 0;
-    RenderData data;
+    RendererData data;
     std::queue<Scene> renderQueue;
     std::atomic<ViewportSize> viewportSize;
     Task renderTask;

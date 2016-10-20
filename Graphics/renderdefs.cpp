@@ -1,4 +1,5 @@
 #include "renderdefs.h"
+#include "Logger/logger.h"
 
 GLuint convertToGlShaderType(ShaderType type)
 {

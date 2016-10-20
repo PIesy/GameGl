@@ -8,11 +8,12 @@ uniform mat4 perspective;
 uniform mat4 rotation;
 uniform vec4 light;
 uniform float intensity;
-uniform vec2 offset = vec2(0.5f, 0.5f);
+uniform vec2 offset;
+uniform float z_offset;
+
+const float ambient = 0.5f;
 
 smooth out vec4 out_color;
-const float z_offset = -2f;
-const float ambient = 0.5f;
 
 void main(void)
 {

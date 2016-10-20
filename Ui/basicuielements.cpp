@@ -42,7 +42,7 @@ void Item::reposition()
     }
 }
 
-void Item::setColor(RenderObject& target, RGBA_Color color)
+void Item::setColor(RenderData& target, RGBA_Color color)
 {
     unsigned int i, j;
 
@@ -58,7 +58,7 @@ void Item::Update()
     reposition();
 }
 
-VertexObject* Item::getGraphics()
+GraphicsObject* Item::getGraphics()
 {
     return &graphics;
 }
@@ -86,7 +86,7 @@ void Item::setState(int x, int y, bool click)
     }
     else
     {
-        if(hover)
+        if (hover)
             lastEvent = Events::onExit;
         else
             lastEvent = Events::None;

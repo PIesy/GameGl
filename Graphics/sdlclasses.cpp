@@ -35,7 +35,6 @@ SdlWindow::operator SDL_Window *()
     return window;
 }
 
-
 SdlGLContext::SdlGLContext(const SDL_GLContext& context, const SdlWindow& window)
 {
     worker.setName("opengl context");

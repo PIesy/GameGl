@@ -40,7 +40,7 @@ void Logger::log(std::string str)
     time(&rawTime);
     formattedTime = localtime(&rawTime);
     strftime(buff, 21, "[%x-%X]", formattedTime);
-    write(buff + str);
+    write(buff + std::string(" ") + str);
 }
 
 void loggerRoutine(Logger* log, LogQueue* queue)

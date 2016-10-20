@@ -1,10 +1,14 @@
 #ifndef GRAPHICSCLASSES_H
 #define GRAPHICSCLASSES_H
 
+#include <string>
+#include <unordered_map>
 #include "Helpers/invokable.h"
 #include "Helpers/size.h"
-#include "Core/service.h"
+#include "Helpers/invokationresult.h"
+#include "Core/service/service.h"
 #include "Math/mathconstants.h"
+#include "uniform.h"
 
 enum class ShaderType { VertexShader, FragmentShader };
 
@@ -48,6 +52,7 @@ public:
     virtual void SetRotation(Mat4 rotation) = 0;
     virtual void SetLight(Vec4 light) = 0;
     virtual void SetIntensity(float intensity) = 0;
+    virtual InvokationResult setUniform(const std::string& name, const UniformValue& value) = 0;
 };
 
 struct RGBA_Color
@@ -60,38 +65,42 @@ struct RGBA_Color
 struct Vertex
 {
     Vec3 coords = {0,0,0};
-    Vec3 normal = {0,0,0};
+    Vec3 normal = {0,0,1};
     Vec4 color = {1,0,0,1};
 };
 
-struct RenderObject
+struct RenderData
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned> indices;
     Program* program = nullptr;
 };
 
-
-class VertexObject
+class GraphicsObject
 {
-    RenderObject object;
+    std::unordered_map<std::string, std::string> attributes;
+    RenderData object;
 public:
-    VertexObject(){}
-    VertexObject(RenderObject& base);
-    VertexObject(RenderObject&& base);
-    VertexObject(VertexObject&& src);
-    VertexObject(const VertexObject& src);
-    operator RenderObject&();
-    VertexObject& operator =(const VertexObject& src);
-    VertexObject& operator =(const RenderObject& src);
-    RenderObject& data();
-    void Append(const VertexObject& src, float offset_x = 0, float offset_y = 0);
-    void Append(const RenderObject& src, float offset_x = 0, float offset_y = 0);
+    GraphicsObject(){}
+    GraphicsObject(RenderData& base);
+    GraphicsObject(RenderData&& base);
+    GraphicsObject(GraphicsObject&& src);
+    GraphicsObject(const GraphicsObject& src);
+    operator RenderData&();
+    GraphicsObject& operator =(const GraphicsObject& src);
+    GraphicsObject& operator =(const RenderData& src);
+    RenderData& data();
+    void setAttribute(const std::string& attributeName, const std::string& attributeValue);
+    const std::string& getAttribute(const std::string& attributeName) const;
+    void Scale(float x, float y = 1, float z = 1);
+    void Move(float x, float y = 0, float z = 0);
+    void Append(const GraphicsObject& src, float offset_x = 0, float offset_y = 0);
+    void Append(const RenderData& src, float offset_x = 0, float offset_y = 0);
 };
 
 struct Scene
 {
-    std::vector<VertexObject*> objects;
+    std::vector<GraphicsObject> objects;
     short passes = 0;
 };
 

@@ -19,7 +19,12 @@ void MeshReader3ds::addVertex(std::string vertex)
 
     for(int i = 0; i < 3; i++)
     {
-        v.coords[i] = std::stof(vertex.substr(offset), &cnt) / 100;
+        if (i == 0)
+            v.coords.x = std::stof(vertex.substr(offset), &cnt);
+        if (i == 1)
+            v.coords.z = std::stof(vertex.substr(offset), &cnt);
+        if (i == 2)
+            v.coords.y = std::stof(vertex.substr(offset), &cnt);
         offset += cnt;
     }
     result.vertices.push_back(v);
@@ -29,7 +34,6 @@ void MeshReader3ds::addIndex(std::string index)
 {
     size_t cnt = 0;
     size_t offset = 0;
-    Vertex v;
 
     for(int i = 0; i < 9; i++)
     {
@@ -38,14 +42,14 @@ void MeshReader3ds::addIndex(std::string index)
         if(i % 3 != 0)
             std::stoul(index.substr(offset), &cnt);
         else
-            result.indices.push_back(std::stoul(index.substr(offset), &cnt) - 1);
+            result.indices.push_back(unsigned(std::stoul(index.substr(offset), &cnt) - 1));
         offset += cnt;
     }
 }
 
 void MeshReader3ds::addNormal(std::string normal)
 {
-    static int i = 0;
+    static unsigned i = 0;
     size_t cnt = 0;
     size_t offset = 0;
     Vec3 v;
@@ -55,7 +59,8 @@ void MeshReader3ds::addNormal(std::string normal)
         v[j] = std::stof(normal.substr(offset), &cnt);
         offset += cnt;
     }
-    result.vertices[i].normal = v;
+    if (i < result.vertices.size())
+        result.vertices[i].normal = v;
     i++;
 }
 
@@ -65,7 +70,7 @@ void MeshReader3ds::Clear()
     result.vertices.clear();
 }
 
-VertexObject MeshReader3ds::getResult()
+GraphicsObject MeshReader3ds::getResult()
 {
     return result;
 }

@@ -2,7 +2,6 @@
 #define SHAREDSTATE_H
 
 #include <memory>
-#include "Logger/logger.h"
 #include "Helpers/helpers.h"
 
 template<class T>

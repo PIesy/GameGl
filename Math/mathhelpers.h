@@ -15,15 +15,5 @@ public:
     operator Mat4&();
 };
 
-class RotationMatrix
-{
-    Mat4 matrix;
-    void setValues(float x, float y, float z, float degree);
-public:
-    enum class Axis {X, Y, Z};
-    RotationMatrix(float degree, Axis axis = Axis::Z);
-    operator Mat4&();
-};
-
 #endif // MATHHELPERS_H
 

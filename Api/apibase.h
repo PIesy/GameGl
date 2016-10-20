@@ -2,7 +2,7 @@
 #define APIBASE
 
 #include "Core/engineinterface.h"
-#include "Core/service.h"
+#include "Core/service/service.h"
 
 class ApiBase
 {

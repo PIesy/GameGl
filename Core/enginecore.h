@@ -21,6 +21,7 @@ class EngineCore: public EngineInterface
 public:
     EngineCore(EngineInitializer initializer);
     ~EngineCore();
+    void RequireModules();
     void AttachModule(Modules name, ModuleInterface *module);
     ModuleInterface& GetModule(Modules name);
     EventHandler& getEventHandler();

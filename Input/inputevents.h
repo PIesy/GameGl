@@ -1,7 +1,7 @@
 #ifndef IOCLASSES
 #define IOCLASSES
 
-#include "Core/eventshandler.h"
+#include "Core/events/eventshandler.h"
 #include "inputdata.h"
 
 class KeyboardEvent: public Event<KeyboardData>

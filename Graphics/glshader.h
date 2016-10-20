@@ -14,7 +14,7 @@ public:
     GlShader(RenderingContext& context);
     void Create(std::string source, ShaderType type);
     void PrintInfo();
-    ShaderType getType() const;
+    ShaderType getType() const;    
     operator GLuint() const;
 };
 

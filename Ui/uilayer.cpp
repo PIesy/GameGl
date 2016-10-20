@@ -64,12 +64,12 @@ void UiLayer::updateAll(int x, int y, bool click)
         el->setState(x, y, click);
 }
 
-VertexObject** UiLayer::getGraphics()
+GraphicsObject** UiLayer::getGraphics()
 {
     int i = 0;
-    VertexObject** objects;
+    GraphicsObject** objects;
 
-    objects = new VertexObject*[elements.size()];
+    objects = new GraphicsObject*[elements.size()];
     for(Element* obj : elements)
     {
         objects[i] = obj->getGraphics();

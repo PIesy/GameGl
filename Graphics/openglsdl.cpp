@@ -1,4 +1,5 @@
 #include "openglsdl.h"
+#include "Logger/logger.h"
 
 GraphicsService::GraphicsService()
 {
@@ -28,6 +29,7 @@ void GraphicsService::Start()
 void GraphicsService::Stop()
 {
     serviceThread.Terminate();
+    SDL_GL_DeleteContext(parentContext);
 }
 
 void GraphicsService::Restart() {}

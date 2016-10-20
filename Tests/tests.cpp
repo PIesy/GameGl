@@ -1,5 +1,5 @@
 #include "tests.h"
-#include "Core/eventshandler.h"
+#include "Core/events/eventshandler.h"
 #include "Logger/logger.h"
 #include <iostream>
 #include <functional>
@@ -35,5 +35,5 @@ void testCc(EventHandler *handler)
 
 void testFunction(TestEvent* event, int* val)
 {
-    Logger::Log("Test event cought " + std::to_string(event->getPayload()) + std::to_string(*val));
+    Logger::Log("Test event cought");
 }

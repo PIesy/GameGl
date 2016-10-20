@@ -1,5 +1,6 @@
 #include "glshader.h"
 #include "renderdefs.h"
+#include "Logger/logger.h"
 
 GlShader::GlShader(RenderingContext& context):context(context) {}
 

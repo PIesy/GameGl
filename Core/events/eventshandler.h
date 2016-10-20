@@ -5,7 +5,7 @@
 #include <typeindex>
 #include <unordered_map>
 #include "Helpers/helpers.h"
-#include "worker.h"
+#include "Core/worker.h"
 
 using EventInvokable = GenericInvokable;
 using EventFilter = std::function<bool(EventInterface*)>;
@@ -18,7 +18,7 @@ class Event: public EventInterface
 {
     T payload;
 public:
-    Event(T payload, int hint) { this->payload = payload; setHint(hint); }
+    Event(T payload, int hint = -1) { this->payload = payload; setHint(hint); }
     virtual ~Event() {}
     const T& getPayload() const { return payload; }
 };

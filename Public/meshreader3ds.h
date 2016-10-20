@@ -6,13 +6,13 @@
 
 class MeshReader3ds : public Scanner
 {
-    RenderObject result;
+    RenderData result;
     void addVertex(std::string vertex);
     void addNormal(std::string normal);
     void addIndex(std::string index);
 public:
     void Analyze(std::string input);
-    VertexObject getResult();
+    GraphicsObject getResult();
     void Clear();
 };
 

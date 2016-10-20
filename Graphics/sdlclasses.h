@@ -3,7 +3,7 @@
 
 #include "graphicsclasses.h"
 #include "SDL2/SDL.h"
-#include "Core/service.h"
+#include "Core/service/service.h"
 #include <string>
 #include "Helpers/sharedstate.h"
 

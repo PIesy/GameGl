@@ -1,7 +1,6 @@
 #ifndef MATHDEFINES_H
 #define MATHDEFINES_H
 
-#include "matrix.h"
 #include "glm/matrix.hpp"
 #include "glm/gtc/type_ptr.hpp"
 

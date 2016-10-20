@@ -72,9 +72,10 @@ void EngineCore::Start()
 
 void EngineCore::Terminate()
 {
-    GlobalBroadcaster::NotifyAll(0);
-    for(ServiceContainer& service: data.services)
+    for (ServiceContainer& service: data.services)
         service.Stop();
+    for (auto& module : modules)
+        delete module.second;
 }
 
 void EngineCore::WaitEnd()
