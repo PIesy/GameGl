@@ -2,8 +2,7 @@
 #define GLSHADER_H
 
 #include "graphicsclasses.h"
-#include <GL/glew.h>
-#include <GL/gl.h>
+#include "Platform/OpenGL/glbindings.h"
 
 class GlShader: public Shader
 {

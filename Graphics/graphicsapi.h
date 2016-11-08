@@ -4,6 +4,7 @@
 #include <string>
 #include "Api/apibase.h"
 #include "graphicsclasses.h"
+#include "renderer.h"
 
 
 class GraphicsApi: public ApiBase

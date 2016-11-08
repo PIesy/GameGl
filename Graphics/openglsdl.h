@@ -3,10 +3,10 @@
 
 #include "renderdefs.h"
 #include "graphicsapi.h"
-#include "renderer.h"
 #include "Core/service/service_cluster.h"
 #include "glprogram.h"
 #include "glshader.h"
+#include "glrenderer.h"
 
 class GraphicsService: public Service
 {

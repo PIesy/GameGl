@@ -4,7 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11
-QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2
+QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2 -lIL -lILU
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \
@@ -38,7 +38,6 @@ HEADERS += \
     Graphics/graphicsclasses.h \
     Graphics/openglsdl.h \
     Graphics/renderdefs.h \
-    Graphics/renderer.h \
     Graphics/sdlclasses.h \
     Graphics/uniform.h \
     Helpers/action.h \
@@ -88,7 +87,20 @@ HEADERS += \
     Graphics/material.h \
     Public/meshreaderobj.h \
     Graphics/glhelpers.h \
-    Helpers/invokationresult.h
+    Helpers/invokationresult.h \
+    Framework/world.h \
+    Framework/camera.h \
+    Framework/worldobject.h \
+    Framework/drawableworldobject.h \
+    Graphics/texture.h \
+    Graphics/renderstep.h \
+    Graphics/rendertarget.h \
+    Graphics/renderpath.h \
+    Graphics/glrenderer.h \
+    Graphics/renderer.h \
+    Graphics/rendering_attributtes.h \
+    Platform/OpenGL/glbindings.h \
+    Platform/OpenGL/gldebug.h
 
 SOURCES += \
     Core/events/eventshandler.cpp \
@@ -105,7 +117,6 @@ SOURCES += \
     Graphics/glshader.cpp \
     Graphics/openglsdl.cpp \
     Graphics/renderdefs.cpp \
-    Graphics/renderer.cpp \
     Graphics/sdlclasses.cpp \
     Graphics/vertexobject.cpp \
     Helpers/action.cpp \
@@ -139,4 +150,18 @@ SOURCES += \
     Graphics/material.cpp \
     Public/meshreaderobj.cpp \
     Graphics/glhelpers.cpp \
-    Graphics/gluniform.cpp
+    Graphics/gluniform.cpp \
+    Framework/world.cpp \
+    Framework/camera.cpp \
+    Framework/worldobject.cpp \
+    Framework/drawableworldobject.cpp \
+    Graphics/graphicsclasses.cpp \
+    Graphics/glrenderer.cpp \
+    Platform/OpenGL/glbindings.cpp \
+    Platform/OpenGL/gldebug.cpp
+
+DISTFILES += \
+    Shaders/vertexshadertex.glsl \
+    Shaders/fragmentshadertex.glsl \
+    Shaders/vertexshadertex_copy.glsl \
+    Shaders/fragmentshadertex_copy.glsl

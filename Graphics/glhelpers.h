@@ -1,9 +1,9 @@
 #ifndef GLHELPERS_H
 #define GLHELPERS_H
 
-#include "GL/glew.h"
-#include "GL/glu.h"
+#include "Platform/OpenGL/glbindings.h"
 #include "graphicsclasses.h"
+#include "rendertarget.h"
 
 namespace glhelpers
 {
@@ -13,6 +13,17 @@ namespace glhelpers
         GLuint VBO;
         GLuint IBO;
         GLuint VAO;
+        GLuint tex = 0;
+        bool externTex = false;
+        int stepId = 0;
+        int texId = 0;
+    };
+
+    struct FramebufferObject
+    {
+        GLuint FBO = 0;
+        std::vector<GLuint> textures = {0};
+        GLuint depthBuff = 0;
     };
 
     class RAIIBufferBinding
@@ -26,6 +37,7 @@ namespace glhelpers
     VertexArrayObject initVAO(GraphicsObject& obj, bool unbindAfterInit = false);
     void updateDataBuffers(GraphicsObject& obj, VertexArrayObject& vao);
 
+    FramebufferObject initFramebuffer(const RenderTarget& target);
 }
 
 #endif // GLHELPERS_H

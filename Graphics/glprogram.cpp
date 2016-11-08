@@ -2,27 +2,15 @@
 #include "renderdefs.h"
 #include "gluniform.h"
 
-struct ShaderProgram
-{
-    Shader* shader;
-    GLuint program;
-};
-
-struct CompileData
-{
-    std::condition_variable var;
-    GLuint* program;
-};
-
 GlProgram::GlProgram(RenderingContext& context):context(context)
 {
-    Task create([this] { program = glCreateProgram(); printGlError("Create prog error"); });
+    Task create([this] { program = gl::program::create(); });
     this->context.Execute(create);
 }
 
 GlProgram::~GlProgram()
 {
-    Task remove([this] { glDeleteProgram(program); });
+    Task remove([this] { gl::program::erase(program); });
     context.Execute(remove);
     remove.WaitTillFinished();
 }
@@ -30,14 +18,14 @@ GlProgram::~GlProgram()
 void GlProgram::Attach(const Shader& shader)
 {
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
-    Task attach([&glShader, this] { glAttachShader(program, glShader); printGlError("Attach error"); });
+    Task attach([&glShader, this] { gl::program::attachShader(program, glShader); });
     context.Execute(attach);
 }
 
 void GlProgram::Detach(const Shader& shader)
 {
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
-    Task detach([&glShader, this] { glDetachShader(program, glShader); });
+    Task detach([&glShader, this] { gl::program::detachShader(program, glShader); });
     context.Execute(detach);
 }
 
@@ -50,14 +38,13 @@ void GlProgram::Compile()
 {
     Task task([this]
     {
-        glLinkProgram(program);
-        printGlError("Compile error");
-        offsetLoc = glGetUniformLocation(program, "offset");
-        printGlError("Uniform location error");
-        perspectiveLoc = glGetUniformLocation(program, "perspective");
-        rotationLoc = glGetUniformLocation(program, "rotation");
-        lightLoc = glGetUniformLocation(program, "light");
-        intensityLoc = glGetUniformLocation(program, "intensity");
+        gl::program::link(program);
+//        offsetLoc = glGetUniformLocation(program, "offset");
+//        printGlError("Uniform location error");
+//        perspectiveLoc = glGetUniformLocation(program, "perspective");
+//        rotationLoc = glGetUniformLocation(program, "rotation");
+        lightLoc = gl::program::getUniformLocation(program, "light");
+        intensityLoc = gl::program::getUniformLocation(program, "intensity");
     });
     context.Execute(task);
     task.WaitTillFinished();
@@ -65,14 +52,14 @@ void GlProgram::Compile()
 
 void GlProgram::Use()
 {
-    glUseProgram(program);
+    gl::program::use(program);
     //printGlError("Use error");
-    glUniform2fv(offsetLoc, 1, glm::value_ptr(offset));
+    //glUniform2fv(offsetLoc, 1, glm::value_ptr(offset));
     //printGlError("Uniform error");
-    glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, glm::value_ptr(perspective));
+    //glUniformMatrix4fv(perspectiveLoc, 1, GL_FALSE, glm::value_ptr(perspective));
     //printGlError("Uniform error");
-    glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, glm::value_ptr(rotation));
-    glUniform4fv(lightLoc, 1, glm::value_ptr(light));
+    //glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, glm::value_ptr(rotation));
+    //gl::program::setUniform4f(lightLoc, 1, glm::value_ptr(light));
     glUniform1f(intensityLoc, intensity);
 }
 
@@ -109,7 +96,7 @@ InvokationResult GlProgram::setUniform(const std::string& name, const UniformVal
     {
         Task uniformLoc;
         auto futureLocation = uniformLoc.SetTask([this, &name] {
-            return glGetUniformLocation(program, name.c_str());
+            return gl::program::getUniformLocation(program, name);
         });
         context.Execute(uniformLoc);
         GLint loc = futureLocation.get();

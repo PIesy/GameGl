@@ -18,10 +18,10 @@ void rotateQuat(glm::fquat& base, float degree, const Vec3& axis)
     base = rot * base;
 }
 
-PerspectiveMatrix::PerspectiveMatrix(float scaleX, float scaleY, float near, float far)
+PerspectiveMatrix::PerspectiveMatrix(float aspectRatio, float vFov, float near, float far)
 {
-    matrix[0][0] = scaleX;
-    matrix[1][1] = scaleY;
+    matrix[0][0] = 1.0f / (aspectRatio * tan(degToRad(vFov / 2)));
+    matrix[1][1] = 1 / tan(degToRad(vFov / 2));
     matrix[2][2] = (near + far) / (near - far);
     matrix[3][2] = (far * near * 2.0f) / (near - far);
     matrix[2][3] = -1;

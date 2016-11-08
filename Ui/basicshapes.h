@@ -28,5 +28,6 @@ public:
     static RenderData Box(){ return shapes.Box(); }
     static RenderData Triangle(){ return shapes.Triangle(); }
     static RenderData Hexagon(){ return shapes.Hexagon(); }
+    static RenderData Plane(int xSize, int ySize, Vec4 color = {0.5f, 0.5f, 0.5f, 1.0f});
 };
 #endif // BASICSHAPES_H

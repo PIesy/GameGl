@@ -11,7 +11,7 @@ class PerspectiveMatrix
 {
     Mat4 matrix;
 public:
-    PerspectiveMatrix(float scaleX, float scaleY, float near, float far);
+    PerspectiveMatrix(float aspectRatio, float vFov, float near, float far);
     operator Mat4&();
 };
 

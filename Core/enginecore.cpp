@@ -74,8 +74,8 @@ void EngineCore::Terminate()
 {
     for (ServiceContainer& service: data.services)
         service.Stop();
-    for (auto& module : modules)
-        delete module.second;
+//    for (auto& module : modules)
+//        delete module.second;
 }
 
 void EngineCore::WaitEnd()

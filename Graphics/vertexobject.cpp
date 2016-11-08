@@ -23,6 +23,8 @@ GraphicsObject::GraphicsObject(const GraphicsObject &src)
 {
     object = src.object;
     attributes = src.attributes;
+    texture = src.texture;
+    configurationMap = src.configurationMap;
 }
 
 GraphicsObject::operator RenderData&()
@@ -34,6 +36,8 @@ GraphicsObject& GraphicsObject::operator=(const GraphicsObject& src)
 {
     object = src.object;
     attributes = src.attributes;
+    texture = src.texture;
+    configurationMap = src.configurationMap;
     return *this;
 }
 
@@ -107,4 +111,39 @@ const std::string& GraphicsObject::getAttribute(const std::string& attributeName
         return attributes.at(attributeName);
     }
     return EMPTY_ATTRIBUTE;
+}
+
+Texture GraphicsObject::getTexture() const
+{
+    return texture;
+}
+
+void GraphicsObject::setTexture(const Texture& value)
+{
+    texture = value;
+}
+
+void GraphicsObject::setConfigurationFor(const std::string& param, const ConfigFunction& value)
+{
+    if (!configurationMap->count(param))
+        configurationMap->insert({param, value});
+    else
+        (*configurationMap)[param] = value;
+}
+
+void GraphicsObject::removeConfigurationFor(const std::string& param)
+{
+    if (configurationMap->count(param))
+        configurationMap->erase(param);
+}
+
+
+std::shared_ptr<GraphicsObject::ConfigMap> GraphicsObject::getConfigurationMap() const
+{
+    return configurationMap;
+}
+
+void GraphicsObject::setConfigurationMap(const std::shared_ptr<GraphicsObject::ConfigMap>& value)
+{
+    configurationMap = value;
 }

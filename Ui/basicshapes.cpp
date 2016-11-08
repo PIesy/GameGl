@@ -4,6 +4,7 @@
 
 NestedShapes Shapes::shapes;
 
+
 NestedShapes::NestedShapes()
 {
     initBox();
@@ -95,4 +96,26 @@ void NestedShapes::initHexagon()
             tmp.coords[1] = i;
             hexagon.vertices.push_back(tmp);
         }
+}
+
+RenderData Shapes::Plane(int xSize, int ySize, Vec4 color)
+{
+    RenderData result;
+    float vertCoordsX[] = {0, 0, xSize, xSize};
+    float vertCoordsZ[] = {0, ySize, ySize, 0};
+    float texCoordsU[] = {1, 1, 0, 0};
+    float texCoordsV[] = {0, 1, 1, 0};
+
+    result.indices = {0, 1, 2,  2, 3, 0};
+
+    for (int i = 0; i < 4; i++)
+    {
+        Vertex vert;
+        vert.coords = {vertCoordsX[i], 0, vertCoordsZ[i]};
+        vert.normal = {0, 1, 0};
+        vert.color = color;
+        vert.uv = {texCoordsU[i], texCoordsV[i]};
+        result.vertices.push_back(vert);
+    }
+    return result;
 }

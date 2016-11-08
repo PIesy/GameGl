@@ -11,12 +11,9 @@ void GlShader::Create(std::string source, ShaderType type)
 
     Task create([=]
     {
-        shader = glCreateShader(shaderType);
-        const char* str = source.c_str();
-        int size = source.length();
-        glShaderSource(shader, 1, &str, &size);
-        glCompileShader(shader);
-        printGlError("Compile shader error");
+        shader = gl::shader::create(shaderType);
+        gl::shader::setSource(shader, source);
+        gl::shader::compile(shader);
         PrintInfo();
     });
     context.Execute(create);

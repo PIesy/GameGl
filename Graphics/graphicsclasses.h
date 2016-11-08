@@ -3,16 +3,22 @@
 
 #include <string>
 #include <unordered_map>
+#include <functional>
+#include <memory>
 #include "Helpers/invokable.h"
 #include "Helpers/size.h"
 #include "Helpers/invokationresult.h"
 #include "Core/service/service.h"
 #include "Math/mathconstants.h"
 #include "uniform.h"
+#include "texture.h"
 
 enum class ShaderType { VertexShader, FragmentShader };
+class Program;
 
 using WindowSize = Size;
+using ConfigFunction = std::function<void(Program&)>;
+const ConfigFunction defaultConfig = [](Program&) {};
 
 class BasicWindow
 {
@@ -53,7 +59,36 @@ public:
     virtual void SetLight(Vec4 light) = 0;
     virtual void SetIntensity(float intensity) = 0;
     virtual InvokationResult setUniform(const std::string& name, const UniformValue& value) = 0;
+
+    template<typename T>
+    InvokationResult setUniform(const T& value, const std::string& name, int count = 1)
+    {
+        T v = value;
+        return setUniform(std::move(v), name, count);
+    }
+
+    template<typename T>
+    InvokationResult setUniform(T& value, const std::string& name, int count = 1)
+    {
+        return setUniform(std::move(value), name, count);
+    }
+
+    template<typename T>
+    InvokationResult setUniform(T&& value, const std::string& name, int count = 1);
 };
+
+template<>
+InvokationResult Program::setUniform<Vec4>(Vec4&& value, const std::string& name, int count);
+template<>
+InvokationResult Program::setUniform<Vec3>(Vec3&& value, const std::string& name, int count);
+template<>
+InvokationResult Program::setUniform<Vec2>(Vec2&& value, const std::string& name, int count);
+template<>
+InvokationResult Program::setUniform<Mat4>(Mat4&& value, const std::string& name, int count);
+template<>
+InvokationResult Program::setUniform<Mat3>(Mat3&& value, const std::string& name, int count);
+template<>
+InvokationResult Program::setUniform<float>(float&& value, const std::string& name, int count);
 
 struct RGBA_Color
 {
@@ -67,6 +102,7 @@ struct Vertex
     Vec3 coords = {0,0,0};
     Vec3 normal = {0,0,1};
     Vec4 color = {1,0,0,1};
+    Vec2 uv = {0, 0};
 };
 
 struct RenderData
@@ -78,8 +114,11 @@ struct RenderData
 
 class GraphicsObject
 {
+    using ConfigMap = std::unordered_map<std::string, ConfigFunction>;
     std::unordered_map<std::string, std::string> attributes;
     RenderData object;
+    Texture texture;
+    std::shared_ptr<ConfigMap> configurationMap = std::make_shared<ConfigMap>();
 public:
     GraphicsObject(){}
     GraphicsObject(RenderData& base);
@@ -96,6 +135,20 @@ public:
     void Move(float x, float y = 0, float z = 0);
     void Append(const GraphicsObject& src, float offset_x = 0, float offset_y = 0);
     void Append(const RenderData& src, float offset_x = 0, float offset_y = 0);
+    Texture getTexture() const;
+    void setTexture(const Texture& value);
+    void setConfigurationFor(const std::string& param, const ConfigFunction& value);
+
+    template<typename T>
+    void Configure(const std::string& param, const T& value)
+    {
+        setConfigurationFor(param, [=](Program& p) { p.setUniform(value, param); });
+    }
+
+    void removeConfigurationFor(const std::string& param);
+
+    std::shared_ptr<ConfigMap> getConfigurationMap() const;
+    void setConfigurationMap(const std::shared_ptr<ConfigMap>& value);
 };
 
 struct Scene
@@ -113,14 +166,6 @@ public:
     virtual void SetWindow(const Window& window) = 0;
     virtual void MakeCurrent() = 0;
     virtual Window getWindow() = 0;
-};
-
-class Renderer: public Service
-{
-public:
-    virtual void SetWindow(const Window& window) = 0;
-    virtual void Draw(const Scene& scene) = 0;
-    virtual void SetViewport(int width, int height) = 0;
 };
 #endif // GRAPHICSCLASSES_H
 

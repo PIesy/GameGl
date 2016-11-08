@@ -8,6 +8,7 @@
 class MeshReaderObj : public Scanner
 {
     unsigned indexOffset = 0;
+    unsigned i_n = 0;
     std::vector<GraphicsObject> result;
     void addVertex(std::string vertex);
     void addNormal(std::string normal);

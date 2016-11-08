@@ -6,6 +6,7 @@ void MeshReaderObj::Analyze(std::string input)
     if (type == "o ")
     {
         indexOffset = 0;
+        i_n = 0;
         for (GraphicsObject& obj : result)
         {
             indexOffset += obj.data().vertices.size();
@@ -66,7 +67,6 @@ void MeshReaderObj::addIndex(std::string index)
 // TODO : utterly broken
 void MeshReaderObj::addNormal(std::string normal)
 {
-    static unsigned i = 0;
     size_t cnt = 0;
     size_t offset = 0;
     Vec3 v;
@@ -76,9 +76,9 @@ void MeshReaderObj::addNormal(std::string normal)
         v[j] = std::stof(normal.substr(offset), &cnt);
         offset += cnt;
     }
-//    if (i < result.vertices.size())
-//        result.vertices[i].normal = v;
-    i++;
+    if (i_n < result.back().data().vertices.size())
+        result.back().data().vertices[i_n].normal = v;
+    i_n++;
 }
 
 void MeshReaderObj::Clear()
