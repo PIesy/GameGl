@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GL/glu.h>
 #include "Logger/logger.h"
+#include <exception>
 #define ENGINE_GL_DEBUG_MESSAGES
 
 #ifdef ENGINE_GL_DEBUG_MESSAGES

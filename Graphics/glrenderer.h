@@ -34,7 +34,7 @@ class GlRenderer: public Renderer
     RenderPath currentPath;
     unsigned int index_count = 0;
     RendererData data;
-    std::queue<RenderPath> renderQueue2;
+    std::queue<Scene> renderQueue2;
     std::atomic<ViewportSize> viewportSize;
     Task renderTask;
     GenericCondition<bool> pause = false;
@@ -53,7 +53,7 @@ public:
     void Restart();
     void Wait();
     void SetWindow(const Window &window);
-    void Draw(const RenderPath& path);
+    void Draw(const Scene& path);
     void SetViewport(int width, int height);
 };
 

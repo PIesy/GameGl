@@ -60,7 +60,7 @@ void GlProgram::Use()
     //printGlError("Uniform error");
     //glUniformMatrix4fv(rotationLoc, 1, GL_FALSE, glm::value_ptr(rotation));
     //gl::program::setUniform4f(lightLoc, 1, glm::value_ptr(light));
-    glUniform1f(intensityLoc, intensity);
+    //glUniform1f(intensityLoc, intensity);
 }
 
 void GlProgram::SetOffset(Vec2 offset)

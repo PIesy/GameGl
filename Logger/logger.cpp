@@ -52,8 +52,13 @@ void loggerRoutine(Logger* log, LogQueue* queue)
     {
         while(!queue->logQueue.empty())
         {
-            log->log(queue->logQueue.front());
-            queue->logQueue.pop();
+            lock.lock();
+            if (!queue->logQueue.empty())
+            {
+                log->log(queue->logQueue.front());
+                queue->logQueue.pop();
+            }
+            lock.unlock();
         }
         if(queue->logQueue.empty())
         {

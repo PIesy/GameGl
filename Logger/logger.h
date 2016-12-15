@@ -36,8 +36,8 @@ public:
     static void Log(std::string str)
     {
     #ifdef LOG_ENABLED
-        logger.queue.logQueue.push(str);
         logger.queue.mutex.lock();
+        logger.queue.logQueue.push(str);
         logger.queue.newString.notify_all();
         logger.queue.mutex.unlock();
     #endif

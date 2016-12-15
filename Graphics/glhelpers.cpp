@@ -1,6 +1,7 @@
 #include "glhelpers.h"
 #include "renderdefs.h"
 #include "Logger/logger.h"
+#include "Platform/OpenGL/gltexture.h"
 
 glhelpers::RAIIBufferBinding::RAIIBufferBinding(GLenum target, GLuint buffer)
 {
@@ -17,6 +18,7 @@ glhelpers::VertexArrayObject glhelpers::initVAO(GraphicsObject& obj, bool unbind
 {
     VertexArrayObject result;
 
+    Texture tex = obj.getTexture();
     if (obj.getTexture().data != nullptr)
         gl::texture::generate(1, &result.tex);
     if (obj.getTexture().textureId != 0)
@@ -41,13 +43,13 @@ glhelpers::VertexArrayObject glhelpers::initVAO(GraphicsObject& obj, bool unbind
         gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl::texture::load2Dimage(GL_TEXTURE_2D, 0, GL_RGB, obj.getTexture().width,
-                     obj.getTexture().height, GL_RGB, GL_UNSIGNED_BYTE, obj.getTexture().data);
+        gl::texture::load2Dimage(GL_TEXTURE_2D, 0, GL_RGBA, obj.getTexture().width,
+                     obj.getTexture().height, tex.componentsNum < 4 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, obj.getTexture().data);
         gl::texture::bind(GL_TEXTURE_2D, 0);
     }
 
-    gl::buffer::setData(GL_ARRAY_BUFFER, obj.data().vertices.size() * sizeof(Vertex), obj.data().vertices.data(), GL_DYNAMIC_DRAW);
-    gl::buffer::setData(GL_ELEMENT_ARRAY_BUFFER, obj.data().indices.size() * sizeof(unsigned), obj.data().indices.data(), GL_DYNAMIC_DRAW);
+    gl::buffer::setData(GL_ARRAY_BUFFER, (obj.data().vertices.size() + 1000) * sizeof(Vertex), obj.data().vertices.data(), GL_DYNAMIC_DRAW);
+    gl::buffer::setData(GL_ELEMENT_ARRAY_BUFFER, (obj.data().indices.size() + 1000) * sizeof(unsigned), obj.data().indices.data(), GL_DYNAMIC_DRAW);
 
     gl::vertexarray::enableVertexAttribute(0);
     gl::vertexarray::enableVertexAttribute(1);
@@ -97,20 +99,25 @@ glhelpers::FramebufferObject glhelpers::initFramebuffer(const RenderTarget& targ
     gl::framebuffer::generate(1, &result.FBO);
     gl::framebuffer::bind(GL_FRAMEBUFFER, result.FBO);
 
-    GLuint tex;
-    gl::texture::generate(1, &tex);
-    result.textures.push_back(tex);
-    gl::texture::bind(GL_TEXTURE_2D, tex);
+    gl::GlTexture tex;
+    tex.setSize(params.width, params.height);
+    tex.setType(gl::TextureType::Tex2d);
+    result.textures.push_back(tex.getId());
     if (params.type == TextureType::Color)
-        gl::texture::load2Dimage(GL_TEXTURE_2D, 0, GL_RGBA, params.width, params.height, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    {
+        tex.setFormat(gl::TextureFormat::RGBA);
+        tex.Load(gl::TextureFormat::RGBA);
+    }
     if (params.type == TextureType::Depth)
-        gl::texture::load2Dimage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, params.width, params.height, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+    {
+        tex.setFormat(gl::TextureFormat::Depth32);
+        tex.Load(gl::TextureFormat::Depth);
+    }
+    tex.setMinFilter(gl::FilterType::Nearest);
+    tex.setMagFilter(gl::FilterType::Nearest);
+    tex.setSWrapping(gl::WrappingType::ClampToEdge);
+    tex.setTWrapping(gl::WrappingType::ClampToEdge);
+    tex.setComparison(gl::CompareFunction::Lequal, gl::CompareMode::ReferenceToTexture);
 
     if (params.type != TextureType::Depth)
     {
@@ -121,9 +128,9 @@ glhelpers::FramebufferObject glhelpers::initFramebuffer(const RenderTarget& targ
     }
 
     if (params.type == TextureType::Color)
-        gl::framebuffer::set2Dtexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+        gl::framebuffer::set2Dtexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.getId(), 0);
     if (params.type == TextureType::Depth)
-        gl::framebuffer::set2Dtexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex, 0);
+        gl::framebuffer::set2Dtexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex.getId(), 0);
 
     GLenum drawBuffers[1];
     if (params.type == TextureType::Color)

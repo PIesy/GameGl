@@ -17,6 +17,8 @@ GraphicsObject::GraphicsObject(GraphicsObject&& src)
 {
     object = src.object;
     attributes = src.attributes;
+    texture = src.texture;
+    configurationMap = src.configurationMap;
 }
 
 GraphicsObject::GraphicsObject(const GraphicsObject &src)
@@ -125,25 +127,21 @@ void GraphicsObject::setTexture(const Texture& value)
 
 void GraphicsObject::setConfigurationFor(const std::string& param, const ConfigFunction& value)
 {
-    if (!configurationMap->count(param))
-        configurationMap->insert({param, value});
+    if (!configurationMap.count(param))
+        configurationMap.insert({param, value});
     else
-        (*configurationMap)[param] = value;
+        configurationMap[param] = value;
 }
 
 void GraphicsObject::removeConfigurationFor(const std::string& param)
 {
-    if (configurationMap->count(param))
-        configurationMap->erase(param);
+    if (configurationMap.count(param))
+        configurationMap.erase(param);
 }
 
 
-std::shared_ptr<GraphicsObject::ConfigMap> GraphicsObject::getConfigurationMap() const
+GraphicsObject::ConfigMap& GraphicsObject::getConfigurationMap()
 {
     return configurationMap;
 }
 
-void GraphicsObject::setConfigurationMap(const std::shared_ptr<GraphicsObject::ConfigMap>& value)
-{
-    configurationMap = value;
-}

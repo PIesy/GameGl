@@ -4,7 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11
-QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2 -lIL -lILU
+QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2 -lassimp
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \
@@ -100,7 +100,12 @@ HEADERS += \
     Graphics/renderer.h \
     Graphics/rendering_attributtes.h \
     Platform/OpenGL/glbindings.h \
-    Platform/OpenGL/gldebug.h
+    Platform/OpenGL/gldebug.h \
+    Platform/OpenGL/gltexture.h \
+    Graphics/scene.h \
+    Framework/Loaders/loader.h \
+    Framework/scenebuilder.h \
+    Framework/Loaders/meshloader.h
 
 SOURCES += \
     Core/events/eventshandler.cpp \
@@ -158,7 +163,11 @@ SOURCES += \
     Graphics/graphicsclasses.cpp \
     Graphics/glrenderer.cpp \
     Platform/OpenGL/glbindings.cpp \
-    Platform/OpenGL/gldebug.cpp
+    Platform/OpenGL/gldebug.cpp \
+    Platform/OpenGL/gltexture.cpp \
+    Framework/Loaders/loader.cpp \
+    Framework/scenebuilder.cpp \
+    Framework/Loaders/meshloader.cpp
 
 DISTFILES += \
     Shaders/vertexshadertex.glsl \

@@ -42,10 +42,10 @@ void GlRenderer::Resume()
     pause.setValue(false);
 }
 
-void GlRenderer::Draw(const RenderPath& path)
+void GlRenderer::Draw(const Scene& path)
 {
     std::lock_guard<std::mutex> lock(queueLock2);
-    renderQueue2.emplace(path);
+    renderQueue2.push(path);
 }
 
 void GlRenderer::SetViewport(int width, int height)
@@ -121,7 +121,7 @@ void GlRenderer::render()
         std::unique_lock<std::mutex> lock(queueLock2);
         if (!renderQueue2.empty())
         {
-            currentPath = renderQueue2.front();
+            currentScene = renderQueue2.front();
             renderQueue2.pop();
             emptyPath = false;
         }
@@ -129,7 +129,7 @@ void GlRenderer::render()
     if (!emptyPath)
     {
         std::vector<glhelpers::FramebufferObject> fbos;
-        for (RenderStep& step : currentPath.steps)
+        for (RenderStep& step : currentScene.path.steps)
         {
             fbos.push_back(glhelpers::initFramebuffer(step.target));
             if (step.target.target == UsableRenderTargets::SCREEN)
@@ -137,17 +137,30 @@ void GlRenderer::render()
             gl::framebuffer::bind(GL_FRAMEBUFFER, fbos.back().FBO);
             gl::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             step.preConfig(*step.prog);
+            step.prog->setUniform(0, "shadowMap");
+            step.prog->setUniform(1, "tex");
+            step.prog->setUniform(0, "useTex");
 
-            for (GraphicsObject& obj: step.objects)
+            for (int& id: step.objects)
             {
+                GraphicsObject& obj = currentScene.objects[id];
                 glhelpers::VertexArrayObject& VAO = getVAO(obj);
-                for (auto& conf : *(obj.getConfigurationMap()))
+                for (auto& conf : obj.getConfigurationMap())
                     conf.second(*step.prog);
                 step.postConfig(*step.prog);
                 gl::vertexarray::bind(VAO.VAO);
                 gl::buffer::bind(GL_ELEMENT_ARRAY_BUFFER, VAO.IBO);
+                if (step.genericTexture.textureId != 0)
+                {
+                    glActiveTexture(GL_TEXTURE0);
+                    gl::texture::bind(GL_TEXTURE_2D, fbos[step.genericTexture.stepId].textures[step.genericTexture.textureId]);
+                }
                 if (VAO.tex != 0)
+                {
+                    glActiveTexture(GL_TEXTURE1);
+                    step.prog->setUniform(1, "useTex");
                     gl::texture::bind(GL_TEXTURE_2D, VAO.tex);
+                }
                 if (VAO.externTex)
                     gl::texture::bind(GL_TEXTURE_2D, fbos[VAO.stepId].textures[VAO.texId]);
                 step.prog->Use();

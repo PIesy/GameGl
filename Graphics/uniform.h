@@ -1,8 +1,6 @@
 #ifndef UNIFORM_H
 #define UNIFORM_H
 
-#include <memory>
-
 enum class UniformTypes: int {FLOAT = 0, INTEGER, UNSIGNED, DOUBLE};
 
 struct UniformValue

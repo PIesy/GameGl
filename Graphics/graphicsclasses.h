@@ -89,6 +89,8 @@ template<>
 InvokationResult Program::setUniform<Mat3>(Mat3&& value, const std::string& name, int count);
 template<>
 InvokationResult Program::setUniform<float>(float&& value, const std::string& name, int count);
+template<>
+InvokationResult Program::setUniform<int>(int&& value, const std::string& name, int count);
 
 struct RGBA_Color
 {
@@ -118,7 +120,7 @@ class GraphicsObject
     std::unordered_map<std::string, std::string> attributes;
     RenderData object;
     Texture texture;
-    std::shared_ptr<ConfigMap> configurationMap = std::make_shared<ConfigMap>();
+    ConfigMap configurationMap;
 public:
     GraphicsObject(){}
     GraphicsObject(RenderData& base);
@@ -147,14 +149,7 @@ public:
 
     void removeConfigurationFor(const std::string& param);
 
-    std::shared_ptr<ConfigMap> getConfigurationMap() const;
-    void setConfigurationMap(const std::shared_ptr<ConfigMap>& value);
-};
-
-struct Scene
-{
-    std::vector<GraphicsObject> objects;
-    short passes = 0;
+    ConfigMap& getConfigurationMap();
 };
 
 class RenderingContext

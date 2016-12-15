@@ -9,6 +9,7 @@ struct Texture
     int64_t size = 0;
     unsigned width = 0;
     unsigned height = 0;
+    unsigned componentsNum = 0;
 
     unsigned stepId = 0;
     unsigned textureId = 0;

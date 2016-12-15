@@ -84,3 +84,17 @@ InvokationResult Program::setUniform<float>(float&& value, const std::string &na
 
     return setUniform(name, val);
 }
+
+template<>
+InvokationResult Program::setUniform<int>(int&& value, const std::string &name, int count)
+{
+    UniformValue val;
+
+    val.count = count;
+    val.horizontalSize = 1;
+    val.verticalSize = 1;
+    val.value = &value;
+    val.type = UniformTypes::INTEGER;
+
+    return setUniform(name, val);
+}
