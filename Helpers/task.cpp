@@ -1,5 +1,4 @@
 #include "task.h"
-#include "helpers.h"
 
 Task* Task::Copy() const
 {

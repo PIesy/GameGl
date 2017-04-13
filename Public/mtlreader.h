@@ -2,8 +2,8 @@
 #define MTLREADER_H
 
 #include <vector>
-#include "Resources/resourcesapi.h"
-#include "Graphics/graphicsclasses.h"
+#include "../Resources/resourcesapi.h"
+#include "../Graphics/graphicsclasses.h"
 
 struct Material
 {

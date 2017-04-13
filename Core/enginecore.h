@@ -1,8 +1,10 @@
 #ifndef ENGINECORE_H
 #define ENGINECORE_H
 
+#include <forward_list>
 #include "engineinterface.h"
 #include "enginecoreincludes.h"
+#include "service/service.h"
 
 struct CoreData
 {

@@ -2,7 +2,7 @@
 #define RESOURCESMODULE_H
 
 #include "module.h"
-#include "Resources/resourcesapi.h"
+#include "../Resources/resourcesapi.h"
 
 class ResourcesModule: public Module
 {

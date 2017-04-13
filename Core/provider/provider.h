@@ -1,7 +1,7 @@
 #ifndef PROVIDER_H
 #define PROVIDER_H
 
-#include "Core/meta.h"
+#include "../meta.h"
 #include <memory>
 
 class ProviderInterface

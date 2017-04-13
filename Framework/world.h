@@ -4,7 +4,6 @@
 #include "worldobject.h"
 #include "camera.h"
 #include "drawableworldobject.h"
-#include "Math/mathdefines.h"
 #include <list>
 
 class World

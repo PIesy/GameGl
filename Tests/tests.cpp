@@ -1,8 +1,6 @@
 #include "tests.h"
-#include "Core/events/eventshandler.h"
-#include "Logger/logger.h"
-#include <iostream>
-#include <functional>
+#include "../Core/events/eventshandler.h"
+#include "../Logger/logger.h"
 
 class TestEvent: public Event<int>
 {

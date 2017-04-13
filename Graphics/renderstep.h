@@ -11,7 +11,7 @@ struct RenderStep
 {
     std::list<int> objects;
     std::list<RenderTarget> targets;
-    RenderTarget target = ScreenRenderTarget();
+    RenderTarget target;
     RenderingAttributes attributes;
     Program* prog;
     Texture genericTexture;

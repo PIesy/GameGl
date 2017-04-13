@@ -2,7 +2,7 @@
 #define IOMODULE
 
 #include "module.h"
-#include "Input/inputapi.h"
+#include "../Input/inputapi.h"
 
 class InputModule: public Module
 {

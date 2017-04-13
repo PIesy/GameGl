@@ -1,7 +1,7 @@
 #ifndef INPUTAPI_H
 #define INPUTAPI_H
 
-#include "Api/apibase.h"
+#include "../Api/apibase.h"
 #include "inputdata.h"
 
 class InputApi: public ApiBase

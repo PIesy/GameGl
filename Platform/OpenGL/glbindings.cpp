@@ -6,7 +6,7 @@
 
 void gl::vertexarray::generate(int count, GLuint* vertexArrays)
 {
-    glGenVertexArrays(count, vertexArrays);
+    glCreateVertexArrays(count, vertexArrays);
     gl::printGlError("glGenVertexArrays");
 }
 
@@ -22,23 +22,47 @@ void gl::vertexarray::erase(int count, GLuint* vertexArrays)
     gl::printGlError("glDeleteVertexArrays");
 }
 
-void gl::vertexarray::disableVertexAttribute(GLuint index)
+void gl::vertexarray::disableVertexAttribute(GLuint target, GLuint index)
 {
-    glDisableVertexAttribArray(index);
-    gl::printGlError("glDisableVertexAttribArray");
+    glDisableVertexArrayAttrib(target, index);
+    gl::printGlError("glDisableVertexArrayAttrib");
 }
 
-void gl::vertexarray::setVertexAttributePointer(GLuint index, int size, GLenum type, GLboolean normalized, size_t stride, const void* pointer)
+void gl::vertexarray::setVertexAttributeFormat(GLuint target, GLuint index, int size, GLenum type, GLboolean normalized, GLuint offset)
 {
-    glVertexAttribPointer(index, size, type, normalized, stride, pointer);
-    gl::printGlError("glVertexAttribPointer");
+    glVertexArrayAttribFormat(target, index, size, type, normalized, offset);
+    gl::printGlError("glVertexArrayAttribFormat");
+}
+
+void gl::vertexarray::enableVertexAttribute(GLuint target, GLuint index)
+{
+    glEnableVertexArrayAttrib(target, index);
+    gl::printGlError("glEnableVertexArrayAttrib");
+}
+
+void gl::vertexarray::bindElementBuffer(GLuint target, GLuint buffer)
+{
+    glVertexArrayElementBuffer(target, buffer);
+    gl::printGlError("glVertexArrayElementBuffer");
+}
+
+void gl::vertexarray::bindVertexBuffer(GLuint target, GLuint bindingIndex, GLuint buffer, GLintptr offset, GLsizei stride)
+{
+    glVertexArrayVertexBuffer(target, bindingIndex, buffer, offset, stride);
+    gl::printGlError("glVertexArrayVertexBuffer");
+}
+
+void gl::vertexarray::bindBufferToAttribute(GLuint target, GLuint attributeIndex, GLuint bindingIndex)
+{
+    glVertexArrayAttribBinding(target, attributeIndex, bindingIndex);
+    gl::printGlError("glVertexArrayAttribBinding");
 }
 
 //buffer
 
 void gl::buffer::generate(int count, GLuint* buffers)
 {
-    glGenBuffers(count, buffers);
+    glCreateBuffers(count, buffers);
     gl::printGlError("glGenBuffers");
 }
 
@@ -54,24 +78,24 @@ void gl::buffer::erase(int count, GLuint* buffers)
     gl::printGlError("glDeleteBuffers");
 }
 
-void gl::buffer::setData(GLenum target, size_t size, const void* data, GLenum usage)
+void gl::buffer::setData(GLuint target, size_t size, const void *data, GLenum usage)
 {
-    glBufferData(target, size, data, usage);
-    gl::printGlError("glBufferData");
+    glNamedBufferData(target, size, data, usage);
+    gl::printGlError("glNamedBufferData");
 }
 
-void gl::buffer::updateData(GLenum target, GLintptr offset, size_t size, const void* data)
+void gl::buffer::updateData(GLuint target, GLintptr offset, size_t size, const void* data)
 {
-    glBufferSubData(target, offset, size, data);
-    gl::printGlError("glBufferSubData");
+    glNamedBufferSubData(target, offset, size, data);
+    gl::printGlError("glNamedBufferSubData");
 }
 
 //texture
 
-void gl::texture::generate(int count, GLuint* textures)
+void gl::texture::generate(int count, GLuint* textures, GLenum target)
 {
-    glGenTextures(count, textures);
-    gl::printGlError("glGenTextures");
+    glCreateTextures(target, count, textures);
+    gl::printGlError("glCreateTextures");
 }
 
 void gl::texture::bind(GLenum target, GLuint texture)
@@ -86,29 +110,42 @@ void gl::texture::erase(int count, GLuint* textures)
     gl::printGlError("glDeleteTextures");
 }
 
-void gl::texture::load2Dimage(GLenum target, GLint mipmapLevel, GLint internalFormat, unsigned width, unsigned height, GLenum format, GLenum type, const void* data)
+void gl::texture::loadImage(GLuint target, GLint mipmapLevel, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height,
+                            GLenum format, GLenum type, const void* data)
 {
-    glTexImage2D(target, mipmapLevel, internalFormat, width, height, 0, format, type, data);
-    gl::printGlError("glTexImage2D");
+    glTextureSubImage2D(target, mipmapLevel, xoffset, yoffset, width, height, format, type, data);
+    gl::printGlError("glTextureImage2D");
 }
 
-void gl::texture::setParameter(GLenum target, GLenum parameter, GLint value)
+void gl::texture::setParameter(GLuint target, GLenum parameter, GLint value)
 {
-    glTexParameteri(target, parameter, value);
-    gl::printGlError("glTexParameteri");
+    glTextureParameteri(target, parameter, value);
+    gl::printGlError("glTextureParameteri");
 }
 
-void gl::texture::setParameter(GLenum target, GLenum parameter, GLfloat value)
+void gl::texture::setParameter(GLuint target, GLenum parameter, GLfloat value)
 {
-    glTexParameterf(target, parameter, value);
-    gl::printGlError("glTexParameterf");
+    glTextureParameterf(target, parameter, value);
+    gl::printGlError("glTextureParameterf");
+}
+
+void gl::texture::allocateStorage(GLuint target, GLsizei mipmapLevels, GLenum internalFormat, GLsizei width, GLsizei height)
+{
+    glTextureStorage2D(target, mipmapLevels, internalFormat, width, height);
+    gl::printGlError("glTextureStorage2D");
+}
+
+void ::gl::texture::setActiveTexture(GLenum textureUnit)
+{
+    glActiveTexture(textureUnit);
+    gl::printGlError("glTextureStorage2D");
 }
 
 //framebuffer
 
 void gl::framebuffer::generate(int count, GLuint* framebuffers)
 {
-    glGenFramebuffers(count, framebuffers);
+    glCreateFramebuffers(count, framebuffers);
     gl::printGlError("glGenFramebuffer");
 }
 
@@ -124,16 +161,29 @@ void gl::framebuffer::erase(int count, GLuint* framebuffers)
     gl::printGlError("glDeleteFramebuffers");
 }
 
-void gl::framebuffer::setRenderbuffer(GLenum target, GLenum attachment, GLenum type, GLuint buffer)
+void gl::framebuffer::setRenderbuffer(GLuint target, GLenum attachment, GLuint buffer)
 {
-    glFramebufferRenderbuffer(target, attachment, type, buffer);
+    glNamedFramebufferRenderbuffer(target, attachment, GL_RENDERBUFFER, buffer);
     gl::printGlError("glFramebufferRenderbuffer");
 }
 
-void gl::framebuffer::set2Dtexture(GLenum target, GLenum attachment, GLenum type, GLuint texture, GLint mipmapLevel)
+void gl::framebuffer::setTexture(GLuint target, GLenum attachment, GLuint texture, GLint level)
 {
-    glFramebufferTexture2D(target, attachment, type, texture, mipmapLevel);
-    gl::printGlError("glFramebufferTexture2D");
+    glNamedFramebufferTexture(target, attachment, texture, level);
+    gl::printGlError("glNamedFramebufferTexture");
+}
+
+GLenum gl::framebuffer::checkStatus(GLuint target, GLenum bindPoint)
+{
+    GLenum result = glCheckNamedFramebufferStatus(target, bindPoint);
+    gl::printGlError("glCheckNamedFramebufferStatus");
+    return result;
+}
+
+void gl::framebuffer::setDrawBuffers(GLuint target, GLsizei count, const GLenum* buffers)
+{
+    glNamedFramebufferDrawBuffers(target, count, buffers);
+    gl::printGlError("glNamedFramebufferDrawBuffers");
 }
 
 //renderbuffer
@@ -263,101 +313,101 @@ void gl::program::erase(GLuint program)
 }
 
 
-GLuint gl::program::getUniformLocation(GLuint program, const std::string& uniformName)
+GLint gl::program::getUniformLocation(GLuint program, const std::string& uniformName)
 {
-    GLuint result = glGetUniformLocation(program, uniformName.c_str());
+    GLint result = glGetUniformLocation(program, uniformName.c_str());
     gl::printGlError("glGetUniformLocation");
     return result;
 }
 
-void gl::program::setUniform1f(GLuint location, int count, const void* value)
+void gl::program::setUniform1f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform1fv(location, count, (const GLfloat*)value);
-    gl::printGlError("glUniform1fv");
+    glProgramUniform1fv(program, location, count, (const GLfloat*)value);
+    gl::printGlError("glProgramUniform1fv");
 }
 
-void gl::program::setUniform2f(GLuint location, int count, const void* value)
+void gl::program::setUniform2f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform2fv(location, count, (const GLfloat*)value);
-    gl::printGlError("glUniform2fv");
+    glProgramUniform2fv(program, location, count, (const GLfloat*)value);
+    gl::printGlError("glProgramUniform2fv");
 }
 
-void gl::program::setUniform3f(GLuint location, int count, const void* value)
+void gl::program::setUniform3f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform3fv(location, count, (const GLfloat*)value);
-    gl::printGlError("glUniform3fv");
+    glProgramUniform3fv(program, location, count, (const GLfloat*)value);
+    gl::printGlError("glProgramUniform3fv");
 }
 
-void gl::program::setUniform4f(GLuint location, int count, const void* value)
+void gl::program::setUniform4f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform4fv(location, count, (const GLfloat*)value);
-    gl::printGlError("glUniform4fv");
+    glProgramUniform4fv(program, location, count, (const GLfloat*)value);
+    gl::printGlError("glProgramUniform4fv");
 }
 
-void gl::program::setUniform1i(GLuint location, int count, const void* value)
+void gl::program::setUniform1i(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform1iv(location, count, (const GLint*)value);
-    gl::printGlError("glUniform1iv");
+    glProgramUniform1iv(program, location, count, (const GLint*)value);
+    gl::printGlError("glProgramUniform1iv");
 }
 
-void gl::program::setUniform2i(GLuint location, int count, const void* value)
+void gl::program::setUniform2i(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform2iv(location, count, (const GLint*)value);
-    gl::printGlError("glUniform2iv");
+    glProgramUniform2iv(program, location, count, (const GLint*)value);
+    gl::printGlError("glProgramUniform2iv");
 }
 
-void gl::program::setUniform3i(GLuint location, int count, const void* value)
+void gl::program::setUniform3i(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform3iv(location, count, (const GLint*)value);
-    gl::printGlError("glUniform3iv");
+    glProgramUniform3iv(program, location, count, (const GLint*)value);
+    gl::printGlError("glProgramUniform3iv");
 }
 
-void gl::program::setUniform4i(GLuint location, int count, const void* value)
+void gl::program::setUniform4i(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform4iv(location, count, (const GLint*)value);
-    gl::printGlError("glUniform4iv");
+    glProgramUniform4iv(program, location, count, (const GLint*)value);
+    gl::printGlError("glProgramUniform4iv");
 }
 
-void gl::program::setUniform1ui(GLuint location, int count, const void* value)
+void gl::program::setUniform1ui(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform1uiv(location, count, (const GLuint*)value);
-    gl::printGlError("glUniform1uiv");
+    glProgramUniform1uiv(program, location, count, (const GLuint*)value);
+    gl::printGlError("glProgramUniform1uiv");
 }
 
-void gl::program::setUniform2ui(GLuint location, int count, const void* value)
+void gl::program::setUniform2ui(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform2uiv(location, count, (const GLuint*)value);
-    gl::printGlError("glUniform2uiv");
+    glProgramUniform2uiv(program, location, count, (const GLuint*)value);
+    gl::printGlError("glProgramUniform2uiv");
 }
 
-void gl::program::setUniform3ui(GLuint location, int count, const void* value)
+void gl::program::setUniform3ui(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform3uiv(location, count, (const GLuint*)value);
-    gl::printGlError("glUniform3uiv");
+    glProgramUniform3uiv(program, location, count, (const GLuint*)value);
+    gl::printGlError("glProgramUniform3uiv");
 }
 
-void gl::program::setUniform4ui(GLuint location, int count, const void* value)
+void gl::program::setUniform4ui(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniform4uiv(location, count, (const GLuint*)value);
-    gl::printGlError("glUniform4uiv");
+    glProgramUniform4uiv(program, location, count, (const GLuint*)value);
+    gl::printGlError("glProgramUniform4uiv");
 }
 
-void gl::program::setUniform2x2f(GLuint location, int count, const void* value)
+void gl::program::setUniform2x2f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniformMatrix2fv(location, count, GL_FALSE, (const GLfloat*)value);
-    gl::printGlError("glUniformMatrix2fv");
+    glProgramUniformMatrix2fv(program, location, count, GL_FALSE, (const GLfloat*)value);
+    gl::printGlError("glProgramUniformMatrix2fv");
 }
 
-void gl::program::setUniform3x3f(GLuint location, int count, const void* value)
+void gl::program::setUniform3x3f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniformMatrix3fv(location, count, GL_FALSE, (const GLfloat*)value);
-    gl::printGlError("glUniformMatrix3fv");
+    glProgramUniformMatrix3fv(program, location, count, GL_FALSE, (const GLfloat*)value);
+    gl::printGlError("glProgramUniformMatrix3fv");
 }
 
-void gl::program::setUniform4x4f(GLuint location, int count, const void* value)
+void gl::program::setUniform4x4f(GLuint program, GLuint location, int count, const void *value)
 {
-    glUniformMatrix4fv(location, count, GL_FALSE, (const GLfloat*)value);
-    gl::printGlError("glUniformMatrix4fv");
+    glProgramUniformMatrix4fv(program, location, count, GL_FALSE, (const GLfloat*)value);
+    gl::printGlError("glProgramUniformMatrix4fv");
 }
 
 //generic
@@ -386,21 +436,15 @@ void gl::setClearColor(float r, float g, float b, float alpha)
     gl::printGlError("glClearColor");
 }
 
-void gl::vertexarray::enableVertexAttribute(GLuint index)
+void gl::enable(GLenum capability)
 {
-    glEnableVertexAttribArray(index);
-    gl::printGlError("glEnableVertexAttribArray");
-}
-
-void gl::enable(GLenum capacity)
-{
-    glEnable(capacity);
+    glEnable(capability);
     gl::printGlError("glEnable");
 }
 
-void gl::disable(GLenum capacity)
+void gl::disable(GLenum capability)
 {
-    glDisable(capacity);
+    glDisable(capability);
     gl::printGlError("glDisable");
 }
 

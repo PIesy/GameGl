@@ -1,5 +1,4 @@
 #include "eventshandler.h"
-#include "Logger/logger.h"
 
 void EventListener::listenFor(std::type_index type)
 {

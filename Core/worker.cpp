@@ -1,5 +1,5 @@
 ﻿#include "worker.h"
-#include "Logger/logger.h"
+#include "../Logger/logger.h"
 #include <sstream>
 
 void workerController(WorkerData *data);

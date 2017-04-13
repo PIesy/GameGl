@@ -1,7 +1,6 @@
 #include "sdlinput.h"
 #include "inputevents.h"
-#include "Logger/logger.h"
-#include <cstdint>
+#include "../Logger/logger.h"
 
 MouseData::Button parseMouseButton(std::uint8_t button);
 
@@ -43,6 +42,7 @@ void SDLInputService::sdlInputRoutine()
                 m = parseMouseEvent(event);
                 handler.ThrowEvent(new MouseEvent(m, integral(m.eventType)));
                 break;
+            default:break;
             }
     }
     Logger::Log("Input service stopped");
@@ -55,15 +55,15 @@ WindowData SDLInputService::parseWindowEvent(SDL_Event& event)
     switch(event.window.event)
     {
     case SDL_WINDOWEVENT_CLOSE:
-        result.eventType = result.Type::Close;
+        result.eventType = WindowData::Type::Close;
         break;
     case SDL_WINDOWEVENT_RESIZED:
-        result.eventType = result.Type::Resize;
+        result.eventType = WindowData::Type::Resize;
         result.coordinates[0] = event.window.data1;
         result.coordinates[1] = event.window.data2;
         break;
     default:
-        result.eventType = result.Type::Hide;
+        result.eventType = WindowData::Type::Hide;
         break;
     }
     return result;
@@ -89,18 +89,20 @@ MouseData SDLInputService::parseMouseEvent(SDL_Event& event)
     switch(event.type)
     {
     case SDL_MOUSEMOTION:
-        result.eventType = result.Type::Motion;
+        result.eventType = MouseData::Type::Motion;
         result.relativeCoordinates[0] = event.motion.xrel;
         result.relativeCoordinates[1] = event.motion.yrel;
         break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:
-        result.eventType = result.Type::Button;
+        result.eventType = MouseData::Type::Button;
         result.button = parseMouseButton(event.button.button);
         result.state = event.button.state == SDL_PRESSED;
         break;
     case SDL_MOUSEWHEEL:
-        result.eventType = result.Type::Wheel;
+        result.eventType = MouseData::Type::Wheel;
+    default:
+        break;
     }
     return result;
 }

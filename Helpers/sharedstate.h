@@ -2,7 +2,6 @@
 #define SHAREDSTATE_H
 
 #include <memory>
-#include "Helpers/helpers.h"
 
 template<class T>
 class SharedState

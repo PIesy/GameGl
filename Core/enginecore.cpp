@@ -1,8 +1,8 @@
 #include "enginecore.h"
-#include "Helpers/helpers.h"
-#include <SDL2/SDL.h>
-#include "Input/inputevents.h"
-#include "Logger/logger.h"
+#include "../Modules/graphicsmodule.h"
+#include "../Modules/inputmodule.h"
+#include "../Modules/resourcesmodule.h"
+#include "../Logger/logger.h"
 
 void SDLpoller(EventHandler* handler);
 

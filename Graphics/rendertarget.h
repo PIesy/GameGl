@@ -3,19 +3,19 @@
 
 #include "graphicsclasses.h"
 
-enum class UsableRenderTargets {SCREEN, TEXTURE};
+enum class RenderTargets {SCREEN, TEXTURE};
 enum class TextureType {Color, Depth, Stencil};
 
 struct TextureParameters
 {
-    unsigned long width;
-    unsigned long height;
+    unsigned width;
+    unsigned height;
     TextureType type;
 };
 
 struct RenderTarget
 {
-    UsableRenderTargets target = UsableRenderTargets::SCREEN;
+    RenderTargets target = RenderTargets::SCREEN;
     TextureParameters textureParameters;
 
     bool operator ==(const RenderTarget& rhs)
@@ -29,17 +29,8 @@ class TextureRenderTarget : public RenderTarget
 public:
     TextureRenderTarget(const TextureParameters& parameters)
     {
-        target = UsableRenderTargets::TEXTURE;
+        target = RenderTargets::TEXTURE;
         textureParameters = parameters;
-    }
-};
-
-class ScreenRenderTarget : public RenderTarget
-{
-public:
-    ScreenRenderTarget()
-    {
-        target = UsableRenderTargets::SCREEN;
     }
 };
 

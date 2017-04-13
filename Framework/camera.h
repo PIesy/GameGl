@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include "Math/mathdefines.h"
+#include "../Math/mathdefines.h"
 #include "worldobject.h"
 
 class Camera: public WorldObject

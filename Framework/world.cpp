@@ -1,6 +1,4 @@
 #include "world.h"
-#include "Graphics/graphicsclasses.h"
-#include <functional>
 
 bool operator ==(const std::reference_wrapper<Camera>& lhs, const std::reference_wrapper<Camera>& rhs)
 {

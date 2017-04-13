@@ -8,8 +8,4 @@
 #include "enginedatastructures.h"
 #include "engineinitializer.h"
 
-#include "Modules/graphicsmodule.h"
-#include "Modules/resourcesmodule.h"
-#include "Modules/inputmodule.h"
-
 #endif // ENGINECOREINCLUDES_H

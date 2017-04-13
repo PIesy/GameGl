@@ -2,6 +2,9 @@
 #define SDLINPUT_H
 
 #include "inputapi.h"
+#include "../Core/service/service.h"
+#include "../Core/events/eventshandler.h"
+#include "../Core/worker.h"
 #include <SDL2/SDL.h>
 
 class SDLInputService: public Service

@@ -1,5 +1,6 @@
 #include "openglsdl.h"
-#include "Logger/logger.h"
+#include "../Logger/logger.h"
+#include "../Platform/OpenGL/gldebug.h"
 
 GraphicsService::GraphicsService()
 {
@@ -50,6 +51,7 @@ SdlGLContext& GraphicsService::getContext()
     {
         SDL_GLContext result = SDL_GL_CreateContext(dummyWindow);
         initGlew();
+        gl::registerDebugCallback();
         SDL_GL_MakeCurrent(dummyWindow, parentContext);
         return result;
     });
@@ -64,7 +66,7 @@ OpenGlSdl::OpenGlSdl()
     if(!SDL_WasInit(SDL_INIT_VIDEO))
         SDL_Init(SDL_INIT_VIDEO);
     mainService = new GraphicsService();
-    SdlGLContext& dummy = (SdlGLContext&)mainService->getContext();
+    SdlGLContext& dummy = mainService->getContext();
     dummyContext = &dummy;
 }
 

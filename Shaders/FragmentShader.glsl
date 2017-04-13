@@ -1,4 +1,4 @@
-#version 330
+#version 430
 
 
 smooth in vec2 texCoord;
@@ -12,8 +12,8 @@ uniform bool useTex = false;
 uniform vec2 windowSize = vec2(1000.0f, 600.0f);
 uniform vec4 light = vec4(50.0f, 100.0f, 50.0f, 0.0f);
 
-uniform sampler2DShadow shadowmap;
-uniform sampler2D tex;
+layout(binding = 0) uniform sampler2DShadow shadowmap;
+layout(binding = 1) uniform sampler2D tex;
 
 const float ambient = 0.5f;
 const float shininies = 0.5f;

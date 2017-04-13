@@ -6,7 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "workerqueueproxy.h"
-#include "Helpers/helpers.h"
+#include "../Helpers/invokable.h"
 
 struct WorkerData
 {

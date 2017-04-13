@@ -1,7 +1,7 @@
 #ifndef MESHLOADER_H
 #define MESHLOADER_H
 
-#include "Graphics/graphicsclasses.h"
+#include "../../Graphics/graphicsclasses.h"
 #include <vector>
 
 class MeshLoader

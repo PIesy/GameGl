@@ -1,7 +1,8 @@
 #ifndef SERVICE
 #define SERVICE
 
-#include "Core/worker.h"
+#include <memory>
+#include "../worker.h"
 
 class Service
 {

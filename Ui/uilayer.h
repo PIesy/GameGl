@@ -1,10 +1,10 @@
 #ifndef UILAYER_H
 #define UILAYER_H
 
-#include "Core/engineinterface.h"
+#include "../Core/engineinterface.h"
 #include "elementinterface.h"
 #include <unordered_set>
-#include "Input/inputevents.h"
+#include "../Input/inputevents.h"
 
 class UiLayer
 {

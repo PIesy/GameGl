@@ -1,6 +1,4 @@
 #include "uilayer.h"
-#include "Input/inputevents.h"
-#include "Helpers/helpers.h"
 
 void UiListener(MouseEvent* event, UiLayer* ui);
 void ResolutionNotifier(WindowEvent* event, UiLayer* ui);
@@ -44,7 +42,7 @@ void UiLayer::UiHandler(MouseEvent* event)
     default:
         break;
     case MouseData::Type::Button:
-        if(data.state == false)
+        if(!data.state)
             updateAll(data.coordinates[0], data.coordinates[1], true);
         break;
     }

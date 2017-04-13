@@ -2,8 +2,8 @@
 #define GLUNIFORM_H
 
 #include "uniform.h"
-#include "Platform/OpenGL/glbindings.h"
-#include "Helpers/invokationresult.h"
+#include "../Platform/OpenGL/glbindings.h"
+#include "../Helpers/invokationresult.h"
 
 struct GlUniform: public UniformValue
 {

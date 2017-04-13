@@ -2,7 +2,7 @@
 #define RESOURCESAPI_H
 
 #include <string>
-#include "Api/apibase.h"
+#include "../Api/apibase.h"
 
 class Scanner
 {

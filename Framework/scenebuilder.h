@@ -2,7 +2,7 @@
 #define SCENEBUILDER_H
 
 #include "world.h"
-#include "Graphics/scene.h"
+#include "../Graphics/scene.h"
 
 class SceneBuilder
 {

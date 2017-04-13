@@ -4,8 +4,8 @@
 #include "eventshandler_interfaces.h"
 #include <typeindex>
 #include <unordered_map>
-#include "Helpers/helpers.h"
-#include "Core/worker.h"
+#include "../../Helpers/helpers.h"
+#include "../worker.h"
 
 using EventInvokable = GenericInvokable;
 using EventFilter = std::function<bool(EventInterface*)>;

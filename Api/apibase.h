@@ -1,8 +1,8 @@
 #ifndef APIBASE
 #define APIBASE
 
-#include "Core/engineinterface.h"
-#include "Core/service/service.h"
+#include "../Core/engineinterface.h"
+#include "../Core/service/service.h"
 
 class ApiBase
 {

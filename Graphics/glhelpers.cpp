@@ -1,84 +1,62 @@
 #include "glhelpers.h"
 #include "renderdefs.h"
-#include "Logger/logger.h"
-#include "Platform/OpenGL/gltexture.h"
+#include "../Logger/logger.h"
+#include "../Platform/OpenGL/gltexture.h"
 
-glhelpers::RAIIBufferBinding::RAIIBufferBinding(GLenum target, GLuint buffer)
-{
-    this->target = target;
-    gl::buffer::bind(target, buffer);
-}
-
-glhelpers::RAIIBufferBinding::~RAIIBufferBinding()
-{
-    gl::buffer::bind(target, 0);
-}
-
-glhelpers::VertexArrayObject glhelpers::initVAO(GraphicsObject& obj, bool unbindAfterInit)
+glhelpers::VertexArrayObject glhelpers::initVAO(GraphicsObject& obj)
 {
     VertexArrayObject result;
 
     Texture tex = obj.getTexture();
     if (obj.getTexture().data != nullptr)
-        gl::texture::generate(1, &result.tex);
+        result.tex = gl::GlTexture(gl::TextureType::Tex2d);
     if (obj.getTexture().textureId != 0)
         result.externTex = true;
-    gl::buffer::generate(1, &result.VBO);
-    gl::buffer::generate(1, &result.IBO);
-    gl::vertexarray::generate(1, &result.VAO);
-
-    gl::vertexarray::bind(result.VAO);
-    if (obj.getTexture().data != nullptr)
-        gl::texture::bind(GL_TEXTURE_2D, result.tex);
-    RAIIBufferBinding arrayBuffer(GL_ARRAY_BUFFER, result.VBO);
-    RAIIBufferBinding elementBuffer(GL_ELEMENT_ARRAY_BUFFER, result.IBO);
 
     if (obj.getTexture().data != nullptr)
     {
-        float anisotropySamples;
-
-        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisotropySamples);
-        gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropySamples);
-        gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl::texture::setParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl::texture::load2Dimage(GL_TEXTURE_2D, 0, GL_RGBA, obj.getTexture().width,
-                     obj.getTexture().height, tex.componentsNum < 4 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE, obj.getTexture().data);
-        gl::texture::bind(GL_TEXTURE_2D, 0);
+        result.tex.setSWrapping(gl::WrappingType::Repeat);
+        result.tex.setTWrapping(gl::WrappingType::Repeat);
+        result.tex.setMinFilter(gl::FilterType::Linear);
+        result.tex.setMagFilter(gl::FilterType::Linear);
+        result.tex.setSize(obj.getTexture().width, obj.getTexture().height);
+        result.tex.Allocate(tex.componentsNum < 4 ? gl::InternalFormat::RGB8 : gl::InternalFormat::RGBA8);
+        result.tex.Load(tex.componentsNum < 4 ? gl::TextureFormat::RGB : gl::TextureFormat::RGBA, obj.getTexture().data);
     }
 
-    gl::buffer::setData(GL_ARRAY_BUFFER, (obj.data().vertices.size() + 1000) * sizeof(Vertex), obj.data().vertices.data(), GL_DYNAMIC_DRAW);
-    gl::buffer::setData(GL_ELEMENT_ARRAY_BUFFER, (obj.data().indices.size() + 1000) * sizeof(unsigned), obj.data().indices.data(), GL_DYNAMIC_DRAW);
+    result.VBO.AllocateBuffer(obj.data().vertices.data(), obj.data().vertices.size() * sizeof(Vertex),
+                              gl::BufferUsage::DynamicDraw);
+    result.IBO.AllocateBuffer(obj.data().indices.data(), obj.data().indices.size() * sizeof(unsigned),
+                              gl::BufferUsage::DynamicDraw);
 
-    gl::vertexarray::enableVertexAttribute(0);
-    gl::vertexarray::enableVertexAttribute(1);
-    gl::vertexarray::enableVertexAttribute(2);
-    gl::vertexarray::enableVertexAttribute(3);
-    gl::vertexarray::setVertexAttributePointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, coords));
-    gl::vertexarray::setVertexAttributePointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    gl::vertexarray::setVertexAttributePointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    gl::vertexarray::setVertexAttributePointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-
-    if (unbindAfterInit)
+    result.VAO.BindElementBuffer(result.IBO);
+    result.VAO.BindBuffer(result.VBO, 0, 0, sizeof(Vertex));
+    for (unsigned i = 0; i < 4; ++i)
     {
-        gl::vertexarray::bind(0);
+        result.VAO.EnableAttribute(i);
+        result.VAO.LinkBuffer(i, 0);
     }
-
+    result.VAO.SetAttributeFormat(0, 3, gl::AttributeTypeFloat::Float, offsetof(Vertex, coords));
+    result.VAO.SetAttributeFormat(1, 4, gl::AttributeTypeFloat::Float, offsetof(Vertex, color));
+    result.VAO.SetAttributeFormat(2, 3, gl::AttributeTypeFloat::Float, offsetof(Vertex, normal));
+    result.VAO.SetAttributeFormat(3, 2, gl::AttributeTypeFloat::Float, offsetof(Vertex, uv));
     return result;
 }
 
 void glhelpers::updateDataBuffers(GraphicsObject& obj, VertexArrayObject& vao)
 {
-    RAIIBufferBinding arrayBuffer(GL_ARRAY_BUFFER, vao.VBO);
-    RAIIBufferBinding elementBuffer(GL_ELEMENT_ARRAY_BUFFER, vao.IBO);
+    if (obj.data().vertices.size() * sizeof(Vertex) != vao.VBO.GetSize())
+        vao.VBO.AllocateBuffer(obj.data().vertices.data(), obj.data().vertices.size() * sizeof(Vertex),
+                               gl::BufferUsage::DynamicDraw);
+    else
+        vao.VBO.UpdateData(obj.data().vertices.data(), obj.data().indices.size());
 
-    gl::buffer::updateData(GL_ARRAY_BUFFER, 0,
-                    obj.data().vertices.size() * sizeof(Vertex),
-                    obj.data().vertices.data());
-    gl::buffer::updateData(GL_ELEMENT_ARRAY_BUFFER, 0,
-                    obj.data().indices.size() * sizeof(unsigned),
-                    obj.data().indices.data());
+    if (obj.data().indices.size() * sizeof(unsigned) != vao.IBO.GetSize())
+        vao.IBO.AllocateBuffer(obj.data().indices.data(), obj.data().indices.size() * sizeof(unsigned),
+                               gl::BufferUsage::DynamicDraw);
+    else
+        vao.IBO.UpdateData(obj.data().indices.data(), obj.data().indices.size() * sizeof(unsigned));
+
     if (obj.getTexture().textureId != 0)
     {
         vao.externTex = true;
@@ -92,56 +70,45 @@ void glhelpers::updateDataBuffers(GraphicsObject& obj, VertexArrayObject& vao)
 glhelpers::FramebufferObject glhelpers::initFramebuffer(const RenderTarget& target)
 {
     FramebufferObject result;
-    if (target.target == UsableRenderTargets::SCREEN)
+    if (target.target == RenderTargets::SCREEN)
         return result;
+    result.FBO = gl::GlFrameBuffer();
     TextureParameters params = target.textureParameters;
 
-    gl::framebuffer::generate(1, &result.FBO);
-    gl::framebuffer::bind(GL_FRAMEBUFFER, result.FBO);
-
-    gl::GlTexture tex;
+    gl::GlTexture tex(gl::TextureType::Tex2d);
     tex.setSize(params.width, params.height);
-    tex.setType(gl::TextureType::Tex2d);
-    result.textures.push_back(tex.getId());
     if (params.type == TextureType::Color)
-    {
-        tex.setFormat(gl::TextureFormat::RGBA);
-        tex.Load(gl::TextureFormat::RGBA);
-    }
+        tex.Allocate(gl::InternalFormat::RGBA8);
     if (params.type == TextureType::Depth)
-    {
-        tex.setFormat(gl::TextureFormat::Depth32);
-        tex.Load(gl::TextureFormat::Depth);
-    }
+        tex.Allocate(gl::InternalFormat::Depth32);
     tex.setMinFilter(gl::FilterType::Nearest);
     tex.setMagFilter(gl::FilterType::Nearest);
     tex.setSWrapping(gl::WrappingType::ClampToEdge);
     tex.setTWrapping(gl::WrappingType::ClampToEdge);
-    tex.setComparison(gl::CompareFunction::Lequal, gl::CompareMode::ReferenceToTexture);
+    tex.setComparisonMode(gl::CompareFunction::Lequal, gl::CompareMode::ReferenceToTexture);
 
     if (params.type != TextureType::Depth)
     {
         gl::renderbuffer::generate(1, &result.depthBuff);
         gl::renderbuffer::bind(GL_RENDERBUFFER, result.depthBuff);
         gl::renderbuffer::setStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, params.width, params.height);
-        gl::framebuffer::setRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, result.depthBuff);
+        result.FBO.BindRenderBuffer(gl::FrameBufferAttachment::Depth, result.depthBuff);
     }
 
     if (params.type == TextureType::Color)
-        gl::framebuffer::set2Dtexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex.getId(), 0);
+        result.FBO.SetTextureToAttachment(gl::FrameBufferAttachment::Color, tex, 0);
     if (params.type == TextureType::Depth)
-        gl::framebuffer::set2Dtexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, tex.getId(), 0);
+        result.FBO.SetTextureToAttachment(gl::FrameBufferAttachment::Depth, tex, 0);
 
-    GLenum drawBuffers[1];
+    std::vector<gl::FrameBufferAttachment> drawBuffers(1);
     if (params.type == TextureType::Color)
-        drawBuffers[0] = {GL_COLOR_ATTACHMENT0};
+        result.FBO.SetDrawBuffers({gl::FrameBufferAttachment::Color});
     if (params.type == TextureType::Depth)
-        drawBuffers[0] = {GL_NONE};
-    glDrawBuffers(1, drawBuffers);
-    printGlError("DRAW BUFFERS?");
-    printGlError("AAAAA?");
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        result.FBO.SetDrawBuffers({gl::FrameBufferAttachment::None});
+    if (result.FBO.GetStatus(gl::FrameBufferTarget::Both) != gl::FrameBufferStatus::Complete)
         Logger::Log("FRAMEBUFFER INCOMPLETE!!!!AAAA!!!!");
+    printGlError("AAAAA?");
     gl::setViewport(params.width, params.height);
+    result.textures.push_back(std::move(tex));
     return result;
 }

@@ -1,7 +1,5 @@
 #include "mathhelpers.h"
 #include "mathconstants.h"
-#include <cmath>
-#include "Logger/logger.h"
 
 float degToRad(float degrees)
 {

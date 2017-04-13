@@ -2,8 +2,8 @@
 #define MESHREADEROBJ_H
 
 #include <vector>
-#include "Resources/filereader.h"
-#include "Graphics/graphicsclasses.h"
+#include "../Resources/filereader.h"
+#include "../Graphics/graphicsclasses.h"
 
 class MeshReaderObj : public Scanner
 {

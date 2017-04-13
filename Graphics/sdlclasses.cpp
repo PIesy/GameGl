@@ -1,11 +1,12 @@
 #include "sdlclasses.h"
+#include "../Helpers/task.h"
 
 
 void SdlWindow::Open(std::string name, int width, int height, bool hidden)
 {
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
@@ -30,7 +31,7 @@ WindowSize SdlWindow::getSize()
     return result;
 }
 
-SdlWindow::operator SDL_Window *()
+SdlWindow::operator SDL_Window*()
 {
     return window;
 }

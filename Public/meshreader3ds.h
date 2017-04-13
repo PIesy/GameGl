@@ -1,8 +1,8 @@
 #ifndef MESHREADER3DS_H
 #define MESHREADER3DS_H
 
-#include "Resources/filereader.h"
-#include "Graphics/graphicsclasses.h"
+#include "../Resources/filereader.h"
+#include "../Graphics/graphicsclasses.h"
 
 class MeshReader3ds : public Scanner
 {

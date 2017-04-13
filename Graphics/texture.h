@@ -1,7 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include <stdint.h>
+#include <cstdint>
+#include <string>
 
 struct Texture
 {
@@ -13,6 +14,7 @@ struct Texture
 
     unsigned stepId = 0;
     unsigned textureId = 0;
+    std::string name;
 };
 
 #endif // TEXTURE_H

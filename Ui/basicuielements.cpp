@@ -1,5 +1,4 @@
 #include "basicuielements.h"
-#include <iostream>
 
 Item::Item(int width, int height)
 {

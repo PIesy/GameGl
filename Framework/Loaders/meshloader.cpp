@@ -1,12 +1,10 @@
 #include "meshloader.h"
-#include <vector>
-#include "Logger/logger.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include <unordered_map>
 
 std::unordered_map<std::string, Texture> textureData;
 

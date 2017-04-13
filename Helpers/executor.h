@@ -6,7 +6,7 @@
 class Executor
 {
 public:
-    void Execute(Invokable& invokable) = 0;
+    virtual void Execute(Invokable& invokable) = 0;
 };
 
 #endif // EXECUTOR_H

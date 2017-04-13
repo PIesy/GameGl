@@ -2,8 +2,8 @@
 #define CONFIGPROVIDER_H
 
 #include <typeindex>
-#include "Core/provider/provider.h"
-#include "Core/config.h"
+#include "../provider.h"
+#include "../../config.h"
 
 class ConfigProvider: ProviderInterface
 {

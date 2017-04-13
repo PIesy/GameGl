@@ -1,8 +1,8 @@
 #ifndef MODULEINTERFACE_H
 #define MODULEINTERFACE_H
 
-#include "Core/engineinterface.h"
-#include "Api/apibase.h"
+#include "../Core/engineinterface.h"
+#include "../Api/apibase.h"
 
 template<class T>
 class ModuleApi

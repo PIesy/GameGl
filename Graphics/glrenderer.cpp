@@ -1,6 +1,5 @@
 #include "glrenderer.h"
-#include "Logger/logger.h"
-#include "glprogram.h"
+#include "../Logger/logger.h"
 
 GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 {
@@ -9,7 +8,7 @@ GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 
 void GlRenderer::Start()
 {
-    if(terminate)
+    if(terminated)
     {
         renderTask = Task(&GlRenderer::renderLoop, this);
         context.Execute(renderTask);
@@ -18,7 +17,7 @@ void GlRenderer::Start()
 
 void GlRenderer::Stop()
 {
-    terminate = true;
+    terminated = true;
 }
 
 void GlRenderer::Restart()
@@ -44,8 +43,9 @@ void GlRenderer::Resume()
 
 void GlRenderer::Draw(const Scene& path)
 {
-    std::lock_guard<std::mutex> lock(queueLock2);
-    renderQueue2.push(path);
+    std::lock_guard<std::mutex> lock(queueLock);
+    if (renderQueue.size() < 3)
+        renderQueue.push(path);
 }
 
 void GlRenderer::SetViewport(int width, int height)
@@ -62,11 +62,11 @@ void GlRenderer::SetWindow(const Window& window)
 
 void GlRenderer::renderLoop()
 {
-    terminate = false;
+    terminated = false;
     Logger::Log("Renderer started");
     printContextInfo();
     viewportSize = context.getWindow().getSize();
-    while(!terminate)
+    while(!terminated)
     {
         if(pause)
             pause.WaitFor(false);
@@ -75,7 +75,7 @@ void GlRenderer::renderLoop()
         draw();
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-    Logger::Log("Renderer stoped");
+    Logger::Log("Renderer stopped");
 }
 
 void GlRenderer::update()
@@ -88,13 +88,9 @@ glhelpers::VertexArrayObject& GlRenderer::getVAO(GraphicsObject& obj)
 {
     const std::string& name = obj.getAttribute("name");
     if (data.VAOs.count(name))
-    {
         glhelpers::updateDataBuffers(obj, data.VAOs[name]);
-    }
     else
-    {
-        data.VAOs.insert({name, glhelpers::initVAO(obj)});
-    }
+        data.VAOs.emplace(name, glhelpers::initVAO(obj));
     return data.VAOs[name];
 }
 
@@ -110,19 +106,17 @@ void GlRenderer::init()
     gl::depthbuffer::setFunction(GL_LEQUAL);
     gl::depthbuffer::setRange(0.0f, 1.0f);
     gl::setBlendFunction(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    printGlError("Buffer error");
 }
 
 void GlRenderer::render()
 {
-    if (!renderQueue2.empty())
+    if (!renderQueue.empty())
     {
-        std::unique_lock<std::mutex> lock(queueLock2);
-        if (!renderQueue2.empty())
+        std::unique_lock<std::mutex> lock(queueLock);
+        if (!renderQueue.empty())
         {
-            currentScene = renderQueue2.front();
-            renderQueue2.pop();
+            currentScene = renderQueue.front();
+            renderQueue.pop();
             emptyPath = false;
         }
     }
@@ -132,13 +126,11 @@ void GlRenderer::render()
         for (RenderStep& step : currentScene.path.steps)
         {
             fbos.push_back(glhelpers::initFramebuffer(step.target));
-            if (step.target.target == UsableRenderTargets::SCREEN)
+            if (step.target.target == RenderTargets::SCREEN)
                 update();
-            gl::framebuffer::bind(GL_FRAMEBUFFER, fbos.back().FBO);
+            fbos.back().FBO.Bind();
             gl::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             step.preConfig(*step.prog);
-            step.prog->setUniform(0, "shadowMap");
-            step.prog->setUniform(1, "tex");
             step.prog->setUniform(0, "useTex");
 
             for (int& id: step.objects)
@@ -148,21 +140,16 @@ void GlRenderer::render()
                 for (auto& conf : obj.getConfigurationMap())
                     conf.second(*step.prog);
                 step.postConfig(*step.prog);
-                gl::vertexarray::bind(VAO.VAO);
-                gl::buffer::bind(GL_ELEMENT_ARRAY_BUFFER, VAO.IBO);
+                VAO.VAO.Bind();
                 if (step.genericTexture.textureId != 0)
+                    fbos[step.genericTexture.stepId].textures[step.genericTexture.textureId - 1].Bind();
+                if (VAO.tex.getId() != 0)
                 {
-                    glActiveTexture(GL_TEXTURE0);
-                    gl::texture::bind(GL_TEXTURE_2D, fbos[step.genericTexture.stepId].textures[step.genericTexture.textureId]);
-                }
-                if (VAO.tex != 0)
-                {
-                    glActiveTexture(GL_TEXTURE1);
                     step.prog->setUniform(1, "useTex");
-                    gl::texture::bind(GL_TEXTURE_2D, VAO.tex);
+                    VAO.tex.Bind(1);
                 }
                 if (VAO.externTex)
-                    gl::texture::bind(GL_TEXTURE_2D, fbos[VAO.stepId].textures[VAO.texId]);
+                    fbos[VAO.stepId].textures[VAO.texId].Bind();
                 step.prog->Use();
                 gl::drawElements(GL_TRIANGLES, obj.data().indices.size(), GL_UNSIGNED_INT, nullptr);
                 gl::program::use(0);
@@ -172,9 +159,6 @@ void GlRenderer::render()
         {
             GLuint rb[1] = {fbo.depthBuff};
             gl::renderbuffer::erase(1, rb);
-            gl::texture::erase(fbo.textures.size(), fbo.textures.data());
-            GLuint fbs[1] = {fbo.FBO};
-            gl::framebuffer::erase(1, fbs);
         }
     }
 }

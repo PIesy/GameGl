@@ -1,7 +1,7 @@
 #ifndef SHADERREADER_H
 #define SHADERREADER_H
 
-#include "Resources/resourcesapi.h"
+#include "../Resources/resourcesapi.h"
 
 class ShaderReader: public Scanner
 {

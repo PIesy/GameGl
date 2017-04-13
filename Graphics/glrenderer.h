@@ -4,9 +4,10 @@
 #include "renderdefs.h"
 #include "graphicsclasses.h"
 #include "sdlclasses.h"
-#include "Helpers/genericcondition.h"
 #include "glhelpers.h"
 #include "renderer.h"
+#include "../Helpers/task.h"
+#include "../Helpers/genericcondition.h"
 #include <atomic>
 #include <mutex>
 #include <list>
@@ -25,16 +26,13 @@ struct RendererData
 
 class GlRenderer: public Renderer
 {
-    std::mutex queueLock2;
+    std::mutex queueLock;
     SdlGLContext& context;
-    bool terminate = true;
-    bool empty = true;
+    bool terminated = true;
     bool emptyPath = true;
     Scene currentScene;
-    RenderPath currentPath;
-    unsigned int index_count = 0;
     RendererData data;
-    std::queue<Scene> renderQueue2;
+    std::queue<Scene> renderQueue;
     std::atomic<ViewportSize> viewportSize;
     Task renderTask;
     GenericCondition<bool> pause = false;

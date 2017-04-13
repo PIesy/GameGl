@@ -1,5 +1,5 @@
 #include "renderdefs.h"
-#include "Logger/logger.h"
+#include "../Logger/logger.h"
 
 GLuint convertToGlShaderType(ShaderType type)
 {
@@ -9,8 +9,6 @@ GLuint convertToGlShaderType(ShaderType type)
         return GL_VERTEX_SHADER;
     case ShaderType::FragmentShader:
         return GL_FRAGMENT_SHADER;
-    default:
-        return 0;
     }
 }
 

@@ -3,8 +3,8 @@
 
 #include "provider.h"
 #include <unordered_map>
-#include "Core/meta.h"
-#include "Core/enginedatastructures.h"
+#include "../meta.h"
+#include "../enginedatastructures.h"
 
 class ProviderHolder
 {

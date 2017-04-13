@@ -2,7 +2,7 @@
 #define GRAPHICSMODULE_H
 
 #include "module.h"
-#include "Graphics/graphicsapi.h"
+#include "../Graphics/graphicsapi.h"
 
 class GraphicsModule: public Module
 {

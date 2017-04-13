@@ -9,9 +9,21 @@
 #include "invokablepack.h"
 
 template<typename T>
-constexpr typename std::underlying_type<T>::type integral(T value)
+constexpr std::underlying_type_t<T> integral(T value)
 {
-    return static_cast<typename std::underlying_type<T>::type>(value);
+    return static_cast<std::underlying_type_t<T>>(value);
+}
+
+template<typename T>
+constexpr std::underlying_type_t<T>* integralPointer(T* value)
+{
+    return reinterpret_cast<std::underlying_type_t<T>*>(value);
+}
+
+template<typename T>
+constexpr const std::underlying_type_t<T>* integralPointer(const T* value)
+{
+    return reinterpret_cast<const std::underlying_type_t<T>*>(value);
 }
 
 template<typename T>
@@ -33,7 +45,7 @@ constexpr Action<Args...> getAction(F&& value, AllArgs&&... args)
 }
 
 template<class ArgPtr>
-constexpr GenericInvokable generilizeInvokable(Action<ArgPtr> action)
+constexpr GenericInvokable* generilizeInvokable(Action<ArgPtr> action)
 {
     return new GenericInvokable(action);
 }

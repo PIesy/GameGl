@@ -1,8 +1,11 @@
 #include "coreinterface.h"
-#include "Core/enginecore.h"
-#include "Graphics/openglsdl.h"
-#include "Resources/filereader.h"
-#include "Input/sdlinput.h"
+#include "../Core/engineinitializer.h"
+#include "../Modules/graphicsmodule.h"
+#include "../Modules/resourcesmodule.h"
+#include "../Core/enginecore.h"
+#include "../Resources/filereader.h"
+#include "../Input/sdlinput.h"
+#include "../Graphics/openglsdl.h"
 
 EngineInitializer makeInit();
 

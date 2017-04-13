@@ -5,11 +5,11 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
-#include "Helpers/invokable.h"
-#include "Helpers/size.h"
-#include "Helpers/invokationresult.h"
-#include "Core/service/service.h"
-#include "Math/mathconstants.h"
+#include "../Helpers/invokable.h"
+#include "../Helpers/size.h"
+#include "../Helpers/invokationresult.h"
+#include "../Core/service/service.h"
+#include "../Math/mathconstants.h"
 #include "uniform.h"
 #include "texture.h"
 
@@ -53,11 +53,6 @@ public:
     virtual void Detach(const Shader& shader) = 0;
     virtual void Compile() = 0;
     virtual void Use() = 0;
-    virtual void SetOffset(Vec2 offset) = 0;
-    virtual void SetPerspective(Mat4 perspective) = 0;
-    virtual void SetRotation(Mat4 rotation) = 0;
-    virtual void SetLight(Vec4 light) = 0;
-    virtual void SetIntensity(float intensity) = 0;
     virtual InvokationResult setUniform(const std::string& name, const UniformValue& value) = 0;
 
     template<typename T>
@@ -134,8 +129,6 @@ public:
     void setAttribute(const std::string& attributeName, const std::string& attributeValue);
     const std::string& getAttribute(const std::string& attributeName) const;
     void Scale(float x, float y = 1, float z = 1);
-    void Move(float x, float y = 0, float z = 0);
-    void Append(const GraphicsObject& src, float offset_x = 0, float offset_y = 0);
     void Append(const RenderData& src, float offset_x = 0, float offset_y = 0);
     Texture getTexture() const;
     void setTexture(const Texture& value);

@@ -54,16 +54,16 @@ InvokationResult setFloatVectorUniform(GLuint program, GLuint location, short ve
     switch(vectorSize)
     {
     case 1:
-        gl::program::setUniform1f(location, count, values);
+        gl::program::setUniform1f(program, location, count, values);
         break;
     case 2:
-        gl::program::setUniform2f(location, count, values);
+        gl::program::setUniform2f(program, location, count, values);
         break;
     case 3:
-        gl::program::setUniform3f(location, count, values);
+        gl::program::setUniform3f(program, location, count, values);
         break;
     case 4:
-        gl::program::setUniform4f(location, count, values);
+        gl::program::setUniform4f(program, location, count, values);
         break;
     default:
         return InvokationResult::ERROR;
@@ -74,25 +74,23 @@ InvokationResult setFloatVectorUniform(GLuint program, GLuint location, short ve
 
 InvokationResult setIntVectorUniform(GLuint program, GLuint location, short vectorSize, GLint* values, unsigned count)
 {
-    glUseProgram(program);
     switch(vectorSize)
     {
     case 1:
-        gl::program::setUniform1i(location, count, values);
+        gl::program::setUniform1i(program, location, count, values);
         break;
     case 2:
-        gl::program::setUniform2i(location, count, values);
+        gl::program::setUniform2i(program, location, count, values);
         break;
     case 3:
-        gl::program::setUniform3i(location, count, values);
+        gl::program::setUniform3i(program, location, count, values);
         break;
     case 4:
-        gl::program::setUniform4i(location, count, values);
+        gl::program::setUniform4i(program, location, count, values);
         break;
     default:
         return InvokationResult::ERROR;
     }
-    glUseProgram(0);
     return InvokationResult::SUCCESS;
 }
 
@@ -102,16 +100,16 @@ InvokationResult setUnsignedVectorUniform(GLuint program, GLuint location, short
     switch(vectorSize)
     {
     case 1:
-        gl::program::setUniform1ui(location, count, values);
+        gl::program::setUniform1ui(program, location, count, values);
         break;
     case 2:
-        gl::program::setUniform2ui(location, count, values);
+        gl::program::setUniform2ui(program, location, count, values);
         break;
     case 3:
-        gl::program::setUniform3ui(location, count, values);
+        gl::program::setUniform3ui(program, location, count, values);
         break;
     case 4:
-        gl::program::setUniform4ui(location, count, values);
+        gl::program::setUniform4ui(program, location, count, values);
         break;
     default:
         return InvokationResult::ERROR;
@@ -122,7 +120,6 @@ InvokationResult setUnsignedVectorUniform(GLuint program, GLuint location, short
 
 InvokationResult setDoubleVectorUniform(GLuint program, GLuint location, short vectorSize, GLdouble* values, unsigned count)
 {
-    glUseProgram(program);
     switch(vectorSize)
     {
     case 1:
@@ -140,20 +137,18 @@ InvokationResult setDoubleVectorUniform(GLuint program, GLuint location, short v
     default:
         return InvokationResult::ERROR;
     }
-    glUseProgram(0);
     return InvokationResult::SUCCESS;
 }
 
 InvokationResult setFloatMatrixUniform(GLuint program, GLuint location, short horizontalSize, short verticalSize, GLfloat* values, unsigned count)
 {
-    glUseProgram(program);
     switch(horizontalSize)
     {
     case 2:
         switch(verticalSize)
         {
         case 2:
-            gl::program::setUniform2x2f(location, count, values);
+            gl::program::setUniform2x2f(program, location, count, values);
             break;
         case 3:
             glUniformMatrix2x3fv(location, count, GL_FALSE, values);
@@ -170,7 +165,7 @@ InvokationResult setFloatMatrixUniform(GLuint program, GLuint location, short ho
             glUniformMatrix3x2fv(location, count, GL_FALSE, values);
             break;
         case 3:
-            gl::program::setUniform3x3f(location, count, values);
+            gl::program::setUniform3x3f(program, location, count, values);
             break;
         case 4:
             glUniformMatrix3x4fv(location, count, GL_FALSE, values);
@@ -187,18 +182,16 @@ InvokationResult setFloatMatrixUniform(GLuint program, GLuint location, short ho
             glUniformMatrix4x3fv(location, count, GL_FALSE, values);
             break;
         case 4:
-            gl::program::setUniform4x4f(location, count, values);
+            gl::program::setUniform4x4f(program, location, count, values);
             break;
         }
         break;
     }
-    glUseProgram(0);
     return InvokationResult::SUCCESS;
 }
 
 InvokationResult setDoubleMatrixUniform(GLuint program, GLuint location, short horizontalSize, short verticalSize, GLdouble* values, unsigned count)
 {
-    glUseProgram(program);
     switch(horizontalSize)
     {
     case 2:
@@ -244,6 +237,5 @@ InvokationResult setDoubleMatrixUniform(GLuint program, GLuint location, short h
         }
         break;
     }
-    glUseProgram(0);
     return InvokationResult::SUCCESS;
 }

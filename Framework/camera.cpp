@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "Math/mathhelpers.h"
 
 float Camera::getNearPlane() const
 {

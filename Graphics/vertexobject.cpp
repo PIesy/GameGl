@@ -1,5 +1,4 @@
 #include "graphicsapi.h"
-#include <cstring>
 
 const std::string EMPTY_ATTRIBUTE = "<none>";
 
@@ -54,11 +53,6 @@ RenderData& GraphicsObject::data()
     return object;
 }
 
-void GraphicsObject::Append(const GraphicsObject& src, float offset_x, float offset_y)
-{
-    Append(src.object, offset_x, offset_y);
-}
-
 void GraphicsObject::Append(const RenderData &src, float offset_x, float offset_y)
 {
     int size = object.vertices.size();
@@ -81,16 +75,6 @@ void GraphicsObject::Scale(float x, float y, float z)
         vertex.coords.x *= x;
         vertex.coords.y *= y;
         vertex.coords.z *= z;
-    }
-}
-
-void GraphicsObject::Move(float x, float y, float z)
-{
-    for (Vertex& vertex : object.vertices)
-    {
-        vertex.coords.x += x;
-        vertex.coords.y += y;
-        vertex.coords.z += z;
     }
 }
 

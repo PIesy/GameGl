@@ -1,6 +1,4 @@
 #include "basicshapes.h"
-#include <cstring>
-#include <cstdlib>
 
 NestedShapes Shapes::shapes;
 

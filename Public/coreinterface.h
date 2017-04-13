@@ -2,8 +2,8 @@
 #define COREINTERFACE_H
 
 #include "apis.h"
-#include "Core/engineinterface.h"
-#include "Graphics/renderdefs.h"
+#include "../Core/engineinterface.h"
+#include "../Graphics/renderdefs.h"
 
 class CoreInterface
 {

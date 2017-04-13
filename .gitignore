@@ -1,1 +1,4 @@
-*.pro.user
+*.pro.user*
+.idea/
+Data/
+cmake-build-debug/

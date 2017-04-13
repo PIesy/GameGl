@@ -1,8 +1,8 @@
 #ifndef WORLDOBJECT_H
 #define WORLDOBJECT_H
 
-#include "Math/mathdefines.h"
-#include "Graphics/graphicsclasses.h"
+#include "../Math/mathdefines.h"
+#include "../Graphics/graphicsclasses.h"
 
 class WorldObject
 {

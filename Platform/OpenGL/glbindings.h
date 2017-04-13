@@ -11,35 +11,42 @@ namespace vertexarray {
     void generate(int count, GLuint* vertexArrays);
     void bind(GLuint vertexArray);
     void erase(int count, GLuint* vertexArrays);
-    void enableVertexAttribute(GLuint index);
-    void disableVertexAttribute(GLuint index);
-    void setVertexAttributePointer(GLuint index, int size, GLenum type, GLboolean normalized, size_t stride, const void* pointer);
+    void enableVertexAttribute(GLuint target, GLuint index);
+    void disableVertexAttribute(GLuint target, GLuint index);
+    void bindElementBuffer(GLuint target, GLuint buffer);
+    void bindVertexBuffer(GLuint target, GLuint bindingIndex, GLuint buffer, GLintptr offset, GLsizei stride);
+    void bindBufferToAttribute(GLuint target, GLuint attributeIndex, GLuint bindingIndex);
+    void setVertexAttributeFormat(GLuint target, GLuint index, int size, GLenum type, GLboolean normalized, GLuint offset);
 }
 
 namespace buffer {
     void generate(int count, GLuint* buffers);
     void bind(GLenum target, GLuint buffer);
     void erase(int count, GLuint* buffers);
-    void setData(GLenum target, size_t size, const void* data, GLenum usage);
-    void updateData(GLenum target, GLintptr offset, size_t size, const void* data);
+    void setData(GLuint target, size_t size, const void* data, GLenum usage);
+    void updateData(GLuint target, GLintptr offset, size_t size, const void* data);
 }
 
 namespace texture {
-    void generate(int count, GLuint* textures);
+    void generate(int count, GLuint* textures, GLenum target);
     void bind(GLenum target, GLuint texture);
     void erase(int count, GLuint* textures);
-    void load2Dimage(GLenum target, GLint mipmapLevel, GLint internalFormat, unsigned width,
-                     unsigned height, GLenum format, GLenum type, const void* data);
-    void setParameter(GLenum target, GLenum parameter, GLint value);
-    void setParameter(GLenum target, GLenum parameter, GLfloat value);
+    void allocateStorage(GLuint target, GLsizei mipmapLevels, GLenum internalFormat, GLsizei width, GLsizei height);
+    void loadImage(GLuint target, GLint mipmapLevel, GLint xoffset, GLint yoffset, GLsizei width,
+                   GLsizei height, GLenum format, GLenum type, const void* data);
+    void setParameter(GLuint target, GLenum parameter, GLint value);
+    void setParameter(GLuint target, GLenum parameter, GLfloat value);
+    void setActiveTexture(GLenum textureUnit);
 }
 
 namespace framebuffer {
     void generate(int count, GLuint* framebuffers);
     void bind(GLenum target, GLuint framebuffer);
     void erase(int count, GLuint* framebuffers);
-    void setRenderbuffer(GLenum target, GLenum attachment, GLenum type, GLuint buffer);
-    void set2Dtexture(GLenum target, GLenum attachment, GLenum type, GLuint texture, GLint mipmapLevel);
+    void setRenderbuffer(GLuint target, GLenum attachment, GLuint buffer);
+    void setTexture(GLuint target, GLenum attachment, GLuint texture, GLint level);
+    void setDrawBuffers(GLuint target, GLsizei count, const GLenum* buffers);
+    GLenum checkStatus(GLuint target, GLenum bindPoint);
 }
 
 namespace renderbuffer {
@@ -74,22 +81,22 @@ namespace program {
     void link(GLuint program);
     void erase(GLuint program);
     void use(GLuint program);
-    GLuint getUniformLocation(GLuint program, const std::string& uniformName);
-    void setUniform1f(GLuint location, int count, const void* value);
-    void setUniform2f(GLuint location, int count, const void* value);
-    void setUniform3f(GLuint location, int count, const void* value);
-    void setUniform4f(GLuint location, int count, const void* value);
-    void setUniform1i(GLuint location, int count, const void* value);
-    void setUniform2i(GLuint location, int count, const void* value);
-    void setUniform3i(GLuint location, int count, const void* value);
-    void setUniform4i(GLuint location, int count, const void* value);
-    void setUniform1ui(GLuint location, int count, const void* value);
-    void setUniform2ui(GLuint location, int count, const void* value);
-    void setUniform3ui(GLuint location, int count, const void* value);
-    void setUniform4ui(GLuint location, int count, const void* value);
-    void setUniform2x2f(GLuint location, int count, const void* value);
-    void setUniform3x3f(GLuint location, int count, const void* value);
-    void setUniform4x4f(GLuint location, int count, const void* value);
+    GLint getUniformLocation(GLuint program, const std::string &uniformName);
+    void setUniform1f(GLuint program, GLuint location, int count, const void *value);
+    void setUniform2f(GLuint program, GLuint location, int count, const void *value);
+    void setUniform3f(GLuint program, GLuint location, int count, const void *value);
+    void setUniform4f(GLuint program, GLuint location, int count, const void *value);
+    void setUniform1i(GLuint program, GLuint location, int count, const void *value);
+    void setUniform2i(GLuint program, GLuint location, int count, const void *value);
+    void setUniform3i(GLuint program, GLuint location, int count, const void *value);
+    void setUniform4i(GLuint program, GLuint location, int count, const void *value);
+    void setUniform1ui(GLuint program, GLuint location, int count, const void *value);
+    void setUniform2ui(GLuint program, GLuint location, int count, const void *value);
+    void setUniform3ui(GLuint program, GLuint location, int count, const void *value);
+    void setUniform4ui(GLuint program, GLuint location, int count, const void *value);
+    void setUniform2x2f(GLuint program, GLuint location, int count, const void *value);
+    void setUniform3x3f(GLuint program, GLuint location, int count, const void *value);
+    void setUniform4x4f(GLuint program, GLuint location, int count, const void *value);
 }
 
 void drawElements(GLenum mode, size_t count, GLenum type, const void* indices);
@@ -97,8 +104,8 @@ void setViewport(unsigned width, unsigned height, int offsetX = 0, int offsetY =
 void clear(GLbitfield mask);
 void setClearColor(float r, float g, float b, float alpha);
 void setBlendFunction(GLenum sfactor, GLenum dfactor);
-void enable(GLenum capacity);
-void disable(GLenum capacity);
+void enable(GLenum capability);
+void disable(GLenum capability);
 
 
 

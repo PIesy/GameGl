@@ -4,7 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11
-QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2 -lassimp
+QMAKE_LFLAGS += -lGL -lGLEW -lGLU -lSDL2 -lassimp -lpthread
 
 OTHER_FILES += \
     Shaders/FragmentShader.glsl \
