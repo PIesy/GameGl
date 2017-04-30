@@ -21,14 +21,15 @@ struct WorkerData
 class Worker
 {
     std::thread::id workerId;
-    WorkerData* data;
+    std::shared_ptr<WorkerData> data{new WorkerData()};
     std::thread* workerThread = nullptr;
 public:
     Worker();
+    Worker(const std::string& name);
     Worker(TaskList& tasks);
     Worker(const Invokable& fun);
     Worker(const Invokable& fun, TaskList& tasks);
-    Worker(const Worker& arg) = delete;
+    Worker(const Worker&) = delete;
     Worker(Worker&& arg);
     ~Worker();
     void setTask(const Invokable& fun);

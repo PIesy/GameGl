@@ -8,8 +8,8 @@ class EventInterface
 {
     int hint;
 public:
-    virtual void setHint(int hint) { this->hint = hint; }
-    virtual int getHint() { return hint; }
+    virtual void SetHint(int hint) { this->hint = hint; }
+    virtual int GetHint() const { return hint; }
     virtual ~EventInterface() {}
 };
 

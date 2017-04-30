@@ -59,18 +59,18 @@ void UiLayer::UpdateResolution(int width, int height)
 void UiLayer::updateAll(int x, int y, bool click)
 {
     for(Element* el : elements)
-        el->setState(x, y, click);
+        el->SetState(x, y, click);
 }
 
-GraphicsObject** UiLayer::getGraphics()
+Mesh* UiLayer::getGraphics()
 {
     int i = 0;
-    GraphicsObject** objects;
+    Mesh* objects;
 
-    objects = new GraphicsObject*[elements.size()];
+    objects = new Mesh[elements.size()];
     for(Element* obj : elements)
     {
-        objects[i] = obj->getGraphics();
+        objects[i] = obj->GetGraphics();
         i++;
     }
     return objects;

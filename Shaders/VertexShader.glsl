@@ -17,7 +17,6 @@ uniform mat4 WtoCMatrix;
 uniform mat4 lightMatrix;
 uniform vec3 worldOffset = vec3(0.0f);
 
-
 const float ambient = 0.5f;
 
 smooth out vec4 out_color;
@@ -31,15 +30,14 @@ void main(void)
 {
     vec4 result = vec4(position, 1);
     vec4 worldView = worldRotation * MtoWMatrix * rotation * result + vec4(worldOffset, 0.0f);
-    vec4 camView = WtoCMatrix * worldView + vec4(offset, 0.0f, 0.0f);
+    vec4 camView = WtoCMatrix * worldView;
     mat3 transform = transpose(inverse(mat3(worldRotation * MtoWMatrix * rotation)));
     vec3 rotnormal = normalize(transform * normal);
 
     out_color = color;
     out_color[3] = 1;
 
-
-    lightPos = lightMatrix * worldView + vec4(offset, 0.0f, 0.0f);
+    lightPos = lightMatrix * worldView;
     gl_Position = perspective * camView;
     texCoord = uv;
     worldPosition = worldView;

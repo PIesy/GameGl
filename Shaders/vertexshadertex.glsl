@@ -16,16 +16,11 @@ uniform mat4 MtoWMatrix;
 uniform mat4 WtoCMatrix;
 uniform vec3 worldOffset = vec3(0.0f);
 
-smooth out vec4 oColor;
-smooth out vec4 pos;
-
 void main(void)
 {
-    vec4 result = vec4(position, 1);
-    vec4 camView = WtoCMatrix * worldRotation * MtoWMatrix * rotation * result + vec4(worldOffset, 0.0f);
-    camView = camView + vec4(offset, 0.0f, 0.0f);
+    vec4 result = vec4(position, 1.0f);
+    vec4 camView = WtoCMatrix * worldRotation * MtoWMatrix * rotation * result;
+    camView = camView; //+ vec4(offset, 0.0f, 0.0f);
 
     gl_Position = perspective * camView;
-    pos = perspective * camView;
-    oColor = color;
 }

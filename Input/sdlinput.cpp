@@ -27,11 +27,11 @@ void SDLInputService::sdlInputRoutine()
             {
             case SDL_WINDOWEVENT:
                 w = parseWindowEvent(event);
-                handler.ThrowEvent(new WindowEvent(w, integral(w.eventType)));
+                handler.ThrowEvent(WindowEvent(w, integral(w.eventType)));
                 break;
             case SDL_KEYDOWN:
                 k = parseKeyboardEvent(event);
-                handler.ThrowEvent(new KeyboardEvent(k, k.scancode));
+                handler.ThrowEvent(KeyboardEvent(k, k.scancode));
                 break;
             case SDL_KEYUP:
                 break;
@@ -40,7 +40,7 @@ void SDLInputService::sdlInputRoutine()
             case SDL_MOUSEMOTION:
             case SDL_MOUSEWHEEL:
                 m = parseMouseEvent(event);
-                handler.ThrowEvent(new MouseEvent(m, integral(m.eventType)));
+                handler.ThrowEvent(MouseEvent(m, integral(m.eventType)));
                 break;
             default:break;
             }
@@ -92,6 +92,7 @@ MouseData SDLInputService::parseMouseEvent(SDL_Event& event)
         result.eventType = MouseData::Type::Motion;
         result.relativeCoordinates[0] = event.motion.xrel;
         result.relativeCoordinates[1] = event.motion.yrel;
+        result.state = (event.motion.state & SDL_BUTTON_LMASK) != 0;
         break;
     case SDL_MOUSEBUTTONDOWN:
     case SDL_MOUSEBUTTONUP:

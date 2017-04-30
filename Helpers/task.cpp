@@ -1,5 +1,10 @@
 #include "task.h"
 
+Task::Task(std::function<void()>&& f)
+{
+    this->task = f;
+}
+
 Task* Task::Copy() const
 {
     return new Task(*this);

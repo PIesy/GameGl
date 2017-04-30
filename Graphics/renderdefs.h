@@ -6,10 +6,10 @@
 #include "SDL2/SDL.h"
 #include "../Core/worker.h"
 #include "graphicsapi.h"
-#include "sdlclasses.h"
+#include "../Platform/Graphics/OpenGL/sdlclasses.h"
 
 GLuint convertToGlShaderType(ShaderType type);
-void printGlError(std::string text);
+
 void initGlew();
 void printContextInfo();
 

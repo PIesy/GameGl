@@ -4,8 +4,10 @@
 #include "mathdefines.h"
 #include <cmath>
 
-float degToRad(float degrees);
+constexpr float degToRad(float degrees);
 void rotateQuat(glm::fquat& base, float degree, const Vec3& axis);
+Mat3 rotationMatrix(const Vec3& axis, float angle);
+Mat4 orthographicProjectionMatrix(const Vec4& bounds, float near, float far);
 
 class PerspectiveMatrix
 {

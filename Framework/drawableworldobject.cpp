@@ -1,15 +1,5 @@
 #include "drawableworldobject.h"
 
-GraphicsObject& DrawableWorldObject::getObject()
-{
-    return object;
-}
-
-void DrawableWorldObject::setObject(const GraphicsObject& value)
-{
-    object = value;
-}
-
 Mat4 DrawableWorldObject::GetPositionMatrix()
 {
     Mat4 result(1.0f);
@@ -21,17 +11,17 @@ Mat4 DrawableWorldObject::GetPositionMatrix()
     return result;
 }
 
-float DrawableWorldObject::getScale() const
+float DrawableWorldObject::GetScale() const
 {
     return scale;
 }
 
-void DrawableWorldObject::setScale(float value)
+void DrawableWorldObject::SetScale(float value)
 {
     scale = value;
 }
 
-Mat4 DrawableWorldObject::getRotation() const
+Mat4 DrawableWorldObject::GetRotation() const
 {
     return rotation;
 }
@@ -48,22 +38,32 @@ void DrawableWorldObject::Rotate(float degree, Vec3 axis)
     rotation = glm::mat4_cast(rot) * rotation;
 }
 
-Mat4 DrawableWorldObject::getWorldRotation() const
+Mat4 DrawableWorldObject::GetWorldRotation() const
 {
     return worldRotation;
 }
 
-void DrawableWorldObject::setWorldRotation(const Mat4& value)
+void DrawableWorldObject::SetWorldRotation(const Mat4& value)
 {
     worldRotation = value;
 }
 
-bool DrawableWorldObject::operator ==(const DrawableWorldObject& rhs)
+bool DrawableWorldObject::operator==(const DrawableWorldObject& rhs)
 {
-    return rhs.object.getAttribute("name") == object.getAttribute("name");
+    return rhs.mesh.GetId() == mesh.GetId();
 }
 
 DrawableWorldObject::DrawableWorldObject()
 {
 
+}
+
+Mesh& DrawableWorldObject::GetMesh()
+{
+    return mesh;
+}
+
+void DrawableWorldObject::setMesh(const Mesh& mesh)
+{
+    DrawableWorldObject::mesh = mesh;
 }

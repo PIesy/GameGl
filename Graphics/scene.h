@@ -4,14 +4,14 @@
 #include "texture.h"
 #include "renderpath.h"
 #include "graphicsclasses.h"
+#include "mesh.h"
+#include "meshdescriptor.h"
 #include <vector>
 
 
 struct Scene
 {
-    std::vector<Texture> textures;
-    std::vector<GraphicsObject> objects;
-    std::vector<std::reference_wrapper<Program>> programs;
+    std::vector<MeshDescriptor> meshes;
     RenderPath path;
 };
 

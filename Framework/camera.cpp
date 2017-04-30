@@ -50,9 +50,7 @@ bool Camera::operator ==(const Camera& rhs)
         return false;
     if (aspectRatio != rhs.aspectRatio)
         return false;
-    if (getPosition() != rhs.getPosition())
-        return false;
-    return true;
+    return getPosition() == rhs.getPosition();
 }
 
 Camera::Camera()
@@ -63,6 +61,8 @@ Camera::Camera()
 Mat4 Camera::GetCameraMatrix()
 {
     Vec3 verticalDirection = {0, 1, 0};
+    if (lookDirection == -verticalDirection || lookDirection == verticalDirection)
+        verticalDirection = {1, 0, 0};
 
     Vec3 rightDirection = glm::normalize(glm::cross(lookDirection, verticalDirection));
     Vec3 camVerticalDirection = glm::cross(rightDirection, lookDirection);
@@ -80,5 +80,10 @@ Mat4 Camera::GetCameraMatrix()
 
 Mat4 Camera::GetPerspectiveMatrix()
 {
-    return PerspectiveMatrix(aspectRatio, 70.0f, nearPlane, farPlane);
+    return PerspectiveMatrix(aspectRatio, 90.0f, nearPlane, farPlane);
+}
+
+Mat4 Camera::GetOrthographicMatrix()
+{
+    return orthographicProjectionMatrix({-100, 100, -100, 100}, nearPlane, farPlane);
 }

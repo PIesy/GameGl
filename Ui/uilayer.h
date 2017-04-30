@@ -19,7 +19,7 @@ public:
     void RemoveElement(Element* element);
     void UiHandler(MouseEvent* event);
     void UpdateResolution(int width, int height);
-    GraphicsObject** getGraphics();
+    Mesh* getGraphics();
     int getCount();
 };
 

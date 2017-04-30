@@ -3,8 +3,7 @@
 #include "../Modules/inputmodule.h"
 #include "../Modules/resourcesmodule.h"
 #include "../Logger/logger.h"
-
-void SDLpoller(EventHandler* handler);
+#include "../Modules/storagemodule.h"
 
 EngineCore::EngineCore(EngineInitializer initializer)
 {
@@ -41,9 +40,11 @@ void EngineCore::initModules()
     GraphicsModule* g = new GraphicsModule;
     InputModule* i = new InputModule;
     ResourcesModule* r = new ResourcesModule;
+    StorageModule* s = new StorageModule;
     AttachModule(Modules::Video, g);
     AttachModule(Modules::Input, i);
     AttachModule(Modules::Storage, r);
+    AttachModule(Modules::Memory, s);
 }
 
 ModuleInterface& EngineCore::GetModule(Modules name)

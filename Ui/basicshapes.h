@@ -2,32 +2,12 @@
 #define BASICSHAPES_H
 
 #include "../Graphics/graphicsapi.h"
-
-
-class NestedShapes
-{
-    RenderData box;
-    RenderData triangle;
-    RenderData hexagon;
-    void initBox();
-    void initTriangle();
-    void initHexagon();
-    RenderData getCopy(const RenderData& src);
-    NestedShapes();
-public:
-    friend class Shapes;
-    RenderData Triangle();
-    RenderData Box();
-    RenderData Hexagon();
-};
+#include "../Graphics/mesh.h"
+#include "../Storage/storageapi.h"
 
 class Shapes {
-    static NestedShapes shapes;
 public:
-    Shapes();
-    static RenderData Box(){ return shapes.Box(); }
-    static RenderData Triangle(){ return shapes.Triangle(); }
-    static RenderData Hexagon(){ return shapes.Hexagon(); }
-    static RenderData Plane(int xSize, int ySize, Vec4 color = {0.5f, 0.5f, 0.5f, 1.0f});
+    static Mesh Rectangle(StorageApi& api, const std::string& name = "quad");
+    static Mesh Plane(int xSize, int ySize, StorageApi& api, const std::string& name = "plane", Vec4 color = {0.5f, 0.5f, 0.5f, 1.0f});
 };
 #endif // BASICSHAPES_H

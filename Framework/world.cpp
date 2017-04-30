@@ -34,17 +34,6 @@ void World::removeCamera(Camera& cam)
     cameras.remove(cam);
 }
 
-DrawableWorldObject& World::addObject(const GraphicsObject& obj, const Vec3& position)
-{
-    DrawableWorldObject drawableObject;
-
-    drawableObject.setObject(obj);
-    drawableObject.setPosition(position);
-    drawableObject.setScale(scaleFactor);
-    drawableObjects.push_back(drawableObject);
-    return drawableObjects.back();
-}
-
 void World::removeObject(DrawableWorldObject& obj)
 {
     drawableObjects.remove(obj);
@@ -78,4 +67,15 @@ void World::setScaleFactor(float value)
 World::World()
 {
     
+}
+
+DrawableWorldObject& World::AddObject(const Mesh& obj, const Vec3& position)
+{
+    DrawableWorldObject drawableObject;
+
+    drawableObject.setMesh(obj);
+    drawableObject.setPosition(position);
+    drawableObject.SetScale(scaleFactor);
+    drawableObjects.push_back(drawableObject);
+    return drawableObjects.back();
 }

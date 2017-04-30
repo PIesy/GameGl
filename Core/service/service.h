@@ -18,8 +18,9 @@ public:
 
 class ServiceContainer
 {
-    std::shared_ptr<Service> service;
     bool isEmpty = true;
+protected:
+    std::shared_ptr<Service> service;
 public:
     ServiceContainer(Service* service);
     ServiceContainer() {}
@@ -31,6 +32,21 @@ public:
     void Wait();
     operator bool();
     bool operator==(const ServiceContainer& rhs);
+};
+
+template<class T>
+class TypedServiceContainer: public ServiceContainer
+{
+public:
+    TypedServiceContainer()
+    {
+        service = std::shared_ptr<Service>(new T());
+    }
+
+    T* operator->()
+    {
+        return static_cast<T*>(service.get());
+    }
 };
 
 #endif // SERVICE

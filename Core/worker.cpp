@@ -2,19 +2,25 @@
 #include "../Logger/logger.h"
 #include <sstream>
 
-void workerController(WorkerData *data);
+void workerController(std::shared_ptr<WorkerData> data);
 void logStatus(std::string message);
 
 Worker::Worker()
 {
-    data = new WorkerData();
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
 
+
+Worker::Worker(const std::string& name)
+{
+    workerThread = new std::thread(workerController, data);
+    workerId = workerThread->get_id();
+    data->name = name;
+}
+
 Worker::Worker(TaskList& tasks)
 {
-    data = new WorkerData();
     data->tasks.ReplaceTaskSource(tasks);
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
@@ -22,7 +28,6 @@ Worker::Worker(TaskList& tasks)
 
 Worker::Worker(const Invokable &fun)
 {
-    data = new WorkerData();
     data->tasks.Push(fun);
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
@@ -30,7 +35,6 @@ Worker::Worker(const Invokable &fun)
 
 Worker::Worker(const Invokable& fun, TaskList& tasks)
 {
-    data = new WorkerData();
     data->tasks.ReplaceTaskSource(tasks);
     data->tasks.Push(fun);
     workerThread = new std::thread(workerController, data);
@@ -54,7 +58,6 @@ Worker::~Worker()
         workerThread->detach();
     }
     delete workerThread;
-//    delete data;
 }
 
 bool Worker::isBusy()
@@ -95,7 +98,7 @@ void Worker::setName(std::string name)
     data->name = name;
 }
 
-void workerController(WorkerData *data)
+void workerController(std::shared_ptr<WorkerData> data)
 {
     TaskData task;
     std::unique_lock<std::mutex> lock(data->mutex, std::defer_lock);

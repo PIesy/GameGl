@@ -12,16 +12,6 @@ GLuint convertToGlShaderType(ShaderType type)
     }
 }
 
-void printGlError(std::string text)
-{
-    GLenum err = glGetError();
-    if(err != GL_NO_ERROR)
-    {
-        Logger::Log(text + " GL ERROR");
-        Logger::Log((const char*)gluErrorString(err));
-    }
-}
-
 void initGlew()
 {
     GLenum glew_err;

@@ -7,11 +7,11 @@ class Button: public Item
 {
     RGBA_Color color;
     RGBA_Color hoverColor = Vec4{1,0,0,1};
-    void initShape();
+    void initShape(StorageApi& api);
     void hover();
     void normal();
 public:
-    Button(int width, int height, RGBA_Color color = Vec4{1,1,1,1});
+    Button(int width, int height, StorageApi& api, RGBA_Color color = Vec4{1,1,1,1});
     void SetColor(RGBA_Color color);
     void SetHoverColor(RGBA_Color color);
 

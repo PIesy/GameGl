@@ -14,14 +14,23 @@ class Task: public Invokable
     SharedState<bool> isInvoked = false;
 public:
     Task() {}
+    Task(std::function<void()>&& f);
+
     template<class F>
     Task(F&& f);
+
     template<class F, class... Args>
     Task(F&& f, Args&&... args);
+
     template<class F>
     auto SetTask(F&& f) -> std::future<typename std::result_of<F()>::type>;
+
+    template<class F>
+    auto SetTask(std::function<F()>&& f) -> std::future<typename std::result_of<F()>::type>;
+
     template<class F, class... Args>
     auto SetTask(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>;
+
     Task* Copy() const;
     void Invoke();
     void operator()();
@@ -30,6 +39,18 @@ public:
 
 template<class F>
 auto Task::SetTask(F&& f) -> std::future<typename std::result_of<F()>::type>
+{
+    using ResultType = typename std::result_of<F()>::type;
+    auto package = std::make_shared<std::packaged_task<ResultType()>>(f);
+    std::future<ResultType> result = package->get_future();
+    task = std::function<void()>([package]() { (*package)(); });
+    isValid = true;
+    hasFuture = true;
+    return result;
+}
+
+template<class F>
+auto Task::SetTask(std::function<F()>&& f) -> std::future<typename std::result_of<F()>::type>
 {
     using ResultType = typename std::result_of<F()>::type;
     auto package = std::make_shared<std::packaged_task<ResultType()>>(f);

@@ -1,32 +1,32 @@
 #include "basicuielements.h"
 
-Item::Item(int width, int height)
+Item::Item(int width, int height, StorageApi& api)
 {
     size[0] = width;
     size[1] = height;
-    setData();
+    setData(api);
 }
 
-void Item::setData()
+void Item::setData(StorageApi& api)
 {
-    base = Shapes::Box();
-    graphics = Shapes::Box();
+    base = Shapes::Rectangle(api);
+    graphics = Shapes::Rectangle(api);
 }
 
 void Item::setFactor()
 {
-    factor[0] = size[0] * 1.0 / window->resolution[0];
-    factor[1] = size[1] * 1.0 / window->resolution[1];
+    factor[0] = size[0] * 1.0f / window->resolution[0];
+    factor[1] = size[1] * 1.0f / window->resolution[1];
 }
 
 void Item::rescale()
 {
     unsigned int i;
 
-    for(i = 0; i < graphics.data().vertices.size(); i++)
+    for(i = 0; i < graphics.GetInfo().vertexCount; i++)
     {
-        graphics.data().vertices[i].coords[0] = (base.data().vertices[i].coords[0] + 1) * factor[0] - 1;
-        graphics.data().vertices[i].coords[1] = (base.data().vertices[i].coords[1] + 1) * factor[1] - 1;
+        graphics.GetData().vertices[i].coords[0] = (base.GetData().vertices[i].coords[0] + 1) * factor[0] - 1;
+        graphics.GetData().vertices[i].coords[1] = (base.GetData().vertices[i].coords[1] + 1) * factor[1] - 1;
     }
 }
 
@@ -34,20 +34,19 @@ void Item::reposition()
 {
     unsigned int i;
 
-    for(i = 0; i < graphics.data().vertices.size(); i++)
+    for(i = 0; i < graphics.GetInfo().vertexCount; i++)
     {
-        graphics.data().vertices[i].coords[0] += position[0] * 2.0 / window->resolution[0];
-        graphics.data().vertices[i].coords[1] += position[1] * 2.0 / window->resolution[1];
+        graphics.GetData().vertices[i].coords[0] += position[0] * 2.0 / window->resolution[0];
+        graphics.GetData().vertices[i].coords[1] += position[1] * 2.0 / window->resolution[1];
     }
 }
 
-void Item::setColor(RenderData& target, RGBA_Color color)
+void Item::setColor(Mesh& target, RGBA_Color color)
 {
     unsigned int i, j;
 
-    for (i = 0; i < target.vertices.size(); i++)
-        for (j = 0; j < 4; j ++)
-            target.vertices[i].color[j] = color.color[j];
+    for (i = 0; i < target.GetInfo().vertexCount; i++)
+        target.GetData().vertices[i].color = color.color;
 }
 
 void Item::Update()
@@ -57,19 +56,19 @@ void Item::Update()
     reposition();
 }
 
-GraphicsObject* Item::getGraphics()
+Mesh& Item::GetGraphics()
 {
-    return &graphics;
+    return graphics;
 }
 
-void Item::setPosition(int x, int y)
+void Item::SetPosition(int x, int y)
 {
     position[0] = x;
     position[1] = y;
     reposition();
 }
 
-void Item::setState(int x, int y, bool click)
+void Item::SetState(int x, int y, bool click)
 {
     y = window->resolution[1] - y;
     if ((x > position[0]) && (x < position[0] + size[0]) && (y > position[1]) && (y < position[1] + size[1]))
@@ -103,7 +102,7 @@ void Item::invokeActions()
     }
 }
 
-void Item::setAction(Events event, const GenericInvokable& action)
+void Item::SetAction(Events event, const GenericInvokable& action)
 {
     actions.emplace(integral(event), action);
 }

@@ -1,36 +1,31 @@
 #ifndef RENDERTARGET_H
 #define RENDERTARGET_H
 
-#include "graphicsclasses.h"
-
-enum class RenderTargets {SCREEN, TEXTURE};
-enum class TextureType {Color, Depth, Stencil};
-
-struct TextureParameters
-{
-    unsigned width;
-    unsigned height;
-    TextureType type;
-};
+#include "texture.h"
 
 struct RenderTarget
 {
-    RenderTargets target = RenderTargets::SCREEN;
-    TextureParameters textureParameters;
+    enum RenderTargets {SCREEN, TEXTURE};
+    RenderTargets target = SCREEN;
+    Texture texture;
+
+    RenderTarget() {}
+
+    RenderTarget(const Texture& texture)
+    {
+        target = TEXTURE;
+        this->texture = texture;
+    }
+
+    RenderTarget(Texture&& texture)
+    {
+        target = TEXTURE;
+        this->texture = texture;
+    }
 
     bool operator ==(const RenderTarget& rhs)
     {
         return target == rhs.target;
-    }
-};
-
-class TextureRenderTarget : public RenderTarget
-{
-public:
-    TextureRenderTarget(const TextureParameters& parameters)
-    {
-        target = RenderTargets::TEXTURE;
-        textureParameters = parameters;
     }
 };
 

@@ -28,7 +28,7 @@ void eventsHandlerTest()
 
 void testCc(EventHandler *handler)
 {
-    handler->ThrowEvent(new TestEvent(25));
+    handler->ThrowEvent(TestEvent(25));
 }
 
 void testFunction(TestEvent* event, int* val)

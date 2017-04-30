@@ -11,7 +11,6 @@
 #include "../Core/service/service.h"
 #include "../Math/mathconstants.h"
 #include "uniform.h"
-#include "texture.h"
 
 enum class ShaderType { VertexShader, FragmentShader };
 class Program;
@@ -100,49 +99,6 @@ struct Vertex
     Vec3 normal = {0,0,1};
     Vec4 color = {1,0,0,1};
     Vec2 uv = {0, 0};
-};
-
-struct RenderData
-{
-    std::vector<Vertex> vertices;
-    std::vector<unsigned> indices;
-    Program* program = nullptr;
-};
-
-class GraphicsObject
-{
-    using ConfigMap = std::unordered_map<std::string, ConfigFunction>;
-    std::unordered_map<std::string, std::string> attributes;
-    RenderData object;
-    Texture texture;
-    ConfigMap configurationMap;
-public:
-    GraphicsObject(){}
-    GraphicsObject(RenderData& base);
-    GraphicsObject(RenderData&& base);
-    GraphicsObject(GraphicsObject&& src);
-    GraphicsObject(const GraphicsObject& src);
-    operator RenderData&();
-    GraphicsObject& operator =(const GraphicsObject& src);
-    GraphicsObject& operator =(const RenderData& src);
-    RenderData& data();
-    void setAttribute(const std::string& attributeName, const std::string& attributeValue);
-    const std::string& getAttribute(const std::string& attributeName) const;
-    void Scale(float x, float y = 1, float z = 1);
-    void Append(const RenderData& src, float offset_x = 0, float offset_y = 0);
-    Texture getTexture() const;
-    void setTexture(const Texture& value);
-    void setConfigurationFor(const std::string& param, const ConfigFunction& value);
-
-    template<typename T>
-    void Configure(const std::string& param, const T& value)
-    {
-        setConfigurationFor(param, [=](Program& p) { p.setUniform(value, param); });
-    }
-
-    void removeConfigurationFor(const std::string& param);
-
-    ConfigMap& getConfigurationMap();
 };
 
 class RenderingContext

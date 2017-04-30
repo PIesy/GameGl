@@ -9,7 +9,7 @@
 
 using EventInvokable = GenericInvokable;
 using EventFilter = std::function<bool(EventInterface*)>;
-const static EventFilter allowAll = [](EventInterface*) { return true; };
+static const EventFilter allowAll = [](EventInterface*) { return true; };
 
 class Invalid {};
 
@@ -18,7 +18,8 @@ class Event: public EventInterface
 {
     T payload;
 public:
-    Event(T payload, int hint = -1) { this->payload = payload; setHint(hint); }
+    Event(T payload, int hint = -1) { this->payload = payload;
+        SetHint(hint); }
     virtual ~Event() {}
     const T& getPayload() const { return payload; }
 };
@@ -46,12 +47,26 @@ class EventHandler
     std::unordered_map<int, std::type_index> listener_ids;
     bool checkListenerType(EventListener listener);
     int createListener(std::type_index type, const EventInvokable& action, const EventFilter& filter);
+    void throwEvent(EventInterface* event, std::type_index type);
 public:
     EventHandler();
+
+    template<typename T>
+    void ThrowEvent(T&& event)
+    {
+        EventInterface* copy = new T(event);
+        throwEvent(copy, typeid(T));
+    }
+
     void ThrowEvent(EventInterface* event);
     int setListener(EventListener listener);
+
     template<typename T>
-    int setListener(const EventInvokable& action, const EventFilter& filter = allowAll) { return createListener(getType<T>(), action, filter); }
+    int setListener(const EventInvokable& action, const EventFilter& filter = allowAll)
+    {
+        return createListener(typeid(T), action, filter);
+    }
+
     bool removeListener(int listenerId);
 };
 

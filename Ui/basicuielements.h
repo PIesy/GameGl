@@ -13,24 +13,26 @@ protected:
     WindowState* window = nullptr;
     float factor[2] = {0,0};
     int position[2] = {0,0};
-    GraphicsObject base;
-    GraphicsObject graphics;
-    std::unordered_multimap<typename std::underlying_type<Events>::type, GenericInvokable> actions;
+    Mesh base;
+    Mesh graphics;
+    std::unordered_multimap<std::underlying_type_t<Events>, GenericInvokable> actions;
+
     void setFactor();
-    void setData();
+    void setData(StorageApi& api);
     void rescale();
     void reposition();
     void invokeActions();
-    void setColor(RenderData& target, RGBA_Color color);
+    void setColor(Mesh& target, RGBA_Color color);
 public:
     Item(){}
-    Item(int width, int height);
-    void Update();
-    GraphicsObject* getGraphics();
-    void setPosition(int x, int y);
-    void setState(int x, int y, bool click);
-    void setAction(Events event, const GenericInvokable& action);
-    void Bind(WindowState* window);
+    Item(int width, int height, StorageApi& api);
+
+    void Update() override;
+    Mesh& GetGraphics() override;
+    void SetPosition(int x, int y) override;
+    void SetState(int x, int y, bool click) override;
+    void SetAction(Events event, const GenericInvokable& action) override;
+    void Bind(WindowState* window) override;
 };
 
 #endif // BASICUIELEMENTS_H

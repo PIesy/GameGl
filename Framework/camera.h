@@ -12,8 +12,10 @@ class Camera: public WorldObject
     Vec3 lookDirection;
 public:
     Camera();
+
     Mat4 GetCameraMatrix();
     Mat4 GetPerspectiveMatrix();
+    Mat4 GetOrthographicMatrix();
     float getNearPlane() const;
     void setNearPlane(float value);
     float getFarPlane() const;

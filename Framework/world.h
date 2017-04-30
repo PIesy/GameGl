@@ -21,7 +21,7 @@ public:
     Camera& addCamera(const Vec3& position);
     void removeCamera(Camera& cam);
 
-    DrawableWorldObject& addObject(const GraphicsObject& obj, const Vec3& position);
+    DrawableWorldObject& AddObject(const Mesh& obj, const Vec3& position);
     void removeObject(DrawableWorldObject& obj);
 
     std::list<DrawableWorldObject>& getDrawableObjects();

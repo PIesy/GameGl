@@ -10,7 +10,7 @@ struct MouseData
     int coordinates[2];
     int relativeCoordinates[2];
     Button button;
-    bool state;
+    bool state = false;
 };
 
 struct WindowData

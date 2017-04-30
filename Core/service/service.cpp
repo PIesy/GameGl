@@ -1,7 +1,7 @@
 #include "service.h"
 
 
-ServiceContainer::ServiceContainer(Service *service)
+ServiceContainer::ServiceContainer(Service* service)
 {
     this->service = std::shared_ptr<Service>(service);
     isEmpty = false;

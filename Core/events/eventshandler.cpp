@@ -1,4 +1,5 @@
 #include "eventshandler.h"
+#include "../../Logger/logger.h"
 
 void EventListener::listenFor(std::type_index type)
 {
@@ -70,7 +71,10 @@ void EventHandler::ThrowEvent(EventInterface* event)
             for(std::pair<const int, EventListener>& listener: listeners.at(getType(*event)))
                 listener.second.Process(packedEvent.get());
         }
-        catch(std::out_of_range) {}
+        catch(std::out_of_range)
+        {
+            Logger::Log(std::string("No listeners registered for ") + getType(*event).name());
+        }
     }));
 }
 
@@ -81,4 +85,21 @@ int EventHandler::createListener(std::type_index type, const EventInvokable& act
     listener.listenFor(type);
     listener.setHandler(action, filter);
     return setListener(listener);
+}
+
+void EventHandler::throwEvent(EventInterface* event, std::type_index type)
+{
+    worker.setTask(Task([event, this, type]()
+    {
+        std::unique_ptr<EventInterface> packedEvent(event);
+        try
+        {
+            for(std::pair<const int, EventListener>& listener: listeners.at(type))
+                listener.second.Process(packedEvent.get());
+        }
+        catch(std::out_of_range)
+        {
+            Logger::Log(std::string("No listeners registered for ") + getType(*event).name());
+        }
+    }));
 }

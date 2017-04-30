@@ -3,23 +3,23 @@
 void ButtonOnHover(void*, Button* btn);
 void ButtonOnExit(void*, Button* btn);
 
-Button::Button(int width, int height, RGBA_Color color)
+Button::Button(int width, int height, StorageApi& api, RGBA_Color color)
 {
     Action<void*> onHover(ButtonOnHover, std::placeholders::_1, this);
     Action<void*> onExit(ButtonOnExit, std::placeholders::_1, this);
     size[0] = width;
     size[1] = height;
-    initShape();
+    initShape(api);
     this->color = color;
     setColor(graphics, color);
-    setAction(Events::onHover, onHover);
-    setAction(Events::onExit, onExit);
+    SetAction(Events::onHover, onHover);
+    SetAction(Events::onExit, onExit);
 }
 
-void Button::initShape()
+void Button::initShape(StorageApi& api)
 {
-    base = Shapes::Box();
-    graphics = Shapes::Box();
+    base = Shapes::Rectangle(api);
+    graphics = Shapes::Rectangle(api);
 }
 
 void Button::SetColor(RGBA_Color color)
