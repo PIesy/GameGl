@@ -1,10 +1,15 @@
 #include "drawableworldobject.h"
 
+DrawableWorldObject::DrawableWorldObject()
+{
+
+}
+
 Mat4 DrawableWorldObject::GetPositionMatrix()
 {
     Mat4 result(1.0f);
 
-    result[3] = Vec4(getPosition(), 1.0f);
+    result[3] = Vec4(GetPosition(), 1.0f);
     result[0][0] = scale;
     result[1][1] = scale;
     result[2][2] = scale;
@@ -26,7 +31,7 @@ Mat4 DrawableWorldObject::GetRotation() const
     return rotation;
 }
 
-void DrawableWorldObject::setRotation(const Mat4& value)
+void DrawableWorldObject::SetRotation(const Mat4& value)
 {
     rotation = value;
 }
@@ -53,17 +58,23 @@ bool DrawableWorldObject::operator==(const DrawableWorldObject& rhs)
     return rhs.mesh.GetId() == mesh.GetId();
 }
 
-DrawableWorldObject::DrawableWorldObject()
-{
-
-}
-
 Mesh& DrawableWorldObject::GetMesh()
 {
     return mesh;
 }
 
-void DrawableWorldObject::setMesh(const Mesh& mesh)
+void DrawableWorldObject::SetMesh(const Mesh& mesh)
 {
     DrawableWorldObject::mesh = mesh;
 }
+
+RenderFlags DrawableWorldObject::GetRenderFlags() const
+{
+    return renderFlags;
+}
+
+void DrawableWorldObject::SetRenderFlags(RenderFlags renderFlags)
+{
+    DrawableWorldObject::renderFlags = renderFlags;
+}
+

@@ -1,8 +1,9 @@
 #ifndef MATHDEFINES_H
 #define MATHDEFINES_H
 
-#include "glm/matrix.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include <glm/matrix.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using Mat4 = glm::mat4x4;
 using Mat3 = glm::mat3x3;

@@ -96,6 +96,11 @@ void gl::GlTexture::SetTWrapping(gl::WrappingType type)
     gl::texture::setParameter(texture, GL_TEXTURE_WRAP_T, integral(type));
 }
 
+void gl::GlTexture::SetRWrapping(gl::WrappingType type)
+{
+    gl::texture::setParameter(texture, GL_TEXTURE_WRAP_R, integral(type));
+}
+
 void gl::GlTexture::Allocate(gl::InternalFormat format, unsigned width, unsigned height, unsigned depth,
                              unsigned mipmapsCount)
 {
@@ -121,8 +126,8 @@ void gl::GlTexture::Allocate(InternalFormat format, unsigned width, unsigned hei
     switch (type)
     {
         case TextureType::Tex2d:
-        case TextureType::TexCube:
         case TextureType::Tex1dArray:
+        case TextureType::TexCube:
             gl::texture::allocateStorage(texture, mipmapsCount + 1, integral(format), width, height);
             break;
         default:

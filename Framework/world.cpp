@@ -24,7 +24,7 @@ Camera& World::addCamera(const Vec3& position)
 {
     Camera cam;
 
-    cam.setPosition(position);
+    cam.SetPosition(position);
     cameras.push_back(cam);
     return cameras.back();
 }
@@ -73,8 +73,8 @@ DrawableWorldObject& World::AddObject(const Mesh& obj, const Vec3& position)
 {
     DrawableWorldObject drawableObject;
 
-    drawableObject.setMesh(obj);
-    drawableObject.setPosition(position);
+    drawableObject.SetMesh(obj);
+    drawableObject.SetPosition(position);
     drawableObject.SetScale(scaleFactor);
     drawableObjects.push_back(drawableObject);
     return drawableObjects.back();

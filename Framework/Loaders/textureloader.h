@@ -13,6 +13,7 @@ class TextureLoader
 public:
     TextureLoader(StorageApi& storage);
     Texture Load(const std::string& path);
+    Texture LoadCubemap(const std::vector<std::string>& files);
 };
 
 

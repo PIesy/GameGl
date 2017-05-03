@@ -36,7 +36,7 @@ class GlRenderer: public Renderer
     void draw();
     void update();
 public:
-    GlRenderer(SdlGLContext& context);
+    explicit GlRenderer(SdlGLContext& context);
     void Start();
     void Stop();
     void Pause();

@@ -1,11 +1,11 @@
 #include "basicshapes.h"
 
-Mesh Shapes::Plane(int xSize, int ySize, StorageApi& api, const std::string& name, Vec4 color)
+Mesh Shapes::Plane(int xSize, int ySize, StorageApi& api, const std::string& name, Vec4&& color)
 {
     float vertCoordsX[] = {0, 0, xSize, xSize};
     float vertCoordsZ[] = {0, ySize, ySize, 0};
     float texCoordsU[] = {0, 0, 1, 1};
-    float texCoordsV[] = {1, 0, 0, 1};
+    float texCoordsV[] = {0, 1, 1, 0};
 
     std::vector<unsigned> indices = {0, 1, 2,  2, 3, 0};
     std::vector<Vertex> vertices;
@@ -27,10 +27,10 @@ Mesh Shapes::Plane(int xSize, int ySize, StorageApi& api, const std::string& nam
 
 Mesh Shapes::Rectangle(StorageApi& api, const std::string& name)
 {
-    float coordsX[] = {0, 0, 1, 1};
-    float coordsY[] = {0, 1, 1, 0};
+    float coordsX[] = {-1, -1, 1, 1};
+    float coordsY[] = {-1, 1, 1, -1};
     float u[] = {0, 0, 1, 1};
-    float v[] = {1, 0, 0, 1};
+    float v[] = {0, 1, 1, 0};
 
     std::vector<unsigned> indices = {0, 1, 2,  2, 3, 0};
     std::vector<Vertex> vertices;

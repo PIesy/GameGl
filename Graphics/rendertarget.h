@@ -11,16 +11,14 @@ struct RenderTarget
 
     RenderTarget() {}
 
-    RenderTarget(const Texture& texture)
+    explicit RenderTarget(const Texture& texture) : texture(texture)
     {
         target = TEXTURE;
-        this->texture = texture;
     }
 
-    RenderTarget(Texture&& texture)
+    explicit RenderTarget(Texture&& texture) : texture(texture)
     {
         target = TEXTURE;
-        this->texture = texture;
     }
 
     bool operator ==(const RenderTarget& rhs)

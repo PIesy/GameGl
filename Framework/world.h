@@ -11,7 +11,7 @@ class World
     std::list<Camera> cameras;
     std::list<DrawableWorldObject> drawableObjects;
     Vec3 worldSize = {1000.0f, 1000.0f, 1000.0f};
-    float scaleFactor = 0.1;
+    float scaleFactor = 1;
 public:
     World();
 

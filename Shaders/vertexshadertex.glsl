@@ -20,7 +20,6 @@ void main(void)
 {
     vec4 result = vec4(position, 1.0f);
     vec4 camView = WtoCMatrix * worldRotation * MtoWMatrix * rotation * result;
-    camView = camView; //+ vec4(offset, 0.0f, 0.0f);
 
     gl_Position = perspective * camView;
 }

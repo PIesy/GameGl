@@ -12,7 +12,7 @@
 #include "../Math/mathconstants.h"
 #include "uniform.h"
 
-enum class ShaderType { VertexShader, FragmentShader };
+enum class ShaderType { VertexShader, FragmentShader, GeometryShader };
 class Program;
 
 using WindowSize = Size;
@@ -55,36 +55,23 @@ public:
     virtual InvokationResult setUniform(const std::string& name, const UniformValue& value) = 0;
 
     template<typename T>
-    InvokationResult setUniform(const T& value, const std::string& name, int count = 1)
-    {
-        T v = value;
-        return setUniform(std::move(v), name, count);
-    }
-
-    template<typename T>
-    InvokationResult setUniform(T& value, const std::string& name, int count = 1)
-    {
-        return setUniform(std::move(value), name, count);
-    }
-
-    template<typename T>
-    InvokationResult setUniform(T&& value, const std::string& name, int count = 1);
+    InvokationResult SetUniform(const T& value, const std::string& name, int count = 1);
 };
 
 template<>
-InvokationResult Program::setUniform<Vec4>(Vec4&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<Vec4>(const Vec4& value, const std::string& name, int count);
 template<>
-InvokationResult Program::setUniform<Vec3>(Vec3&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<Vec3>(const Vec3& value, const std::string& name, int count);
 template<>
-InvokationResult Program::setUniform<Vec2>(Vec2&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<Vec2>(const Vec2& value, const std::string& name, int count);
 template<>
-InvokationResult Program::setUniform<Mat4>(Mat4&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<Mat4>(const Mat4& value, const std::string& name, int count);
 template<>
-InvokationResult Program::setUniform<Mat3>(Mat3&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<Mat3>(const Mat3& value, const std::string& name, int count);
 template<>
-InvokationResult Program::setUniform<float>(float&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<float>(const float& value, const std::string& name, int count);
 template<>
-InvokationResult Program::setUniform<int>(int&& value, const std::string& name, int count);
+InvokationResult Program::SetUniform<int>(const int& value, const std::string& name, int count);
 
 struct RGBA_Color
 {

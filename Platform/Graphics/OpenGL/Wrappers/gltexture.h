@@ -94,6 +94,7 @@ namespace gl {
         void SetMagFilter(FilterType type);
         void SetSWrapping(WrappingType type);
         void SetTWrapping(WrappingType type);
+        void SetRWrapping(WrappingType type);
         void SetComparisonMode(CompareFunction function, CompareMode mode);
 
         GLuint GetId() const;

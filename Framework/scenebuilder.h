@@ -6,10 +6,10 @@
 
 class SceneBuilder
 {
-    RenderPath path;
+    std::vector<std::pair<RenderStep, RenderFlags>> steps;
 public:
     Scene BuildScene(World& world, Camera& camera);
-    void AddStep(const RenderStep& step);
+    void AddStep(const RenderStep& step, RenderFlags flags = RenderFlags::Default);
 };
 
 #endif // SCENEBUILDER_H

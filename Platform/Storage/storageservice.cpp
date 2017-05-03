@@ -77,7 +77,7 @@ StorageDescriptor StorageService::place(const void* ptr, size_t size)
 
 void StorageService::clearAll()
 {
-    std::for_each(storage.begin(), storage.end(), [](auto item)
+    std::for_each(storage.begin(), storage.end(), [](auto& item)
     {
         free(item.second);
     });

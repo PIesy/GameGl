@@ -1,5 +1,6 @@
 #include "glrenderer.h"
 #include "../../../Logger/logger.h"
+#include "gltexturefactory.h"
 
 GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 {
@@ -86,12 +87,9 @@ void GlRenderer::update()
 
 void GlRenderer::init()
 {
-    gl::setClearColor(0.2, 0.2, 0.2, 1);
-    gl::enable(GL_BLEND);
-    gl::enable(GL_DEPTH_TEST);
-    //gl::enable(GL_CULL_FACE);
+    gl::setClearColor(0.0, 0.0, 0.0, 0.0);
+    gl::enable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     gl::culling::setFrontFace(GL_CW);
-    gl::culling::cullFace(GL_BACK);
     gl::depthbuffer::enableWrite(GL_TRUE);
     gl::depthbuffer::setFunction(GL_LEQUAL);
     gl::depthbuffer::setRange(0.0f, 1.0f);
@@ -112,16 +110,14 @@ void GlRenderer::render()
     }
     if (!emptyPath)
     {
-        std::vector<glhelpers::FramebufferObject> fbos;
+        ViewportSize size = viewportSize;
         for (RenderStep& step : currentScene.path.steps)
         {
-            gl::GlFrameBufferContainer frameBuffer = glContext.BuildFrameBuffer(step.targets);
+            glContext.UpdateState(step.attributes);
+            gl::GlFrameBufferContainer& frameBuffer = glContext.BuildFrameBuffer(step, currentScene.path.steps, size.width, size.height);
             frameBuffer.frameBuffer.Bind();
-            if (frameBuffer.frameBuffer.GetId() == 0)
-                update();
-            gl::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glContext.UpdateFrameBuffer(step.attributes);
             step.preConfig(*step.prog);
-            step.prog->setUniform(0, "useTex");
 
             for (int id : step.objects)
             {
@@ -132,20 +128,20 @@ void GlRenderer::render()
                 meshObject.vertexArray.Bind();
 
                 int bindPoint = 0;
-                if (!step.genericTexture.info.name.empty())
-                    globalData.Get().textureMap.at(step.genericTexture.info.name).Bind(bindPoint++);
-
+                for (Texture& genericTexture : step.genericTextures)
+                    glContext.LoadTexture(genericTexture).Bind(bindPoint++);
                 if (!meshObject.textures.empty())
                 {
-                    step.prog->setUniform(1, "useTex");
                     for (gl::GlTexture& texture : meshObject.textures)
                         texture.Bind(bindPoint++);
                 }
+
                 step.prog->Use();
                 gl::drawElements(GL_TRIANGLES, mesh.mesh.GetInfo().indexCount, GL_UNSIGNED_INT, nullptr);
                 gl::program::use(0);
             }
         }
+        glContext.ClearFrameState();
     }
 }
 

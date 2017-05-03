@@ -6,7 +6,7 @@
 
 struct RenderPath
 {
-    std::list<RenderStep> steps;
+    std::vector<RenderStep> steps;
 };
 
 #endif // RENDERPATH_H

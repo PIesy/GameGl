@@ -53,7 +53,7 @@ namespace gl {
         GLuint frameBuffer = 0;
     public:
         GlFrameBuffer();
-        GlFrameBuffer(unsigned id);
+        explicit GlFrameBuffer(unsigned id);
         GlFrameBuffer(const GlFrameBuffer&) = delete;
         GlFrameBuffer& operator =(const GlFrameBuffer& src) = delete;
         GlFrameBuffer(GlFrameBuffer&& src);

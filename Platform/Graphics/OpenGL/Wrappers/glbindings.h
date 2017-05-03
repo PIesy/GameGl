@@ -51,6 +51,8 @@ namespace framebuffer {
     void setTexture(GLuint target, GLenum attachment, GLuint texture, GLint level);
     void setDrawBuffers(GLuint target, GLsizei count, const GLenum* buffers);
     GLenum checkStatus(GLuint target, GLenum bindPoint);
+    void blit(GLuint src, GLuint target, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1,
+              GLint targetX0, GLint targetY0, GLint targetX1, GLint targetY1, GLbitfield bufferMask, GLenum filter);
 }
 
 namespace renderbuffer {

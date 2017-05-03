@@ -4,6 +4,7 @@
 #include "graphicsclasses.h"
 #include "rendertarget.h"
 #include "rendering_attributtes.h"
+#include "framebufferproperties.h"
 #include <list>
 #include <functional>
 
@@ -11,9 +12,10 @@ struct RenderStep
 {
     std::list<int> objects;
     std::list<RenderTarget> targets;
-    RenderingAttributes attributes;
+    RenderingAttributes attributes = defaultAttributes;
+    FrameBufferProperties frameBufferProperties;
     Program* prog;
-    Texture genericTexture;
+    std::list<Texture> genericTextures;
     ConfigFunction preConfig = defaultConfig;
     ConfigFunction postConfig = defaultConfig;
 };

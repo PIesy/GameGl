@@ -1,41 +1,41 @@
 #include "camera.h"
 
-float Camera::getNearPlane() const
+float Camera::GetNearPlane() const
 {
     return nearPlane;
 }
 
-void Camera::setNearPlane(float value)
+void Camera::SetNearPlane(float value)
 {
     nearPlane = value;
 }
 
-float Camera::getFarPlane() const
+float Camera::GetFarPlane() const
 {
     return farPlane;
 }
 
-void Camera::setFarPlane(float value)
+void Camera::SetFarPlane(float value)
 {
     farPlane = value;
 }
 
-float Camera::getAspectRatio() const
+float Camera::GetAspectRatio() const
 {
     return aspectRatio;
 }
 
-void Camera::setAspectRatio(float value)
+void Camera::SetAspectRatio(float value)
 {
     aspectRatio = value;
 }
 
-Vec3 Camera::getLookDirection() const
+Vec3 Camera::GetLookDirection() const
 {
     return lookDirection;
 }
 
-void Camera::setLookDirection(const Vec3& value)
+void Camera::SetLookDirection(const Vec3& value)
 {
     lookDirection = glm::normalize(value);
 }
@@ -50,7 +50,7 @@ bool Camera::operator ==(const Camera& rhs)
         return false;
     if (aspectRatio != rhs.aspectRatio)
         return false;
-    return getPosition() == rhs.getPosition();
+    return GetPosition() == rhs.GetPosition();
 }
 
 Camera::Camera()
@@ -58,32 +58,25 @@ Camera::Camera()
 
 }
 
-Mat4 Camera::GetCameraMatrix()
+Mat4 Camera::GetCameraMatrix() const
 {
     Vec3 verticalDirection = {0, 1, 0};
     if (lookDirection == -verticalDirection || lookDirection == verticalDirection)
-        verticalDirection = {1, 0, 0};
-
-    Vec3 rightDirection = glm::normalize(glm::cross(lookDirection, verticalDirection));
-    Vec3 camVerticalDirection = glm::cross(rightDirection, lookDirection);
-
-    Mat4 rot(1.0f);
-    rot[0] = Vec4(rightDirection, 0.0f);
-    rot[1] = Vec4(camVerticalDirection, 0.0f);
-    rot[2] = Vec4(-lookDirection, 0.0f);
-    rot = glm::transpose(rot);
-
-    Mat4 translationMat(1.0f);
-    translationMat[3] = Vec4(-getPosition(), 1.0f);
-    return rot * translationMat;
+        verticalDirection = {0, 0, 1};
+    return GetCameraMatrix(lookDirection, verticalDirection);
 }
 
-Mat4 Camera::GetPerspectiveMatrix()
+Mat4 Camera::GetPerspectiveMatrix() const
 {
-    return PerspectiveMatrix(aspectRatio, 90.0f, nearPlane, farPlane);
+    return glm::perspective(glm::radians(90.0f), aspectRatio, nearPlane, farPlane);
 }
 
-Mat4 Camera::GetOrthographicMatrix()
+Mat4 Camera::GetOrthographicMatrix() const
 {
-    return orthographicProjectionMatrix({-100, 100, -100, 100}, nearPlane, farPlane);
+    return glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, nearPlane, farPlane);
+}
+
+Mat4 Camera::GetCameraMatrix(const Vec3& lookDirection, const Vec3& verticalDirection) const
+{
+    return glm::lookAt(GetPosition(), GetPosition() + lookDirection, verticalDirection);
 }

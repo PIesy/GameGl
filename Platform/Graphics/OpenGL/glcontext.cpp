@@ -5,8 +5,8 @@
 #include "glcontext.h"
 #include "graphicscontextdata.h"
 #include "gltexturefactory.h"
-#include "glframebuffercontainer.h"
 #include "../../../Logger/logger.h"
+#include <algorithm>
 
 
 gl::GlTexture& GlContext::LoadTexture(const Texture& texture)
@@ -46,7 +46,6 @@ void GlContext::configureTexture(gl::GlTexture& texture, const TextureParameters
     gl::FilterType filterType;
     switch (parameters.sampling)
     {
-
         case TextureSampling::Linear:
             filterType = gl::FilterType::Linear;
             break;
@@ -56,6 +55,7 @@ void GlContext::configureTexture(gl::GlTexture& texture, const TextureParameters
 
     texture.SetSWrapping(wrappingType);
     texture.SetTWrapping(wrappingType);
+    texture.SetRWrapping(wrappingType);
     texture.SetMinFilter(filterType);
     texture.SetMagFilter(filterType);
 
@@ -99,52 +99,231 @@ gl::GlMeshObject& GlContext::LoadMesh(const Mesh& mesh)
     return result;
 }
 
-gl::GlFrameBufferContainer GlContext::BuildFrameBuffer(const std::list<RenderTarget>& targets)
+gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, const std::vector<RenderStep>& steps,
+                                                        unsigned viewportWidth, unsigned viewportHeight)
 {
+    const std::list<RenderTarget>& targets = step.targets;
+
+    if (step.frameBufferProperties.frameBufferType == FrameBufferProperties::REUSE_FROM_STEP)
+    {
+        frameBuffers.emplace_back(gl::GlFrameBufferContainer{});
+        gl::GlFrameBufferContainer& result = frameBuffers[step.frameBufferProperties.stepId];
+        if (result.frameBuffer.GetId() == 0)
+            gl::setViewport(viewportWidth, viewportHeight);
+        else
+        {
+            TextureInfo info = steps[step.frameBufferProperties.stepId].targets.begin()->texture.info;
+            gl::setViewport(info.width, info.height);
+        }
+        return result;
+    }
+
     if (targets.empty() || targets.begin()->target == RenderTarget::SCREEN)
-        return gl::GlFrameBufferContainer{};
+    {
+        frameBuffers.emplace_back(gl::GlFrameBufferContainer{});
+        if (step.frameBufferProperties.frameBufferType == FrameBufferProperties::NEW_COPY_BUFFERS_FROM)
+            blitFrameBuffers(frameBuffers[step.frameBufferProperties.stepId], frameBuffers.back(), step.frameBufferProperties, viewportWidth, viewportHeight);
+        gl::setViewport(viewportWidth, viewportHeight);
+        return frameBuffers.back();
+    }
 
-    gl::GlFrameBufferContainer result;
-    result.frameBuffer = gl::GlFrameBuffer{};
-
+    frameBuffers.push_back({gl::GlFrameBuffer{}, std::vector<gl::GlRenderBuffer>{}});
+    gl::GlFrameBufferContainer& result = frameBuffers.back();
+    TextureInfo info = targets.begin()->texture.info;
+    GLbitfield clearMask = 0;
     int i = 0;
     bool depthInitialized = false;
-
+    bool stencilInitialized = false;
     std::vector<gl::FrameBufferAttachment> drawBuffers;
+
     for (const RenderTarget& target : targets)
     {
         switch (target.texture.info.target)
         {
             case TextureBindpoint::Color:
+                clearMask |= GL_COLOR_BUFFER_BIT;
                 drawBuffers.push_back(gl::FrameBufferAttachment::Color + i);
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Color + i, LoadTexture(target.texture), 0);
                 break;
             case TextureBindpoint::Depth:
                 depthInitialized = true;
+                clearMask |= GL_DEPTH_BUFFER_BIT;
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Depth, LoadTexture(target.texture), 0);
                 break;
             case TextureBindpoint::Stencil:
+                clearMask |= GL_STENCIL_BUFFER_BIT;
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Stencil, LoadTexture(target.texture), 0);
                 break;
             case TextureBindpoint::DepthStencil:
+                depthInitialized = true;
+                stencilInitialized = true;
+                clearMask |= GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::DepthStencil, LoadTexture(target.texture), 0);
         }
     }
 
-    TextureInfo info = targets.begin()->texture.info;
-    if (!depthInitialized)
+    if (!depthInitialized && state.depthTest)
     {
+        clearMask &= GL_DEPTH_BUFFER_BIT;
         result.renderBuffers.emplace_back(gl::GlRenderBuffer{});
         gl::GlRenderBuffer& depthBuffer = result.renderBuffers.back();
         depthBuffer.SetStorage(gl::InternalFormat::Depth32, info.width, info.height);
         result.frameBuffer.BindRenderBuffer(gl::FrameBufferAttachment::Depth, depthBuffer);
     }
+
+    if (!stencilInitialized && state.stencilTest)
+    {
+        clearMask &= GL_STENCIL_BUFFER_BIT;
+        result.renderBuffers.emplace_back(gl::GlRenderBuffer{});
+        gl::GlRenderBuffer& stencilBuffer = result.renderBuffers.back();
+        stencilBuffer.SetStorage(gl::InternalFormat::Stencil, info.width, info.height);
+        result.frameBuffer.BindRenderBuffer(gl::FrameBufferAttachment::Stencil, stencilBuffer);
+    }
+
     if (drawBuffers.empty())
         result.frameBuffer.SetDrawBuffers({gl::FrameBufferAttachment::None});
     else
         result.frameBuffer.SetDrawBuffers(drawBuffers);
+
     if (result.frameBuffer.GetStatus(gl::FrameBufferTarget::Both) != gl::FrameBufferStatus::Complete)
-        Logger::Log("Something is very wrong");
+        Logger::Log("Could not create framebuffer");
+
     gl::setViewport(info.width, info.height);
+    if (clearMask)
+        gl::clear(clearMask);
     return result;
+}
+
+void GlContext::UpdateState(const RenderingAttributes& attributes)
+{
+    // Depth test
+    if (std::find(attributes.begin(), attributes.end(), RenderingAttribute::DepthTest) != attributes.end())
+    {
+        if (!state.depthTest)
+        {
+            state.depthTest = true;
+            gl::enable(GL_DEPTH_TEST);
+        }
+    }
+    else
+    {
+        if (state.depthTest)
+        {
+            state.depthTest = false;
+            gl::disable(GL_DEPTH_TEST);
+        }
+    }
+
+
+    // Blend
+    if (std::find(attributes.begin(), attributes.end(), RenderingAttribute::Blend) != attributes.end())
+    {
+        if (!state.blend)
+        {
+            state.blend = true;
+            gl::enable(GL_BLEND);
+        }
+    }
+    else
+    {
+        if (state.blend)
+        {
+            state.blend = false;
+            gl::disable(GL_BLEND);
+        }
+    }
+
+    // Stencil
+    if (std::find(attributes.begin(), attributes.end(), RenderingAttribute::StencilTest) != attributes.end())
+    {
+        if (!state.stencilTest)
+        {
+            state.stencilTest = true;
+            gl::enable(GL_STENCIL_TEST);
+        }
+    }
+    else
+    {
+        if (state.stencilTest)
+        {
+            state.stencilTest = false;
+            gl::disable(GL_STENCIL_TEST);
+        }
+    }
+
+    // Culling
+    bool cullBack;
+
+    if ((cullBack = std::find(attributes.begin(), attributes.end(), RenderingAttribute::CullBack) != attributes.end())
+        || std::find(attributes.begin(), attributes.end(), RenderingAttribute::CullFace) != attributes.end())
+    {
+        if (!state.culling)
+        {
+            state.culling = true;
+            gl::enable(GL_CULL_FACE);
+            if (cullBack)
+            {
+                if (state.cullFace)
+                {
+                    state.cullFace = false;
+                    gl::culling::cullFace(GL_BACK);
+                }
+            }
+            else
+            {
+                if (!state.cullFace)
+                {
+                    state.cullFace = true;
+                    gl::culling::cullFace(GL_FRONT);
+                }
+            }
+        }
+    }
+    else
+    {
+        if (state.culling)
+        {
+            state.culling = false;
+            gl::disable(GL_CULL_FACE);
+        }
+    }
+}
+
+void GlContext::UpdateFrameBuffer(const RenderingAttributes& attributes)
+{
+    if (std::find(attributes.begin(), attributes.end(), RenderingAttribute::ClearBuffer) != attributes.end())
+    {
+        GLbitfield clearFlags = GL_COLOR_BUFFER_BIT;
+
+        if (state.depthTest)
+            clearFlags |= GL_DEPTH_BUFFER_BIT;
+        if (state.stencilTest)
+            clearFlags |= GL_STENCIL_BUFFER;
+        gl::clear(clearFlags);
+    }
+}
+
+void GlContext::ClearFrameState()
+{
+    frameBuffers.clear();
+    frameBuffers.shrink_to_fit();
+}
+
+void GlContext::blitFrameBuffers(gl::GlFrameBufferContainer& src, gl::GlFrameBufferContainer& target, const FrameBufferProperties& properties,
+                                 unsigned width, unsigned height)
+{
+    if (properties.sourceBuffer == FrameBufferProperties::ALL || properties.sourceBuffer & FrameBufferProperties::COLOR)
+        gl::framebuffer::blit(src.frameBuffer.GetId(), target.frameBuffer.GetId(), 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+    GLbitfield mask = 0;
+    if (properties.sourceBuffer == FrameBufferProperties::ALL)
+        mask |= GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT;
+    else
+    {
+        if (properties.sourceBuffer & FrameBufferProperties::DEPTH)
+            mask |= GL_DEPTH_BUFFER_BIT;
+        if (properties.sourceBuffer & FrameBufferProperties::STENCIL)
+            mask |= GL_STENCIL_BUFFER_BIT;
+    }
+    gl::framebuffer::blit(src.frameBuffer.GetId(), target.frameBuffer.GetId(), 0, 0, width, height, 0, 0, width, height, mask, GL_NEAREST);
 }

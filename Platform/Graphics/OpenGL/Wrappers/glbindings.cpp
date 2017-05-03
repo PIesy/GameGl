@@ -206,6 +206,13 @@ void gl::framebuffer::setDrawBuffers(GLuint target, GLsizei count, const GLenum*
     gl::printGlError("glNamedFramebufferDrawBuffers");
 }
 
+void gl::framebuffer::blit(GLuint src, GLuint target, GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint targetX0, GLint targetY0, GLint targetX1,
+                           GLint targetY1, GLbitfield bufferMask, GLenum filter)
+{
+    glBlitNamedFramebuffer(src, target, srcX0, srcY0, srcX1, srcY1, targetX0, targetY0, targetX1, targetY1, bufferMask, filter);
+    gl::printGlError("glBlitNamedFramebuffer");
+}
+
 //renderbuffer
 
 void gl::renderbuffer::generate(int count, GLuint* renderbuffers)

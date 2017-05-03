@@ -1,11 +1,11 @@
 #include "worldobject.h"
 
-const Vec3& WorldObject::getPosition() const
+const Vec3& WorldObject::GetPosition() const
 {
     return position;
 }
 
-void WorldObject::setPosition(const Vec3& value)
+void WorldObject::SetPosition(const Vec3& value)
 {
     position = value;
 }

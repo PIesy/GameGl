@@ -13,17 +13,18 @@ class Camera: public WorldObject
 public:
     Camera();
 
-    Mat4 GetCameraMatrix();
-    Mat4 GetPerspectiveMatrix();
-    Mat4 GetOrthographicMatrix();
-    float getNearPlane() const;
-    void setNearPlane(float value);
-    float getFarPlane() const;
-    void setFarPlane(float value);
-    float getAspectRatio() const;
-    void setAspectRatio(float value);
-    Vec3 getLookDirection() const;
-    void setLookDirection(const Vec3& value);
+    Mat4 GetCameraMatrix() const;
+    Mat4 GetCameraMatrix(const Vec3& lookDirection, const Vec3& verticalDirection) const;
+    Mat4 GetPerspectiveMatrix() const;
+    Mat4 GetOrthographicMatrix() const;
+    float GetNearPlane() const;
+    void SetNearPlane(float value);
+    float GetFarPlane() const;
+    void SetFarPlane(float value);
+    float GetAspectRatio() const;
+    void SetAspectRatio(float value);
+    Vec3 GetLookDirection() const;
+    void SetLookDirection(const Vec3& value);
 
     bool operator ==(const Camera& rhs);
 };

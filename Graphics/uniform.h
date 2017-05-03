@@ -5,7 +5,7 @@ enum class UniformTypes: int {FLOAT = 0, INTEGER, UNSIGNED, DOUBLE};
 
 struct UniformValue
 {
-    void* value;
+    const void* value;
     UniformTypes type;
     unsigned count = 1;
     short horizontalSize = 1;

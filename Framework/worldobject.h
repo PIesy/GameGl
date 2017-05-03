@@ -10,8 +10,8 @@ class WorldObject
 public:
     WorldObject();
     virtual ~WorldObject();
-    const Vec3& getPosition() const;
-    void setPosition(const Vec3& value);
+    const Vec3& GetPosition() const;
+    void SetPosition(const Vec3& value);
     bool operator ==(const WorldObject& rhs);
 };
 

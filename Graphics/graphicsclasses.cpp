@@ -2,77 +2,77 @@
 
 
 template<>
-InvokationResult Program::setUniform<Vec4>(Vec4&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<Vec4>(const Vec4& value, const std::string &name, int count)
 {
     UniformValue val;
 
     val.count = count;
     val.horizontalSize = 4;
     val.verticalSize = 1;
-    val.value = glm::value_ptr(value);
+    val.value = &value;
     val.type = UniformTypes::FLOAT;
 
     return setUniform(name, val);
 }
 
 template<>
-InvokationResult Program::setUniform<Vec2>(Vec2&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<Vec2>(const Vec2& value, const std::string &name, int count)
 {
     UniformValue val;
 
     val.count = count;
     val.horizontalSize = 2;
     val.verticalSize = 1;
-    val.value = glm::value_ptr(value);
+    val.value = &value;
     val.type = UniformTypes::FLOAT;
 
     return setUniform(name, val);
 }
 
 template<>
-InvokationResult Program::setUniform<Vec3>(Vec3&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<Vec3>(const Vec3& value, const std::string &name, int count)
 {
     UniformValue val;
 
     val.count = count;
     val.horizontalSize = 3;
     val.verticalSize = 1;
-    val.value = glm::value_ptr(value);
+    val.value = &value;
     val.type = UniformTypes::FLOAT;
 
     return setUniform(name, val);
 }
 
 template<>
-InvokationResult Program::setUniform<Mat4>(Mat4&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<Mat4>(const Mat4& value, const std::string &name, int count)
 {
     UniformValue val;
 
     val.count = count;
     val.horizontalSize = 4;
     val.verticalSize = 4;
-    val.value = glm::value_ptr(value);
+    val.value = &value;
     val.type = UniformTypes::FLOAT;
 
     return setUniform(name, val);
 }
 
 template<>
-InvokationResult Program::setUniform<Mat3>(Mat3&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<Mat3>(const Mat3& value, const std::string &name, int count)
 {
     UniformValue val;
 
     val.count = count;
     val.horizontalSize = 3;
     val.verticalSize = 3;
-    val.value = glm::value_ptr(value);
+    val.value = &value;
     val.type = UniformTypes::FLOAT;
 
     return setUniform(name, val);
 }
 
 template<>
-InvokationResult Program::setUniform<float>(float&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<float>(const float& value, const std::string &name, int count)
 {
     UniformValue val;
 
@@ -86,7 +86,7 @@ InvokationResult Program::setUniform<float>(float&& value, const std::string &na
 }
 
 template<>
-InvokationResult Program::setUniform<int>(int&& value, const std::string &name, int count)
+InvokationResult Program::SetUniform<int>(const int& value, const std::string &name, int count)
 {
     UniformValue val;
 

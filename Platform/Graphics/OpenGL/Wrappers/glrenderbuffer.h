@@ -16,7 +16,7 @@ namespace gl {
         GLuint renderBuffer = 0;
     public:
         GlRenderBuffer();
-        GlRenderBuffer(GLuint id);
+        explicit GlRenderBuffer(GLuint id);
         GlRenderBuffer(const GlRenderBuffer&) = delete;
         GlRenderBuffer& operator=(const GlRenderBuffer&) = delete;
         GlRenderBuffer(GlRenderBuffer&& src);

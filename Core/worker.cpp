@@ -125,7 +125,7 @@ void workerController(std::shared_ptr<WorkerData> data)
     }
     catch (std::exception e)
     {
-        Logger::Log(std::string("Error ") + e.what());
+        Logger::Log(std::string("Error ") + e.what() + " name: " + data->name);
     }
 
     data->isRunning = false;
