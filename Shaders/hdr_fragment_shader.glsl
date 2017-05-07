@@ -4,8 +4,8 @@ in vec2 uvCoords;
 
 layout(binding = 0) uniform sampler2D hdrMap;
 
-uniform bool useGammaCorrection = false;
-uniform float exposure = 2.0f;
+uniform bool useGammaCorrection = true;
+uniform float exposure = 1.0f;
 
 out vec4 color;
 

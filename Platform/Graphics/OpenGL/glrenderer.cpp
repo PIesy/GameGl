@@ -140,6 +140,7 @@ void GlRenderer::render()
                 gl::drawElements(GL_TRIANGLES, mesh.mesh.GetInfo().indexCount, GL_UNSIGNED_INT, nullptr);
                 gl::program::use(0);
             }
+            glContext.UpdateFrameState(frameBuffer, step.attributes);
         }
         glContext.ClearFrameState();
     }

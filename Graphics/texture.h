@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "../Helpers/storagepointer.h"
 
 enum class TextureType { Tex1D, Tex2D, Tex3D, Cubemap };
@@ -18,7 +19,8 @@ struct TextureInfo
     unsigned mipmaps = 0;
     TextureType type = TextureType::Tex2D;
     TextureBindpoint target = TextureBindpoint::Color;
-    TexturePixelFormat pixelFormat = TexturePixelFormat::Float8;
+    TexturePixelFormat sourcePixelFormat = TexturePixelFormat::Float8;
+    TexturePixelFormat targetPixelFormat = TexturePixelFormat::Float8;
     std::string name;
 };
 
@@ -29,6 +31,7 @@ struct TextureParameters
 {
     TextureWrapping wrapping = TextureWrapping::Clamp;
     TextureSampling sampling = TextureSampling::Linear;
+    unsigned useMipLevel = 0;
     unsigned anisotropicFiltering = 0;
 };
 

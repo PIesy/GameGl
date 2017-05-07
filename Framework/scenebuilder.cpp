@@ -5,7 +5,7 @@ Scene SceneBuilder::BuildScene(World& world, Camera& camera)
     Scene scene;
     std::vector<RenderFlags> flags;
 
-    for (DrawableWorldObject& obj : world.getDrawableObjects())
+    for (DrawableWorldObject& obj : world.GetDrawableObjects())
     {
         Mesh& mesh = obj.GetMesh();
         Mat4 camMat = camera.GetCameraMatrix();
@@ -19,13 +19,10 @@ Scene SceneBuilder::BuildScene(World& world, Camera& camera)
         ConfigFunction c;
         c = [=](Program& p)
         {
-            p.SetUniform(useTex, "useTex");
-            p.SetUniform(0.0f, "debug");
             p.SetUniform(camPosition, "camPosition");
             p.SetUniform(camMat, "WtoCMatrix");
             p.SetUniform(perspMat, "perspective");
             p.SetUniform(posMat, "MtoWMatrix");
-            p.SetUniform(worldRotMat, "worldRotation");
             p.SetUniform(rotMat, "rotation");
         };
 
@@ -33,10 +30,28 @@ Scene SceneBuilder::BuildScene(World& world, Camera& camera)
         flags.push_back(obj.GetRenderFlags());
     }
 
-    for (auto& step : steps)
-        scene.path.steps.emplace_back(step.first);
-
     int i = 0;
+
+    std::vector<Vec3> lightPositions;
+    std::vector<Vec3> lightColors;
+    for (Light& light : world.GetLights())
+    {
+        lightPositions.push_back(light.GetPosition());
+        lightColors.push_back(light.GetLightColor());
+    }
+
+    for (auto& step : steps)
+    {
+        scene.path.steps.emplace_back(step.first);
+        scene.path.steps.back().preConfig = [=](Program& p)
+        {
+            p.SetUniform(lightPositions[0], "lightPositions", lightPositions.size());
+            p.SetUniform(lightColors[0], "lightColors", lightColors.size());
+            p.SetUniform((int)lightPositions.size(), "actualLightsCount");
+        };
+    }
+
+    i = 0;
     for (MeshDescriptor& obj : scene.meshes)
     {
         int j = 0;

@@ -7,12 +7,11 @@
 #include "Framework/Loaders/meshloader.h"
 #include "Framework/Loaders/programloader.h"
 #include "Logger/logger.h"
+#include "Framework/texturebuilder.h"
 
 float aspectFactor;
 bool stop = false;
 Camera cam;
-Camera lightCam;
-Camera skyboxCam;
 Vec3 lookDir = {0, -1, 1};
 Vec3 camPos = {500, 500, 500};
 Program* prog2;
@@ -21,8 +20,20 @@ Program* skyboxProg;
 Program* hdrProg;
 Program* pbrProg;
 Program* normalsProg;
+Program* hdrIblProg;
+Program* hdrIblConvProg;
+Program* hdrIblPrefProg;
+Program* brdfLutProg;
 Texture cubeMap;
-float windowSizeX = 1000.0f, windowSizeY = 600.0f;
+Texture pbrArrayCerberus;
+Texture pbrArrayGold;
+Light light1;
+Texture hdrMap;
+Texture hdrSkybox;
+Texture hdrSkyboxConv;
+Texture hdrSkyboxPref;
+Texture brdfLut;
+float windowSizeX = 1280.0f, windowSizeY = 720.0f;
 
 void updateViewport(WindowEvent* e, Renderer* renderer);
 void closeApp(void*, CoreInterface* core);
@@ -30,6 +41,7 @@ void shiftKeyboard(KeyboardEvent* event, World& world);
 void mouseRotate(MouseEvent* event, DrawableWorldObject& obj);
 
 Program& prepareProgram(CoreInterface* engine);
+void initRenderer(World& world, Renderer& renderer);
 void drawMesh2(World& world, Renderer& renderer);
 
 Program& prepareProgram2(CoreInterface* engine);
@@ -56,45 +68,52 @@ int main()
     hdrProg = &programLoader.Load("hdr_vertex_shader.glsl", "hdr_fragment_shader.glsl");
     pbrProg = &programLoader.Load("pbr_vertex_shader.glsl", "pbr_fragment_shader.glsl");
     normalsProg = &programLoader.Load("normals_vertex_shader.glsl", "normals_fragment_shader.glsl", "normals_geometry_shader.glsl");
+    hdrIblProg = &programLoader.Load("ibl_cubemap_vertex_shader.glsl", "ibl_cubemap_fragment_shader.glsl", "ibl_cubemap_geometry_shader.glsl");
+    hdrIblConvProg = &programLoader.Load("ibl_cubemap_vertex_shader.glsl", "ibl_cubemap_convolution_fragment_shader.glsl", "ibl_cubemap_geometry_shader.glsl");
+    hdrIblPrefProg = &programLoader.Load("ibl_cubemap_vertex_shader.glsl", "ibl_cubemap_prefilter_fragment_shader.glsl", "ibl_cubemap_geometry_shader.glsl");
+    brdfLutProg = &programLoader.Load("hdr_vertex_shader.glsl", "brdf_lut_fragment_shader.glsl");
 
     MeshLoader loader{engine.GetStorage()};
     TextureLoader textureLoader{engine.GetStorage()};
 
     cubeMap = textureLoader.LoadCubemap({"posx.jpg", "negx.jpg", "posy.jpg", "negy.jpg", "posz.jpg", "negz.jpg"});
-    auto meshes = loader.Load("sphere.blend");
+    pbrArrayCerberus = textureLoader.LoadArray({"cerberus/Textures/Cerberus_N.tga", "cerberus/Textures/Cerberus_A.tga",
+                                                "cerberus/Textures/Cerberus_M.tga", "cerberus/Textures/Cerberus_R.tga"});
+    pbrArrayGold = textureLoader.LoadArray({"pbr/gold/normal.png", "pbr/gold/albedo.png",
+                                            "pbr/gold/metallic.png", "pbr/gold/roughness.png"});
+    hdrMap = textureLoader.Load("newport_loft.hdr", true);
+    auto meshes = loader.Load("cerberus/Cerberus_LP.FBX");
     Mesh plane = Shapes::Plane(1000, 1000, engine.GetStorage(), "floor");
     Mesh skybox = loader.Load("cube.obj")[0];
+    Mesh sphere = loader.Load("sphere.blend")[0];
+    meshes[0].AddTexture(pbrArrayCerberus);
+    sphere.AddTexture(pbrArrayGold);
 
     World world;
-    plane.AddTexture(textureLoader.Load("snowS.jpg"));
+    plane.AddTexture(pbrArrayGold);
 
-    cam = world.addCamera(camPos);
+    cam = world.AddCamera(camPos);
     cam.SetAspectRatio(aspectFactor);
     cam.SetNearPlane(1.0f);
     cam.SetFarPlane(1700.f);
     cam.SetLookDirection(lookDir);
 
-    lightCam = world.addCamera({450, 410, 450});
-    lightCam.SetAspectRatio(1);
-    lightCam.SetNearPlane(1.0f);
-    lightCam.SetFarPlane(100.0f);
-    lightCam.SetLookDirection({0, -1, 0});
-
-    skyboxCam = world.addCamera({0, 0, 0});
-    skyboxCam.SetAspectRatio(aspectFactor);
-    skyboxCam.SetNearPlane(0.1f);
-    skyboxCam.SetFarPlane(2.0f);
-    skyboxCam.SetLookDirection(lookDir);
+//    light1 = world.AddLight({450, 410, 450}, {150, 150, 150});
+//    world.AddLight({350, 410, 350}, {0, 300, 0});
+//    world.AddLight({450, 440, 450}, {150, 150, 150});
+//    world.AddLight({350, 440, 350}, {150, 150, 150});
 
     DrawableWorldObject& obj = world.AddObject(meshes[0], {400, 420, 400});
-    obj.SetScale(10.0);
-    world.AddObject(plane, {0, 400, 0});
+    obj.SetScale(1);
+    obj.Rotate(270.0f, {1, 0, 0});
+    //world.AddObject(plane, {0, 400, 0});
+    world.AddObject(sphere, {350, 400, 350}).SetScale(10);
+    world.AddObject(sphere, {350, 420, 350}).SetScale(10);
+    world.AddObject(sphere, {350, 440, 350}).SetScale(10);
     DrawableWorldObject& s = world.AddObject(skybox, {0, 0, 0});
     s.SetRenderFlags(RenderFlags::SkyBox);
 
     world.AddObject(Shapes::Rectangle(engine.GetStorage()), {0, 0, 0}).SetRenderFlags(RenderFlags::FullScreenQuad);
-
-    drawMesh2(world, renderer);
 
     Action<MouseEvent*> rotate(mouseRotate, std::placeholders::_1, std::ref(obj));
     Action<KeyboardEvent*> move(shiftKeyboard, std::placeholders::_1, std::ref(world));
@@ -102,8 +121,10 @@ int main()
     engine.getEventHandler().setListener<KeyboardEvent>(move);
     engine.getEventHandler().setListener<MouseEvent>(rotate, [](EventInterface* e) { return e->GetHint() == integral(MouseData::Type::Motion); });
 
+    initRenderer(world, renderer);
     while (!stop)
     {
+        obj.Rotate(0.5f, {0, 1, 0});
         drawMesh2(world, renderer);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
@@ -182,7 +203,6 @@ void shiftKeyboard(KeyboardEvent* event, World& world)
 
     cam.SetLookDirection(lookDir);
     cam.SetPosition(camPos);
-    skyboxCam.SetLookDirection(lookDir);
 }
 
 void mouseRotate(MouseEvent *event, DrawableWorldObject& obj)
@@ -206,6 +226,74 @@ Program& prepareProgram2(CoreInterface* engine)
     return loader.Load("cubemap_vertex_shader.glsl", "cubemap_fragment_shader.glsl", "cubemap_geometry_shader.glsl");
 }
 
+void initRenderer(World& world, Renderer& renderer)
+{
+    SceneBuilder builder;
+    RenderStep step0;
+    RenderStep step1;
+    RenderStep step3;
+    Light fakeLight;
+
+    hdrSkybox = TextureBuilder::BuildTexture(TextureType::Cubemap, TextureBindpoint::Color, 1024, 1024, 6, 4, TexturePixelFormat::Float16, true);
+    hdrSkybox.info.name = "hdrSkybox";
+
+    step0.genericTextures = {hdrMap};
+    step0.prog = hdrIblProg;
+    step0.targets.push_back(RenderTarget(hdrSkybox));
+    step0.attributes.push_back(RenderingAttribute::UpdateMipmaps);
+    step0.postConfig = [=](Program& p)
+    {
+        p.SetUniform(fakeLight.GetCubeMapMatrices()[0], "projections", 6);
+        p.SetUniform(fakeLight.GetPerspectiveMatrix(), "perspective");
+    };
+
+    step1.genericTextures = {hdrSkybox};
+    step1.prog = hdrIblConvProg;
+    hdrSkyboxConv = TextureBuilder::BuildTexture(TextureType::Cubemap, TextureBindpoint::Color, 32, 32, 6, 4, TexturePixelFormat::Float16, false);
+    hdrSkyboxConv.info.name = "hdrSkyboxDiffuse";
+    step1.targets.push_back(RenderTarget(hdrSkyboxConv));
+    step1.postConfig = [=](Program& p)
+    {
+        p.SetUniform(fakeLight.GetCubeMapMatrices()[0], "projections", 6);
+        p.SetUniform(fakeLight.GetPerspectiveMatrix(), "perspective");
+    };
+
+    builder.AddStep(step0, RenderFlags::SkyBox);
+    builder.AddStep(step1, RenderFlags::SkyBox);
+
+    const int mipmaps = 5;
+
+    hdrSkyboxPref = TextureBuilder::BuildTexture(TextureType::Cubemap, TextureBindpoint::Color, 128, 128, 6, 4, TexturePixelFormat::Float16, false);
+    hdrSkyboxPref.info.mipmaps = mipmaps - 1;
+    hdrSkyboxPref.info.name = "hdrSkyboxPref";
+    for (int i = 0; i < mipmaps; ++i)
+    {
+        RenderStep step;
+
+        hdrSkyboxPref.parameters.useMipLevel = i;
+        step.genericTextures = {hdrSkybox};
+        step.targets.push_back(RenderTarget(hdrSkyboxPref));
+        step.prog = hdrIblPrefProg;
+        step.postConfig = [=](Program& p)
+        {
+            p.SetUniform(fakeLight.GetCubeMapMatrices()[0], "projections", 6);
+            p.SetUniform(fakeLight.GetPerspectiveMatrix(), "perspective");
+            p.SetUniform((float) i / mipmaps, "roughness");
+        };
+        builder.AddStep(step, RenderFlags::SkyBox);
+    }
+
+    brdfLut = TextureBuilder::BuildTexture(TextureType::Tex2D, TextureBindpoint::Color, 512, 512, 1, 3, TexturePixelFormat::Float16, false);
+    brdfLut.info.name = "brdfLut";
+    step3.prog = brdfLutProg;
+    step3.attributes = {RenderingAttribute::ClearBuffer};
+    step3.targets.push_back(RenderTarget(brdfLut));
+
+    builder.AddStep(step3, RenderFlags::FullScreenQuad);
+
+    renderer.Draw(builder.BuildScene(world, cam));
+}
+
 void drawMesh2(World& world, Renderer& renderer)
 {
     SceneBuilder builder;
@@ -216,25 +304,13 @@ void drawMesh2(World& world, Renderer& renderer)
     RenderStep step4;
     TextureInfo textureInfo;
     TextureParameters textureParameters;
-    Texture texture, texture2;
-
-    cubeMap.parameters.sampling = TextureSampling::Linear;
-    cubeMap.parameters.anisotropicFiltering = 16;
-    step3.genericTextures = {cubeMap};
-    step3.attributes = {RenderingAttribute::DepthTest};
-    step3.prog = skyboxProg;
-    step3.postConfig = [=](Program& p)
-    {
-        p.SetUniform(Vec3{0, 0, 0}, "worldCenter");
-        p.SetUniform(skyboxCam.GetPerspectiveMatrix(), "perspective");
-        p.SetUniform(skyboxCam.GetCameraMatrix(), "WtoCMatrix");
-    };
+    Texture texture;
 
     textureInfo.width = 2048;
     textureInfo.height = 2048;
     textureInfo.type = TextureType::Cubemap;
     textureInfo.target = TextureBindpoint::Depth;
-    textureInfo.pixelFormat = TexturePixelFormat::Float24;
+    textureInfo.targetPixelFormat = TexturePixelFormat::Float24;
     textureInfo.name = "shadow";
     textureParameters.wrapping = TextureWrapping::Clamp;
     textureParameters.sampling = TextureSampling::Linear;
@@ -243,61 +319,52 @@ void drawMesh2(World& world, Renderer& renderer)
     step1.targets.push_back(RenderTarget(texture));
     step1.prog = prog2;
 
-    std::vector<Mat4> cameraMatrices;
-
-    cameraMatrices.push_back(lightCam.GetCameraMatrix({1.0, 0, 0}, {0, -1.0, 0}));
-    cameraMatrices.push_back(lightCam.GetCameraMatrix({-1.0, 0, 0}, {0, -1.0, 0}));
-    cameraMatrices.push_back(lightCam.GetCameraMatrix({0, 1.0, 0}, {0, 0, 1.0}));
-    cameraMatrices.push_back(lightCam.GetCameraMatrix({0, -1.0, 0}, {0, 0, -1.0}));
-    cameraMatrices.push_back(lightCam.GetCameraMatrix({0, 0, 1.0}, {0, -1.0, 0}));
-    cameraMatrices.push_back(lightCam.GetCameraMatrix({0, 0, -1.0}, {0, -1.0, 0}));
-
     step1.postConfig = [=](Program& p)
     {
-        p.SetUniform(cameraMatrices[0], "projections", 6);
-        p.SetUniform(lightCam.GetPerspectiveMatrix(), "perspective");
-        p.SetUniform(lightCam.GetCameraMatrix(), "camView");
-        p.SetUniform(lightCam.GetNearPlane(), "nearPlane");
-        p.SetUniform(lightCam.GetFarPlane(), "farPlane");
-        p.SetUniform(lightCam.GetPosition(), "lightPosition");
+        p.SetUniform(light1.GetCubeMapMatrices()[0], "projections", 6);
+        p.SetUniform(light1.GetPerspectiveMatrix(), "perspective");
+        p.SetUniform(0.1f, "nearPlane");
+        p.SetUniform(light1.GetMaxDistance(), "farPlane");
+        p.SetUniform(light1.GetPosition(), "lightPosition");
     };
-
 
     Texture hdrTexture;
     hdrTexture.info.name = "colorBuffHdr";
-    hdrTexture.info.pixelFormat = TexturePixelFormat::Float32;
+    hdrTexture.info.targetPixelFormat= TexturePixelFormat::Float32;
     hdrTexture.info.channels = 4;
     hdrTexture.info.width = windowSizeX;
     hdrTexture.info.height = windowSizeY;
 
+    step2.genericTextures = {hdrSkyboxConv, hdrSkyboxPref, brdfLut};
     step2.targets.push_back(RenderTarget(hdrTexture));
     step2.prog = pbrProg;
-    step2.genericTextures = {texture};
-    step2.postConfig = [=](Program& p)
-    {
-        p.SetUniform(lightCam.GetPerspectiveMatrix(), "lightMatrix");
-        p.SetUniform(lightCam.GetPosition(), "lightPosition");
-        p.SetUniform(Vec3(150.0f, 150.0f, 150.0f), "lightColor");
-        p.SetUniform(lightCam.GetNearPlane(), "nearPlane");
-        p.SetUniform(cam.GetPosition(), "camPos");
-        p.SetUniform(lightCam.GetFarPlane(), "farPlane");
-    };
 
     step2_5.attributes = {RenderingAttribute::DepthTest};
     step2_5.frameBufferProperties.frameBufferType = FrameBufferProperties::REUSE_FROM_STEP;
-    step2_5.frameBufferProperties.stepId = 1;
+    step2_5.frameBufferProperties.stepId = 0;
     step2_5.prog = normalsProg;
 
     step3.frameBufferProperties.frameBufferType = FrameBufferProperties::REUSE_FROM_STEP;
-    step3.frameBufferProperties.stepId = 1;
+    step3.frameBufferProperties.stepId = 0;
+    cubeMap.parameters.sampling = TextureSampling::Linear;
+    cubeMap.parameters.anisotropicFiltering = 16;
+    step3.genericTextures = {hdrSkybox};
+    step3.attributes = {RenderingAttribute::DepthTest};
+    step3.prog = skyboxProg;
+
+    step3.postConfig = [=](Program& p)
+    {
+        p.SetUniform(cam.GetPerspectiveMatrix(), "perspective");
+        p.SetUniform(cam.GetCameraMatrix(), "WtoCMatrix");
+    };
 
     step4.genericTextures = {hdrTexture};
     step4.prog = hdrProg;
 
-    builder.AddStep(step1);
+    //builder.AddStep(step1);
     builder.AddStep(step2);
     //builder.AddStep(step2_5);
-    builder.AddStep(step3, RenderFlags::SkyBox);
+    //builder.AddStep(step3, RenderFlags::SkyBox);
     builder.AddStep(step4, RenderFlags::FullScreenQuad);
 
     renderer.Draw(builder.BuildScene(world, cam));

@@ -68,7 +68,7 @@ Mat4 Camera::GetCameraMatrix() const
 
 Mat4 Camera::GetPerspectiveMatrix() const
 {
-    return glm::perspective(glm::radians(90.0f), aspectRatio, nearPlane, farPlane);
+    return glm::perspective(glm::radians(70.0f), aspectRatio, nearPlane, farPlane);
 }
 
 Mat4 Camera::GetOrthographicMatrix() const

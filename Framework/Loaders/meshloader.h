@@ -10,7 +10,7 @@ class MeshLoader
 {
     StorageApi& api;
 public:
-    MeshLoader(StorageApi& storage);
+    explicit MeshLoader(StorageApi& storage);
     std::vector<Mesh> Load(const std::string& path);
 };
 

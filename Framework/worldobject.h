@@ -6,7 +6,7 @@
 
 class WorldObject
 {
-    Vec3 position;
+    Vec3 position = {0, 0, 0};
 public:
     WorldObject();
     virtual ~WorldObject();

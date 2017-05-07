@@ -86,6 +86,7 @@ struct Vertex
     Vec3 normal = {0,0,1};
     Vec4 color = {1,0,0,1};
     Vec2 uv = {0, 0};
+    Vec3 tangent = {0, 0, 0};
 };
 
 class RenderingContext

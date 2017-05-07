@@ -29,7 +29,22 @@ gl::GlTexture gl::GlTextureFactory::build2dTexture(const TextureInfo& parameters
     else
         result = gl::GlTexture{TextureType::Tex2dArray};
 
-    result.Allocate(decodeFormat(parameters), parameters.width, parameters.height, parameters.mipmaps);
+    result.Allocate(decodeFormat(parameters), parameters.width, parameters.height, parameters.count, parameters.mipmaps);
+
+    gl::SourcePixelSize pixelSize;
+    switch (parameters.sourcePixelFormat)
+    {
+        case TexturePixelFormat::Float8:
+            pixelSize = gl::SourcePixelSize::Byte;
+            break;
+        case TexturePixelFormat::Float16:
+            pixelSize = gl::SourcePixelSize::Short;
+            break;
+        case TexturePixelFormat::Float24:
+        case TexturePixelFormat::Float32:
+            pixelSize = gl::SourcePixelSize::Float;
+            break;
+    }
 
     unsigned i = 0;
     for (const StoragePointer& p : pointers)
@@ -42,29 +57,29 @@ gl::GlTexture gl::GlTextureFactory::build2dTexture(const TextureInfo& parameters
                     if (parameters.count == 1)
                     {
                         if (parameters.channels == 3)
-                            result.Load(gl::SourceFormat::RGB, p);
+                            result.Load(gl::SourceFormat::RGB, pixelSize, p, 0);
                         if (parameters.channels == 4)
-                            result.Load(gl::SourceFormat::RGBA, p);
+                            result.Load(gl::SourceFormat::RGBA, pixelSize, p, 0);
                     }
                     else
                     {
                         if (parameters.channels == 3)
-                            result.Load(gl::SourceFormat::RGB, 0, 0, i, p);
+                            result.Load(gl::SourceFormat::RGB, pixelSize, 0, 0, i, p, 1, 0);
                         if (parameters.channels == 4)
-                            result.Load(gl::SourceFormat::RGBA, 0, 0, i, p);
+                            result.Load(gl::SourceFormat::RGBA, pixelSize, 0, 0, i, p, 1, 0);
                     }
                     break;
                 case TextureBindpoint::Depth:
                     if (parameters.count == 1)
-                        result.Load(gl::SourceFormat::Depth, p);
+                        result.Load(gl::SourceFormat::Depth, pixelSize, p, 0);
                     else
-                        result.Load(gl::SourceFormat::Depth, 0, 0, i, p);
+                        result.Load(gl::SourceFormat::Depth, pixelSize, 0, 0, i, p, 1, 0);
                     break;
                 case TextureBindpoint::Stencil:
                     if (parameters.count == 1)
-                        result.Load(gl::SourceFormat::Stencil, p);
+                        result.Load(gl::SourceFormat::Stencil, pixelSize, p, 0);
                     else
-                        result.Load(gl::SourceFormat::Stencil, 0, 0, i, p);
+                        result.Load(gl::SourceFormat::Stencil, pixelSize, 0, 0, i, p, 1, 0);
                     break;
                 case TextureBindpoint::DepthStencil:
                     break;
@@ -80,7 +95,7 @@ gl::InternalFormat gl::GlTextureFactory::decodeFormat(const TextureInfo& paramet
     switch (parameters.target)
     {
         case TextureBindpoint::Color:
-            switch (parameters.pixelFormat)
+            switch (parameters.targetPixelFormat)
             {
                 case TexturePixelFormat::Float8:
                     if (parameters.channels == 3)
@@ -105,7 +120,7 @@ gl::InternalFormat gl::GlTextureFactory::decodeFormat(const TextureInfo& paramet
             }
             break;
         case TextureBindpoint::Depth:
-            switch (parameters.pixelFormat)
+            switch (parameters.targetPixelFormat)
             {
                 case TexturePixelFormat::Float8:
                     Logger::Log("Unsupported texture format Depth 8 bit using 16 bit instead");

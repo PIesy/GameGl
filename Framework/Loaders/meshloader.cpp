@@ -24,7 +24,7 @@ std::vector<Mesh> MeshLoader::Load(const std::string& path)
     Assimp::Importer importer;
     std::vector<Mesh> result;
 
-    const aiScene* scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_Triangulate);
+    const aiScene* scene = importer.ReadFile(path, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs);
 
     for (unsigned m = 0; m < scene->mNumMeshes; m++)
         result.push_back(loadMesh(scene->mMeshes[m], scene, api));
@@ -50,6 +50,7 @@ Mesh loadMesh(aiMesh* mesh, const aiScene* scene, StorageApi& api)
 
         v.coords = {mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z};
         v.normal = {mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z};
+        v.tangent = {mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z};
         if (mesh->mNumUVComponents[0] != 0 && mesh->mTextureCoords[0] != nullptr)
             v.uv = {mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y};
         aiColor3D c;

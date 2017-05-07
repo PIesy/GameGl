@@ -35,18 +35,18 @@ void gl::GlTexture::Bind(int textureUnit)
     gl::texture::bind(integral(type), texture);
 }
 
-void gl::GlTexture::Load(gl::SourceFormat format, const void* data, unsigned mipmapLevel)
+void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, const void* data, unsigned int mipmapLevel)
 {
     switch (type)
     {
         case TextureType::Tex2d:
-            gl::texture::loadImage(texture, mipmapLevel, 0, 0, width, height, integral(format), GL_UNSIGNED_BYTE, data);
+            gl::texture::loadImage(texture, mipmapLevel, 0, 0, width, height, integral(format), integral(pixelSize), data);
             break;
         case TextureType::Tex3d:
         case TextureType::Tex2dArray:
         case TextureType::TexCube:
             gl::texture::loadImage(texture, mipmapLevel, 0, 0, 0, width, height, depth,
-                                   integral(format), GL_UNSIGNED_BYTE, data);
+                                   integral(format), integral(pixelSize), data);
             break;
         default:
             Logger::Log("Not yet implemented");
@@ -55,20 +55,20 @@ void gl::GlTexture::Load(gl::SourceFormat format, const void* data, unsigned mip
 }
 
 
-void gl::GlTexture::Load(gl::SourceFormat format, unsigned xOffset, unsigned yOffset, unsigned zOffset,
-                         const void* data, unsigned int levels, unsigned int mipmapLevel)
+void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, unsigned xOffset, unsigned yOffset, unsigned zOffset, const void* data, unsigned int levels,
+                         unsigned int mipmapLevel)
 {
     switch (type)
     {
         case TextureType::Tex2d:
             gl::texture::loadImage(texture, mipmapLevel, xOffset, yOffset,
-                                   width, height, integral(format), GL_UNSIGNED_BYTE, data);
+                                   width, height, integral(format), integral(pixelSize), data);
             break;
         case TextureType::Tex3d:
         case TextureType::Tex2dArray:
         case TextureType::TexCube:
             gl::texture::loadImage(texture, mipmapLevel, xOffset, yOffset, zOffset, width, height, levels,
-                                   integral(format), GL_UNSIGNED_BYTE, data);
+                                   integral(format), integral(pixelSize), data);
             break;
         default:
             Logger::Log("Not yet implemented");
@@ -109,29 +109,17 @@ void gl::GlTexture::Allocate(gl::InternalFormat format, unsigned width, unsigned
     this->depth = depth;
     switch (type)
     {
+        case TextureType::Tex2d:
+        case TextureType::Tex1dArray:
+        case TextureType::TexCube:
+            gl::texture::allocateStorage(texture, mipmapsCount + 1, integral(format), width, height);
+            break;
         case TextureType::Tex3d:
         case TextureType::Tex2dArray:
             gl::texture::allocateStorage(texture, mipmapsCount + 1, integral(format), width, height, depth);
             break;
         default:
             Logger::Log("Use 2 dimensional allocate for this texture type");
-            break;
-    }
-}
-
-void gl::GlTexture::Allocate(InternalFormat format, unsigned width, unsigned height, unsigned mipmapsCount)
-{
-    this->width = width;
-    this->height = height;
-    switch (type)
-    {
-        case TextureType::Tex2d:
-        case TextureType::Tex1dArray:
-        case TextureType::TexCube:
-            gl::texture::allocateStorage(texture, mipmapsCount + 1, integral(format), width, height);
-            break;
-        default:
-            Logger::Log("Use 3 dimensional allocate for this texture type");
             break;
     }
 }

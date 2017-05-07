@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdint>
 
-enum class RenderingAttribute: uint8_t {DepthTest, CullFace, CullBack, Blend, StencilTest, ClearBuffer};
+enum class RenderingAttribute: uint8_t {DepthTest, CullFace, CullBack, Blend, StencilTest, ClearBuffer, UpdateMipmaps};
 
 using RenderingAttributes = std::vector<RenderingAttribute>;
 

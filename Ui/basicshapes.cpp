@@ -17,6 +17,7 @@ Mesh Shapes::Plane(int xSize, int ySize, StorageApi& api, const std::string& nam
         vert.normal = {0, 1, 0};
         vert.color = color;
         vert.uv = {texCoordsU[i], texCoordsV[i]};
+        vert.tangent = {0, 0, 1};
         vertices.push_back(vert);
     }
     auto desc1 = api.Place(vertices.size() * sizeof(Vertex), vertices.data());

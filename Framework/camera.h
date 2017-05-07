@@ -6,9 +6,9 @@
 
 class Camera: public WorldObject
 {
-    float nearPlane;
-    float farPlane;
-    float aspectRatio;
+    float nearPlane = 1;
+    float farPlane = 1;
+    float aspectRatio = 1;
     Vec3 lookDirection;
 public:
     Camera();

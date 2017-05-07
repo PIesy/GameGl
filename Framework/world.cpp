@@ -10,17 +10,17 @@ bool operator ==(const std::reference_wrapper<DrawableWorldObject>& lhs, const s
     return lhs == rhs;
 }
 
-std::list<Camera> World::getCameras() const
+std::list<Camera> World::GetCameras() const
 {
     return cameras;
 }
 
-void World::setCameras(const std::list<Camera>& value)
+void World::SetCameras(const std::list<Camera>& value)
 {
     cameras = value;
 }
 
-Camera& World::addCamera(const Vec3& position)
+Camera& World::AddCamera(const Vec3& position)
 {
     Camera cam;
 
@@ -29,7 +29,7 @@ Camera& World::addCamera(const Vec3& position)
     return cameras.back();
 }
 
-void World::removeCamera(Camera& cam)
+void World::RemoveCamera(Camera& cam)
 {
     cameras.remove(cam);
 }
@@ -39,27 +39,27 @@ void World::removeObject(DrawableWorldObject& obj)
     drawableObjects.remove(obj);
 }
 
-std::list<DrawableWorldObject>& World::getDrawableObjects()
+std::list<DrawableWorldObject>& World::GetDrawableObjects()
 {
     return drawableObjects;
 }
 
-Vec3 World::getWorldSize() const
+Vec3 World::GetWorldSize() const
 {
     return worldSize;
 }
 
-void World::setWorldSize(const Vec3& value)
+void World::SetWorldSize(const Vec3& value)
 {
     worldSize = value;
 }
 
-float World::getScaleFactor() const
+float World::GetScaleFactor() const
 {
     return scaleFactor;
 }
 
-void World::setScaleFactor(float value)
+void World::SetScaleFactor(float value)
 {
     scaleFactor = value;
 }
@@ -78,4 +78,19 @@ DrawableWorldObject& World::AddObject(const Mesh& obj, const Vec3& position)
     drawableObject.SetScale(scaleFactor);
     drawableObjects.push_back(drawableObject);
     return drawableObjects.back();
+}
+
+Light& World::AddLight(const Vec3& position, const Vec3& color)
+{
+    Light light;
+
+    light.SetPosition(position);
+    light.SetLightColor(color);
+    lights.push_back(light);
+    return lights.back();
+}
+
+std::list<Light>& World::GetLights()
+{
+    return lights;
 }

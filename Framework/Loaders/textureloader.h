@@ -12,8 +12,9 @@ class TextureLoader
     StorageApi& api;
 public:
     TextureLoader(StorageApi& storage);
-    Texture Load(const std::string& path);
-    Texture LoadCubemap(const std::vector<std::string>& files);
+    Texture Load(const std::string& path, bool useHDR = false);
+    Texture LoadCubemap(const std::array<std::string, 6>& files, bool useHDR = false);
+    Texture LoadArray(const std::vector<std::string>& files, bool useHDR = false);
 };
 
 

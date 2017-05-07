@@ -41,6 +41,7 @@ namespace texture {
     void setParameter(GLuint target, GLenum parameter, GLint value);
     void setParameter(GLuint target, GLenum parameter, GLfloat value);
     void setActiveTexture(GLenum textureUnit);
+    void generateMipmaps(GLuint target);
 }
 
 namespace framebuffer {

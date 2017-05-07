@@ -161,6 +161,12 @@ void gl::texture::loadImage(GLuint target, GLint mipmapLevel, GLint xoffset, GLi
     gl::printGlError("glTextureImage3D");
 }
 
+void gl::texture::generateMipmaps(GLuint target)
+{
+    glGenerateTextureMipmap(target);
+    gl::printGlError("glGenerateTextureMipmap");
+}
+
 //framebuffer
 
 void gl::framebuffer::generate(int count, GLuint* framebuffers)

@@ -8,7 +8,6 @@
 #include "../../../Logger/logger.h"
 #include <algorithm>
 
-
 gl::GlTexture& GlContext::LoadTexture(const Texture& texture)
 {
     if (texture.info.name.empty())
@@ -19,13 +18,13 @@ gl::GlTexture& GlContext::LoadTexture(const Texture& texture)
     globalData.Get().textureMap.emplace(texture.info.name, gl::GlTextureFactory::BuildTexture(texture.info, texture.data));
     gl::GlTexture& result = globalData.Get().textureMap[texture.info.name];
 
-    configureTexture(result, texture.parameters);
+    configureTexture(result, texture.parameters, texture.info);
     if (texture.info.target == TextureBindpoint::Depth)
         result.SetComparisonMode(gl::CompareFunction::Lequal, gl::CompareMode::ReferenceToTexture);
     return result;
 }
 
-void GlContext::configureTexture(gl::GlTexture& texture, const TextureParameters& parameters)
+void GlContext::configureTexture(gl::GlTexture& texture, const TextureParameters& parameters, const TextureInfo& info)
 {
     gl::WrappingType wrappingType;
     switch (parameters.wrapping)
@@ -47,17 +46,17 @@ void GlContext::configureTexture(gl::GlTexture& texture, const TextureParameters
     switch (parameters.sampling)
     {
         case TextureSampling::Linear:
-            filterType = gl::FilterType::Linear;
+            texture.SetMinFilter((info.mipmaps == 0 ? gl::FilterType::Linear : gl::FilterType::MipmapLinear));
+            texture.SetMagFilter(gl::FilterType::Linear);
             break;
         case TextureSampling::Nearest:
-            filterType = gl::FilterType::Nearest;
+            texture.SetMinFilter((info.mipmaps == 0 ? gl::FilterType::Nearest : gl::FilterType::MipmapNearest));
+            texture.SetMagFilter(gl::FilterType::Nearest);
     }
 
     texture.SetSWrapping(wrappingType);
     texture.SetTWrapping(wrappingType);
     texture.SetRWrapping(wrappingType);
-    texture.SetMinFilter(filterType);
-    texture.SetMagFilter(filterType);
 
     if (parameters.anisotropicFiltering > 0)
         texture.SetAnisotropicFiltering(parameters.anisotropicFiltering);
@@ -82,7 +81,7 @@ gl::GlMeshObject& GlContext::LoadMesh(const Mesh& mesh)
 
     result.vertexArray.BindElementBuffer(elementBuffer);
     result.vertexArray.BindBuffer(vertexBuffer, 0, 0, sizeof(Vertex));
-    for (unsigned i = 0; i < 4; ++i)
+    for (unsigned i = 0; i < 5; ++i)
     {
         result.vertexArray.EnableAttribute(i);
         result.vertexArray.LinkBuffer(i, 0);
@@ -91,6 +90,7 @@ gl::GlMeshObject& GlContext::LoadMesh(const Mesh& mesh)
     result.vertexArray.SetAttributeFormat(1, 4, gl::AttributeTypeFloat::Float, offsetof(Vertex, color));
     result.vertexArray.SetAttributeFormat(2, 3, gl::AttributeTypeFloat::Float, offsetof(Vertex, normal));
     result.vertexArray.SetAttributeFormat(3, 2, gl::AttributeTypeFloat::Float, offsetof(Vertex, uv));
+    result.vertexArray.SetAttributeFormat(4, 3, gl::AttributeTypeFloat::Float, offsetof(Vertex, tangent));
 
     elementBuffer.SetIsElementArray(true);
     globalData.Get().bufferMap.emplace(mesh.GetId(), std::move(elementBuffer));
@@ -130,6 +130,7 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
     frameBuffers.push_back({gl::GlFrameBuffer{}, std::vector<gl::GlRenderBuffer>{}});
     gl::GlFrameBufferContainer& result = frameBuffers.back();
     TextureInfo info = targets.begin()->texture.info;
+    TextureParameters parameters = targets.begin()->texture.parameters;
     GLbitfield clearMask = 0;
     int i = 0;
     bool depthInitialized = false;
@@ -138,37 +139,52 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
 
     for (const RenderTarget& target : targets)
     {
+        result.textures.push_back(std::ref(LoadTexture(target.texture)));
         switch (target.texture.info.target)
         {
             case TextureBindpoint::Color:
                 clearMask |= GL_COLOR_BUFFER_BIT;
                 drawBuffers.push_back(gl::FrameBufferAttachment::Color + i);
-                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Color + i, LoadTexture(target.texture), 0);
+                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Color + i, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
                 break;
             case TextureBindpoint::Depth:
                 depthInitialized = true;
                 clearMask |= GL_DEPTH_BUFFER_BIT;
-                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Depth, LoadTexture(target.texture), 0);
+                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Depth, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
                 break;
             case TextureBindpoint::Stencil:
                 clearMask |= GL_STENCIL_BUFFER_BIT;
-                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Stencil, LoadTexture(target.texture), 0);
+                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Stencil, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
                 break;
             case TextureBindpoint::DepthStencil:
                 depthInitialized = true;
                 stencilInitialized = true;
                 clearMask |= GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::DepthStencil, LoadTexture(target.texture), 0);
+                result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::DepthStencil, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
         }
     }
 
     if (!depthInitialized && state.depthTest)
     {
         clearMask &= GL_DEPTH_BUFFER_BIT;
-        result.renderBuffers.emplace_back(gl::GlRenderBuffer{});
-        gl::GlRenderBuffer& depthBuffer = result.renderBuffers.back();
-        depthBuffer.SetStorage(gl::InternalFormat::Depth32, info.width, info.height);
-        result.frameBuffer.BindRenderBuffer(gl::FrameBufferAttachment::Depth, depthBuffer);
+        if (info.count == 1)
+        {
+            result.renderBuffers.emplace_back(gl::GlRenderBuffer{});
+            gl::GlRenderBuffer& depthBuffer = result.renderBuffers.back();
+            depthBuffer.SetStorage(gl::InternalFormat::Depth32, info.width, info.height);
+            result.frameBuffer.BindRenderBuffer(gl::FrameBufferAttachment::Depth, depthBuffer);
+        }
+        else
+        {
+            Texture depth = targets.front().texture;
+            depth.info.width = depth.info.width / (int)std::pow(2, depth.parameters.useMipLevel);
+            depth.info.height = depth.info.height / (int)std::pow(2, depth.parameters.useMipLevel);
+            depth.info.target = TextureBindpoint::Depth;
+            depth.info.mipmaps = 0;
+            depth.info.name = "layeredDepth" + std::to_string(usedDepthTextures++);
+            depth.info.targetPixelFormat = TexturePixelFormat::Float24;
+            result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Depth, LoadTexture(depth), 0);
+        }
     }
 
     if (!stencilInitialized && state.stencilTest)
@@ -188,7 +204,7 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
     if (result.frameBuffer.GetStatus(gl::FrameBufferTarget::Both) != gl::FrameBufferStatus::Complete)
         Logger::Log("Could not create framebuffer");
 
-    gl::setViewport(info.width, info.height);
+    gl::setViewport(info.width / (int)std::pow(2, parameters.useMipLevel), info.height / (int)std::pow(2, parameters.useMipLevel));
     if (clearMask)
         gl::clear(clearMask);
     return result;
@@ -307,6 +323,7 @@ void GlContext::ClearFrameState()
 {
     frameBuffers.clear();
     frameBuffers.shrink_to_fit();
+    usedDepthTextures = 0;
 }
 
 void GlContext::blitFrameBuffers(gl::GlFrameBufferContainer& src, gl::GlFrameBufferContainer& target, const FrameBufferProperties& properties,
@@ -326,4 +343,14 @@ void GlContext::blitFrameBuffers(gl::GlFrameBufferContainer& src, gl::GlFrameBuf
             mask |= GL_STENCIL_BUFFER_BIT;
     }
     gl::framebuffer::blit(src.frameBuffer.GetId(), target.frameBuffer.GetId(), 0, 0, width, height, 0, 0, width, height, mask, GL_NEAREST);
+}
+
+void GlContext::UpdateFrameState(gl::GlFrameBufferContainer& frameBuffer, const RenderingAttributes& attributes)
+{
+    if (frameBuffer.textures.size() && std::find(attributes.begin(), attributes.end(), RenderingAttribute::UpdateMipmaps) != attributes.end())
+    {
+        for (gl::GlTexture& tex : frameBuffer.textures)
+            gl::texture::generateMipmaps(tex.GetId());
+    }
+
 }

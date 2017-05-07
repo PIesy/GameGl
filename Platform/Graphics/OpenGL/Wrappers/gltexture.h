@@ -27,6 +27,13 @@ namespace gl {
         Stencil = GL_STENCIL_INDEX
     };
 
+    enum class SourcePixelSize : GLenum
+    {
+        Byte = GL_UNSIGNED_BYTE,
+        Short = GL_UNSIGNED_SHORT,
+        Float = GL_FLOAT
+    };
+
     enum class InternalFormat : GLenum
     {
         RGBA8 = GL_RGBA8,
@@ -43,7 +50,13 @@ namespace gl {
         Stencil = GL_STENCIL_INDEX8
     };
 
-    enum class FilterType : GLint { Nearest = GL_NEAREST, Linear = GL_LINEAR };
+    enum class FilterType : GLint
+    {
+        Nearest = GL_NEAREST,
+        MipmapNearest = GL_NEAREST_MIPMAP_NEAREST,
+        Linear = GL_LINEAR,
+        MipmapLinear = GL_LINEAR_MIPMAP_LINEAR
+    };
 
     enum class WrappingType : GLint
     {
@@ -85,10 +98,9 @@ namespace gl {
 
         void Bind(int textureUnit = 0);
         void Allocate(InternalFormat format, unsigned width, unsigned height, unsigned depth, unsigned mipmapsCount);
-        void Allocate(InternalFormat format, unsigned width, unsigned height, unsigned mipmapsCount);
-        void Load(SourceFormat format, const void* data, unsigned mipmapLevel = 0);
-        void Load(SourceFormat format, unsigned xOffset, unsigned yOffset, unsigned zOffset,
-                  const void* data, unsigned levels = 1, unsigned mipmapLevel = 0);
+        void Load(SourceFormat format, SourcePixelSize pixelSize, const void* data, unsigned int mipmapLevel);
+        void Load(SourceFormat format, SourcePixelSize pixelSize, unsigned xOffset, unsigned yOffset, unsigned zOffset, const void* data, unsigned int levels,
+                          unsigned int mipmapLevel);
         void SetAnisotropicFiltering(int level);
         void SetMinFilter(FilterType type);
         void SetMagFilter(FilterType type);
