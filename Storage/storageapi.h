@@ -14,7 +14,9 @@ public:
     virtual ~StorageApi(){}
     virtual StorageDescriptor Allocate(size_t size, unsigned itemCount = 1, unsigned alignment = 1) = 0;
     virtual StorageDescriptor Place(size_t size, const void* data) = 0;
-    virtual void Erase(StorageDescriptor& descriptor) = 0;
+    virtual StorageDescriptor Place(size_t size, const void* data, size_t id) = 0;
+    virtual StorageDescriptor Get(size_t id) = 0;
+    virtual void Erase(size_t id) = 0;
 };
 
 

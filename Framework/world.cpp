@@ -73,10 +73,19 @@ DrawableWorldObject& World::AddObject(const Mesh& obj, const Vec3& position)
 {
     DrawableWorldObject drawableObject;
 
-    drawableObject.SetMesh(obj);
+    drawableObject.SetMeshes({obj});
     drawableObject.SetPosition(position);
-    drawableObject.SetScale(scaleFactor);
-    drawableObjects.push_back(drawableObject);
+    drawableObjects.push_back(std::move(drawableObject));
+    return drawableObjects.back();
+}
+
+DrawableWorldObject& World::AddObject(const std::vector<Mesh>& obj, const Vec3& position)
+{
+    DrawableWorldObject object;
+
+    object.SetMeshes(obj);
+    object.SetPosition(position);
+    drawableObjects.push_back(std::move(object));
     return drawableObjects.back();
 }
 
@@ -86,7 +95,7 @@ Light& World::AddLight(const Vec3& position, const Vec3& color)
 
     light.SetPosition(position);
     light.SetLightColor(color);
-    lights.push_back(light);
+    lights.push_back(std::move(light));
     return lights.back();
 }
 

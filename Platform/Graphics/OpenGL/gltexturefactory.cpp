@@ -23,7 +23,12 @@ gl::GlTexture gl::GlTextureFactory::build2dTexture(const TextureInfo& parameters
     gl::GlTexture result;
 
     if (parameters.type == ::TextureType::Cubemap)
-        result = gl::GlTexture{TextureType::TexCube};
+    {
+        if (parameters.count / 6 == 1)
+            result = gl::GlTexture{TextureType::TexCube};
+        else if (parameters.count / 6 > 1)
+            result = gl::GlTexture{TextureType::TexCubeArray};
+    }
     else if (parameters.count == 1)
         result = gl::GlTexture{TextureType::Tex2d};
     else

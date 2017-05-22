@@ -14,11 +14,10 @@ class DefaultStorage : public StorageApi
     TypedServiceContainer<StorageService> service;
 public:
     StorageDescriptor Allocate(size_t size, unsigned int itemCount, unsigned int alignment) override;
-
+    StorageDescriptor Place(size_t size, const void* data, size_t id) override;
     StorageDescriptor Place(size_t size, const void* data) override;
-
-    void Erase(StorageDescriptor& descriptor) override;
-
+    StorageDescriptor Get(size_t id) override;
+    void Erase(size_t id) override;
     ServiceContainer getService() override;
 };
 

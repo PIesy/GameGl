@@ -9,12 +9,12 @@ StorageDescriptor DefaultStorage::Allocate(size_t size, unsigned int itemCount, 
     return service->Allocate(size, itemCount, alignment);
 }
 
-StorageDescriptor DefaultStorage::Place(size_t size, const void* data)
+StorageDescriptor DefaultStorage::Place(size_t size, const void* data, size_t id)
 {
-    return service->Place(size, data);
+    return service->Place(size, data, id);
 }
 
-void DefaultStorage::Erase(StorageDescriptor& descriptor)
+void DefaultStorage::Erase(size_t id)
 {
 
 }
@@ -22,4 +22,14 @@ void DefaultStorage::Erase(StorageDescriptor& descriptor)
 ServiceContainer DefaultStorage::getService()
 {
     return service;
+}
+
+StorageDescriptor DefaultStorage::Place(size_t size, const void* data)
+{
+    return service->Place(size, data);
+}
+
+StorageDescriptor DefaultStorage::Get(size_t id)
+{
+    return service->Get(id);
 }

@@ -14,12 +14,15 @@
 class StorageService : public Service
 {
     Worker serviceThread{"storage service"};
-    std::unordered_map<unsigned long, void*> storage;
+    std::unordered_map<unsigned long, StorageDescriptor> storage;
+    std::unordered_map<size_t, StorageDescriptor> storageExternalKey;
     std::mt19937_64 randomEngine;
     bool isRunning = false;
 
     StorageDescriptor allocateNew(size_t size, unsigned elementCount, unsigned alignment);
     StorageDescriptor place(const void* ptr, size_t size);
+    StorageDescriptor placeId(const void* ptr, size_t size, size_t id);
+    StorageDescriptor get(size_t id);
     void clearAll();
 public:
     virtual ~StorageService();
@@ -33,6 +36,8 @@ public:
 
     StorageDescriptor Allocate(size_t size, unsigned elementCount, unsigned alignment);
     StorageDescriptor Place(size_t size, const void* ptr);
+    StorageDescriptor Place(size_t size, const void* ptr, size_t id);
+    StorageDescriptor Get(size_t id);
 };
 
 

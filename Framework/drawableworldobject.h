@@ -7,6 +7,7 @@
 
 class DrawableWorldObject : public WorldObject
 {
+    std::vector<Mesh> meshes;
     Mesh mesh;
     float scale = 1.0f;
     Mat4 rotation{1};
@@ -15,8 +16,8 @@ class DrawableWorldObject : public WorldObject
 public:
     DrawableWorldObject();
 
-    Mesh& GetMesh();
-    void SetMesh(const Mesh& mesh);
+    std::vector<Mesh>& GetMeshes();
+    void SetMeshes(const std::vector<Mesh>& meshes);
     Mat4 GetPositionMatrix();
     float GetScale() const;
     void SetScale(float value);

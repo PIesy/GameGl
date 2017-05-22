@@ -14,6 +14,7 @@ namespace gl {
         Tex1d = GL_TEXTURE_1D,
         Tex1dArray = GL_TEXTURE_1D_ARRAY,
         TexCube = GL_TEXTURE_CUBE_MAP,
+        TexCubeArray = GL_TEXTURE_CUBE_MAP_ARRAY,
         Tex3d = GL_TEXTURE_3D
     };
 

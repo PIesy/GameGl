@@ -58,16 +58,6 @@ bool DrawableWorldObject::operator==(const DrawableWorldObject& rhs)
     return rhs.mesh.GetId() == mesh.GetId();
 }
 
-Mesh& DrawableWorldObject::GetMesh()
-{
-    return mesh;
-}
-
-void DrawableWorldObject::SetMesh(const Mesh& mesh)
-{
-    DrawableWorldObject::mesh = mesh;
-}
-
 RenderFlags DrawableWorldObject::GetRenderFlags() const
 {
     return renderFlags;
@@ -76,5 +66,15 @@ RenderFlags DrawableWorldObject::GetRenderFlags() const
 void DrawableWorldObject::SetRenderFlags(RenderFlags renderFlags)
 {
     DrawableWorldObject::renderFlags = renderFlags;
+}
+
+std::vector<Mesh>& DrawableWorldObject::GetMeshes()
+{
+    return meshes;
+}
+
+void DrawableWorldObject::SetMeshes(const std::vector<Mesh>& meshes)
+{
+    DrawableWorldObject::meshes = meshes;
 }
 

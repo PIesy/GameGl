@@ -47,15 +47,16 @@ void StorageService::Wait()
 StorageDescriptor StorageService::allocateNew(size_t size, unsigned elementCount, unsigned alignment)
 {
     StorageDescriptor desc;
-    void* data = aligned_alloc(alignment, size * elementCount);
+    size_t elementSize = std::max((size_t)alignment, size);
+    void* data = aligned_alloc(alignment, elementSize * elementCount);
 
     desc.alignment = alignment;
-    desc.size = size;
+    desc.size = elementSize;
     desc.itemCount = elementCount;
     desc.pointer = StoragePointer([data]() { return data; }, []() { return true; });
     desc.id = randomEngine();
 
-    storage.emplace(desc.id, data);
+    storage.emplace(desc.id, desc);
     return desc;
 }
 
@@ -63,7 +64,7 @@ StorageDescriptor StorageService::place(const void* ptr, size_t size)
 {
     StorageDescriptor desc;
 
-    void* data = malloc(size);
+    void* data = std::malloc(size);
     std::memcpy(data, ptr, size);
     desc.size = size;
     desc.alignment = 1;
@@ -71,15 +72,37 @@ StorageDescriptor StorageService::place(const void* ptr, size_t size)
     desc.id = randomEngine();
     desc.pointer = StoragePointer([data]() { return data; }, []() { return true; });
 
-    storage.emplace(desc.id, data);
+    storage.emplace(desc.id, desc);
+    return desc;
+}
+
+StorageDescriptor StorageService::placeId(const void* ptr, size_t size, size_t id)
+{
+    StorageDescriptor desc;
+
+    void* data = std::malloc(size);
+    std::memcpy(data, ptr, size);
+    desc.size = size;
+    desc.alignment = 1;
+    desc.itemCount = 1;
+    desc.id = id;
+    desc.pointer = StoragePointer([data]() { return data; }, []() { return true; });
+
+    storageExternalKey.emplace(desc.id, desc);
     return desc;
 }
 
 void StorageService::clearAll()
 {
-    std::for_each(storage.begin(), storage.end(), [](auto& item)
+    std::for_each(std::begin(storageExternalKey), std::end(storageExternalKey), [](auto& item)
     {
-        free(item.second);
+        free(item.second.pointer);
+    });
+    storageExternalKey.clear();
+
+    std::for_each(std::begin(storage), std::end(storage), [](auto& item)
+    {
+        free(item.second.pointer);
     });
     storage.clear();
 }
@@ -103,4 +126,29 @@ StorageDescriptor StorageService::Place(size_t size, const void* ptr)
 StorageService::~StorageService()
 {
     Stop();
+}
+
+StorageDescriptor StorageService::Place(size_t size, const void* ptr, size_t id)
+{
+    Task task;
+    auto future = task.SetTask(std::bind(&StorageService::placeId, this, ptr, size, id));
+    serviceThread.setTask(task);
+    return future.get();
+}
+
+StorageDescriptor StorageService::Get(size_t id)
+{
+    Task task;
+    auto future = task.SetTask(std::bind(&StorageService::get, this, id));
+    serviceThread.setTask(task);
+    return future.get();
+}
+
+StorageDescriptor StorageService::get(size_t id)
+{
+    if (storageExternalKey.count(id))
+        return storageExternalKey[id];
+    if (storage.count(id))
+        return storage[id];
+    return StorageDescriptor();
 }

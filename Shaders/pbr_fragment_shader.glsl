@@ -8,7 +8,8 @@ in mat3 normalTransform;
 layout(binding = 0) uniform samplerCube irradianceMap;
 layout(binding = 1) uniform samplerCube prefilterMap;
 layout(binding = 2) uniform sampler2D brdfMap;
-layout(binding = 3) uniform sampler2DArray material;
+layout(binding = 3) uniform samplerCubeArrayShadow shadowMaps;
+layout(binding = 4) uniform sampler2DArray material;
 
 uniform vec3 albedo = vec3(0.5f, 0.0f, 0.0f);
 uniform float metallic = 0.5f;
@@ -17,6 +18,7 @@ uniform float ao = 1.0f;
 
 uniform vec3 lightPositions[256];
 uniform vec3 lightColors[256];
+uniform float lightFarPlanes[256];
 uniform int actualLightsCount;
 
 uniform vec3 camPosition;
@@ -76,6 +78,14 @@ vec3 calculateLight(vec3 normal, vec3 viewDirection, vec3 F0, vec3 lightPosition
     return (kD * a / pi + specular) * radiance * NL;
 }
 
+bool checkShadows(int i)
+{
+    vec3 lightDir = worldPosition - lightPositions[i];
+    float depth = length(lightDir);
+    float shadow = texture(shadowMaps, vec4(lightDir, i), depth / lightFarPlanes[i]);
+    return shadow < 1;
+}
+
 void main()
 {
     vec3 viewDirection = normalize(camPosition - worldPosition);
@@ -91,7 +101,10 @@ void main()
     F0 = mix(F0, a, m);
 
     for (int i = 0; i < actualLightsCount; ++i)
-        light += calculateLight(normal, viewDirection, F0, lightPositions[i], lightColors[i], a, r, m);
+    {
+        if (checkShadows(i))
+            light += calculateLight(normal, viewDirection, F0, lightPositions[i], lightColors[i], a, r, m);
+    }
 
 
 
@@ -104,8 +117,8 @@ void main()
     float mipmapCount = textureQueryLevels(prefilterMap);
     vec3 pref = textureLod(prefilterMap, refl, r * mipmapCount).rgb;
 
-    vec3 fresn = fresnelRough(F0, NV, roughness);
-    vec2 brdf = texture(brdfMap, vec2(NV, roughness)).rg;
+    vec3 fresn = fresnelRough(F0, NV, r);
+    vec2 brdf = texture(brdfMap, vec2(NV, r)).rg;
     vec3 spec = pref * (fresn * brdf.x + brdf.y);
 
     vec3 ambient = ((1.0f - kS) * diffuse + spec) * ao;

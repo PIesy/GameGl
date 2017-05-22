@@ -116,10 +116,11 @@ void gl::GlTexture::Allocate(gl::InternalFormat format, unsigned width, unsigned
             break;
         case TextureType::Tex3d:
         case TextureType::Tex2dArray:
+        case TextureType::TexCubeArray:
             gl::texture::allocateStorage(texture, mipmapsCount + 1, integral(format), width, height, depth);
             break;
         default:
-            Logger::Log("Use 2 dimensional allocate for this texture type");
+            Logger::Log("Cant create that texture type");
             break;
     }
 }

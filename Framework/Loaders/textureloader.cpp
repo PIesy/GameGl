@@ -24,7 +24,9 @@ Texture TextureLoader::Load(const std::string& path, bool useHDR)
     if (data != nullptr)
     {
         size_t pixelSize = useHDR ? sizeof(float) : 1;
-        StorageDescriptor desc = api.Place(height * width * 4 * pixelSize, data);
+        StorageDescriptor desc = api.Get(std::hash<std::string>{}(path));
+        if (!desc.size)
+            desc = api.Place(height * width * 4 * pixelSize, data, std::hash<std::string>{}(path));
         stbi_image_free(data);
         TextureInfo parameters;
 
@@ -35,7 +37,7 @@ Texture TextureLoader::Load(const std::string& path, bool useHDR)
         if (useHDR)
         {
             parameters.sourcePixelFormat = TexturePixelFormat::Float32;
-            parameters.targetPixelFormat = TexturePixelFormat::Float16;
+            parameters.targetPixelFormat = TexturePixelFormat::Float32;
         }
 
         tex.data.emplace_back(desc.pointer);

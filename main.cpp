@@ -8,6 +8,7 @@
 #include "Framework/Loaders/programloader.h"
 #include "Logger/logger.h"
 #include "Framework/texturebuilder.h"
+#include <algorithm>
 
 float aspectFactor;
 bool stop = false;
@@ -81,13 +82,15 @@ int main()
                                                 "cerberus/Textures/Cerberus_M.tga", "cerberus/Textures/Cerberus_R.tga"});
     pbrArrayGold = textureLoader.LoadArray({"pbr/gold/normal.png", "pbr/gold/albedo.png",
                                             "pbr/gold/metallic.png", "pbr/gold/roughness.png"});
-    hdrMap = textureLoader.Load("newport_loft.hdr", true);
+    hdrMap = textureLoader.Load("lakeR.hdr", true);
     auto meshes = loader.Load("cerberus/Cerberus_LP.FBX");
     Mesh plane = Shapes::Plane(1000, 1000, engine.GetStorage(), "floor");
     Mesh skybox = loader.Load("cube.obj")[0];
     Mesh sphere = loader.Load("sphere.blend")[0];
+    std::vector<Mesh> sofa = loader.Load("sofa/sofa.obj");
     meshes[0].AddTexture(pbrArrayCerberus);
     sphere.AddTexture(pbrArrayGold);
+    std::for_each(std::begin(sofa), std::end(sofa), [](Mesh& m) {m.AddTexture(pbrArrayGold);});
 
     World world;
     plane.AddTexture(pbrArrayGold);
@@ -98,15 +101,16 @@ int main()
     cam.SetFarPlane(1700.f);
     cam.SetLookDirection(lookDir);
 
-//    light1 = world.AddLight({450, 410, 450}, {150, 150, 150});
-//    world.AddLight({350, 410, 350}, {0, 300, 0});
-//    world.AddLight({450, 440, 450}, {150, 150, 150});
-//    world.AddLight({350, 440, 350}, {150, 150, 150});
+    light1 = world.AddLight({450, 410, 450}, {150, 150, 150});
+    world.AddLight({350, 410, 350}, {150, 150, 150});
+    world.AddLight({450, 440, 450}, {150, 150, 150});
+    world.AddLight({350, 440, 350}, {150, 150, 150});
 
     DrawableWorldObject& obj = world.AddObject(meshes[0], {400, 420, 400});
     obj.SetScale(1);
     obj.Rotate(270.0f, {1, 0, 0});
     //world.AddObject(plane, {0, 400, 0});
+    world.AddObject(sofa, {450, 420, 450}).SetScale(0.05f);
     world.AddObject(sphere, {350, 400, 350}).SetScale(10);
     world.AddObject(sphere, {350, 420, 350}).SetScale(10);
     world.AddObject(sphere, {350, 440, 350}).SetScale(10);
@@ -234,7 +238,7 @@ void initRenderer(World& world, Renderer& renderer)
     RenderStep step3;
     Light fakeLight;
 
-    hdrSkybox = TextureBuilder::BuildTexture(TextureType::Cubemap, TextureBindpoint::Color, 1024, 1024, 6, 4, TexturePixelFormat::Float16, true);
+    hdrSkybox = TextureBuilder::BuildCubemap(TextureBindpoint::Color, 1024, 1024, 1, 4, TexturePixelFormat::Float16, true);
     hdrSkybox.info.name = "hdrSkybox";
 
     step0.genericTextures = {hdrMap};
@@ -249,7 +253,7 @@ void initRenderer(World& world, Renderer& renderer)
 
     step1.genericTextures = {hdrSkybox};
     step1.prog = hdrIblConvProg;
-    hdrSkyboxConv = TextureBuilder::BuildTexture(TextureType::Cubemap, TextureBindpoint::Color, 32, 32, 6, 4, TexturePixelFormat::Float16, false);
+    hdrSkyboxConv = TextureBuilder::BuildCubemap(TextureBindpoint::Color, 32, 32, 1, 4, TexturePixelFormat::Float16, false);
     hdrSkyboxConv.info.name = "hdrSkyboxDiffuse";
     step1.targets.push_back(RenderTarget(hdrSkyboxConv));
     step1.postConfig = [=](Program& p)
@@ -263,7 +267,7 @@ void initRenderer(World& world, Renderer& renderer)
 
     const int mipmaps = 5;
 
-    hdrSkyboxPref = TextureBuilder::BuildTexture(TextureType::Cubemap, TextureBindpoint::Color, 128, 128, 6, 4, TexturePixelFormat::Float16, false);
+    hdrSkyboxPref = TextureBuilder::BuildCubemap(TextureBindpoint::Color, 128, 128, 1, 4, TexturePixelFormat::Float16, false);
     hdrSkyboxPref.info.mipmaps = mipmaps - 1;
     hdrSkyboxPref.info.name = "hdrSkyboxPref";
     for (int i = 0; i < mipmaps; ++i)
@@ -283,7 +287,7 @@ void initRenderer(World& world, Renderer& renderer)
         builder.AddStep(step, RenderFlags::SkyBox);
     }
 
-    brdfLut = TextureBuilder::BuildTexture(TextureType::Tex2D, TextureBindpoint::Color, 512, 512, 1, 3, TexturePixelFormat::Float16, false);
+    brdfLut = TextureBuilder::Build2DTexture(TextureBindpoint::Color, 512, 512, 1, 3, TexturePixelFormat::Float16, false);
     brdfLut.info.name = "brdfLut";
     step3.prog = brdfLutProg;
     step3.attributes = {RenderingAttribute::ClearBuffer};
@@ -302,31 +306,33 @@ void drawMesh2(World& world, Renderer& renderer)
     RenderStep step2_5;
     RenderStep step3;
     RenderStep step4;
-    TextureInfo textureInfo;
-    TextureParameters textureParameters;
-    Texture texture;
+    Texture texture = TextureBuilder::BuildCubemap(TextureBindpoint::Depth, 512, 512, world.GetLights().size(), 1, TexturePixelFormat::Float24, false);
+    texture.info.name = "shadow";
 
-    textureInfo.width = 2048;
-    textureInfo.height = 2048;
-    textureInfo.type = TextureType::Cubemap;
-    textureInfo.target = TextureBindpoint::Depth;
-    textureInfo.targetPixelFormat = TexturePixelFormat::Float24;
-    textureInfo.name = "shadow";
-    textureParameters.wrapping = TextureWrapping::Clamp;
-    textureParameters.sampling = TextureSampling::Linear;
-    texture.info = textureInfo;
-    texture.parameters = textureParameters;
     step1.targets.push_back(RenderTarget(texture));
     step1.prog = prog2;
+    step1.attributes = {RenderingAttribute::DepthTest, RenderingAttribute::ClearBuffer};
 
-    step1.postConfig = [=](Program& p)
+    int i = 0;
+    for (Light& light : world.GetLights())
     {
-        p.SetUniform(light1.GetCubeMapMatrices()[0], "projections", 6);
-        p.SetUniform(light1.GetPerspectiveMatrix(), "perspective");
-        p.SetUniform(0.1f, "nearPlane");
-        p.SetUniform(light1.GetMaxDistance(), "farPlane");
-        p.SetUniform(light1.GetPosition(), "lightPosition");
-    };
+        if (i != 0)
+        {
+            step1.attributes = {RenderingAttribute::DepthTest};
+            step1.frameBufferProperties.frameBufferType = FrameBufferProperties::REUSE_FROM_STEP;
+            step1.frameBufferProperties.stepId = 0;
+        }
+        step1.postConfig = [light, i](Program& p)
+        {
+            p.SetUniform(i, "baseLayer");
+            p.SetUniform(light.GetCubeMapMatrices()[0], "projections", 6);
+            p.SetUniform(light.GetPerspectiveMatrix(), "perspective");
+            p.SetUniform(light.GetMaxDistance(), "farPlane");
+            p.SetUniform(light.GetPosition(), "lightPosition");
+        };
+        builder.AddStep(step1);
+        i++;
+    }
 
     Texture hdrTexture;
     hdrTexture.info.name = "colorBuffHdr";
@@ -335,17 +341,17 @@ void drawMesh2(World& world, Renderer& renderer)
     hdrTexture.info.width = windowSizeX;
     hdrTexture.info.height = windowSizeY;
 
-    step2.genericTextures = {hdrSkyboxConv, hdrSkyboxPref, brdfLut};
+    step2.genericTextures = {hdrSkyboxConv, hdrSkyboxPref, brdfLut, texture};
     step2.targets.push_back(RenderTarget(hdrTexture));
     step2.prog = pbrProg;
 
     step2_5.attributes = {RenderingAttribute::DepthTest};
     step2_5.frameBufferProperties.frameBufferType = FrameBufferProperties::REUSE_FROM_STEP;
-    step2_5.frameBufferProperties.stepId = 0;
+    step2_5.frameBufferProperties.stepId = i;
     step2_5.prog = normalsProg;
 
     step3.frameBufferProperties.frameBufferType = FrameBufferProperties::REUSE_FROM_STEP;
-    step3.frameBufferProperties.stepId = 0;
+    step3.frameBufferProperties.stepId = i;
     cubeMap.parameters.sampling = TextureSampling::Linear;
     cubeMap.parameters.anisotropicFiltering = 16;
     step3.genericTextures = {hdrSkybox};
@@ -364,7 +370,7 @@ void drawMesh2(World& world, Renderer& renderer)
     //builder.AddStep(step1);
     builder.AddStep(step2);
     //builder.AddStep(step2_5);
-    //builder.AddStep(step3, RenderFlags::SkyBox);
+    builder.AddStep(step3, RenderFlags::SkyBox);
     builder.AddStep(step4, RenderFlags::FullScreenQuad);
 
     renderer.Draw(builder.BuildScene(world, cam));

@@ -10,10 +10,10 @@
 struct StorageDescriptor
 {
     StoragePointer pointer;
-    unsigned long id;
-    unsigned alignment;
-    size_t size;
-    unsigned itemCount;
+    size_t id = 0;
+    unsigned alignment = 0;
+    size_t size = 0;
+    unsigned itemCount = 0;
 
     bool operator==(const StorageDescriptor& rhs) const
     {

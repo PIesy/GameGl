@@ -5,7 +5,7 @@
 #include "../provider.h"
 #include "../../config.h"
 
-class ConfigProvider: ProviderInterface
+class ConfigProvider: public ProviderInterface
 {
 public:
     virtual Config getConfig(std::type_index classId) = 0;

@@ -8,6 +8,8 @@
 
 #include "worldobject.h"
 
+enum class LightType {Point, Directional, Spotlight};
+
 class Light : public WorldObject
 {
     float maxDistance = 10;

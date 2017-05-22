@@ -22,8 +22,8 @@ namespace std {
 template<>
 struct hash<MetaInfo>
 {
-    typedef MetaInfo argument_type;
-    typedef std::size_t result_type;
+    using argument_type = MetaInfo;
+    using result_type = std::size_t;
 
     result_type operator()(const argument_type& s) const
     {
