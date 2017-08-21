@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
-#include "../Helpers/invokable.h"
+#include "../Core/invokable.h"
 #include "../Helpers/size.h"
 #include "../Helpers/invokationresult.h"
 #include "../Core/service/service.h"
@@ -41,7 +41,7 @@ class Shader
 {
 public:
     virtual ~Shader(){}
-    virtual ShaderType getType() const = 0;
+    virtual ShaderType GetType() const = 0;
 };
 
 class Program
@@ -52,7 +52,7 @@ public:
     virtual void Detach(const Shader& shader) = 0;
     virtual void Compile() = 0;
     virtual void Use() = 0;
-    virtual InvokationResult setUniform(const std::string& name, const UniformValue& value) = 0;
+    virtual InvokationResult SetUniform(const std::string& name, const UniformValue& value) = 0;
 
     template<typename T>
     InvokationResult SetUniform(const T& value, const std::string& name, int count = 1);
@@ -72,6 +72,8 @@ template<>
 InvokationResult Program::SetUniform<float>(const float& value, const std::string& name, int count);
 template<>
 InvokationResult Program::SetUniform<int>(const int& value, const std::string& name, int count);
+template<>
+InvokationResult Program::SetUniform<bool>(const bool& value, const std::string& name, int count);
 
 struct RGBA_Color
 {

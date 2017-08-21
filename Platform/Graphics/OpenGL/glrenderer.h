@@ -4,7 +4,6 @@
 #include "../../../Graphics/renderdefs.h"
 #include "../../../Graphics/graphicsclasses.h"
 #include "sdlclasses.h"
-#include "glhelpers.h"
 #include "../../../Graphics/renderer.h"
 #include "../../../Helpers/task.h"
 #include "../../../Helpers/genericcondition.h"

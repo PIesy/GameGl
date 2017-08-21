@@ -9,17 +9,33 @@ layout(binding = 0) uniform samplerCube irradianceMap;
 layout(binding = 1) uniform samplerCube prefilterMap;
 layout(binding = 2) uniform sampler2D brdfMap;
 layout(binding = 3) uniform samplerCubeArrayShadow shadowMaps;
-layout(binding = 4) uniform sampler2DArray material;
+layout(binding = 4) uniform sampler2DArrayShadow globalShadowMaps;
+layout(binding = 5) uniform sampler2DArray material;
+layout(binding = 6) uniform sampler2D aoMap;
 
+uniform int tilingFactor = 1;
+uniform bool albedoTex = false;
 uniform vec3 albedo = vec3(0.5f, 0.0f, 0.0f);
-uniform float metallic = 0.5f;
-uniform float roughness = 0.1f;
+uniform bool metallnessTex = false;
+uniform float metallness = 0.0f;
+uniform bool roughnessTex = false;
+uniform float roughness = 1.0f;
+uniform bool aoTex = false;
 uniform float ao = 1.0f;
+uniform bool aoTiling = false;
+uniform bool normalTex = false;
+uniform bool inverseRoughness = false;
+uniform bool noIbl = false;
+uniform bool noShadows = false;
 
 uniform vec3 lightPositions[256];
 uniform vec3 lightColors[256];
 uniform float lightFarPlanes[256];
-uniform int actualLightsCount;
+uniform int actualLightsCount = 0;
+uniform vec3 directionalLights[256];
+uniform vec3 directionalLightsColor[256];
+uniform mat4 directionalLightsMatrices[256];
+uniform int directionalLightsCount = 0;
 
 uniform vec3 camPosition;
 
@@ -78,12 +94,44 @@ vec3 calculateLight(vec3 normal, vec3 viewDirection, vec3 F0, vec3 lightPosition
     return (kD * a / pi + specular) * radiance * NL;
 }
 
-bool checkShadows(int i)
+vec3 calculateDirectionalLight(vec3 normal, vec3 viewDirection, vec3 F0, vec3 direction, vec3 lightColor, vec3 a, float r, float m)
 {
+    vec3 lightDirection = normalize(-direction);
+    vec3 halfVector = normalize(viewDirection + lightDirection);
+    float NV = clamp(dot(normal, viewDirection), 0.0f, 1.0f);
+    float NL = clamp(dot(normal, lightDirection), 0.0f, 1.0f);
+    float HV = clamp(dot(halfVector, viewDirection), 0.0f, 1.0f);
+    vec3 radiance = lightColor;
+
+    float NDF = GGXDistribution(normal, halfVector, r);
+    float G = geometrySchlickGGX(NV, r) * geometrySchlickGGX(NL, r);
+    vec3 kS = fresnel(F0, HV);
+
+    vec3 specular = NDF * G * kS / (4 * NV * NL + 0.001);
+    vec3 kD = (vec3(1.0) - kS) * (1 - m);
+
+    return (kD * a / pi + specular) * radiance * NL;
+}
+
+float checkShadows(int i)
+{
+    if (noShadows)
+        return 1.0f;
     vec3 lightDir = worldPosition - lightPositions[i];
-    float depth = length(lightDir);
+    float depth = distance(lightPositions[i], worldPosition);
     float shadow = texture(shadowMaps, vec4(lightDir, i), depth / lightFarPlanes[i]);
-    return shadow < 1;
+    return shadow;
+}
+
+float checkGlobalShadows(int i)
+{
+    if (noShadows)
+        return 1.0f;
+    vec4 projection = directionalLightsMatrices[i] * vec4(worldPosition, 1.0f);
+    projection.xyz = projection.xyz * 0.5f + 0.5f;
+    projection.z -= 0.001f;
+    float shadow = texture(globalShadowMaps, vec4(projection.xy, i, projection.z));
+    return shadow;
 }
 
 void main()
@@ -91,26 +139,70 @@ void main()
     vec3 viewDirection = normalize(camPosition - worldPosition);
     vec3 light = vec3(0.0);
     vec3 F0 = vec3(0.04);
+    vec2 modUv = uvCoords * tilingFactor;
 
-    vec3 normal = texture(material, vec3(uvCoords, 0)).rgb;
+    vec3 normal = normalWorldDirection;
+    int index = 0;
+    if (normalTex)
+        normal = texture(material, vec3(modUv, index++)).rgb;
     normal = normalize(normal * 2.0f - 1.0f);
     normal = normalize(normalTransform * normal);
-    vec3 a = texture(material, vec3(uvCoords, 1)).rgb;
-    float m = texture(material, vec3(uvCoords, 2)).r;
-    float r = texture(material, vec3(uvCoords, 3)).r;
+
+    vec3 a;
+    if (albedoTex)
+    {
+        a = texture(material, vec3(modUv, index)).rgb;
+        index++;
+    }
+    else
+        a = albedo;
+
+    float m;
+    if (metallnessTex)
+    {
+        m = texture(material, vec3(modUv, index)).r;
+        index++;
+    }
+    else
+        m = metallness;
+
+    float r;
+    if (roughnessTex)
+    {
+        r = texture(material, vec3(modUv, index)).r;
+        if (inverseRoughness)
+            r = 1.0f - r;
+    }
+    else
+        r = roughness;
+
+    float ao_ = 1.0f;
+    if (aoTex)
+        ao_ = texture(aoMap, aoTiling ? modUv : uvCoords).r;
+    else
+        ao_ = ao;
+
     F0 = mix(F0, a, m);
 
     for (int i = 0; i < actualLightsCount; ++i)
     {
-        if (checkShadows(i))
-            light += calculateLight(normal, viewDirection, F0, lightPositions[i], lightColors[i], a, r, m);
+        light += calculateLight(normal, viewDirection, F0, lightPositions[i], lightColors[i], a, r, m) * checkShadows(i);
     }
 
+    for (int i = 0; i < directionalLightsCount; ++i)
+    {
+        light += calculateDirectionalLight(normal, viewDirection, F0, directionalLights[i], directionalLightsColor[i], a, r, m) * checkGlobalShadows(i);
+    }
 
+    vec3 ambient = vec3(0.0f);
+
+    vec3 spec = vec3(0.0f);
+    vec3 diffuse = vec3(0.1f);
+    vec3 kS = vec3(0.7f);
 
     float NV = max(dot(normal, viewDirection), 0.0f);
-    vec3 kS = fresnelRough(F0, NV, r);
-    vec3 diffuse = texture(irradianceMap, normal).rgb * a;
+    kS = fresnelRough(F0, NV, r);
+    diffuse = texture(irradianceMap, normal).rgb * a;
 
 
     vec3 refl = reflect(-viewDirection, normal);
@@ -119,9 +211,9 @@ void main()
 
     vec3 fresn = fresnelRough(F0, NV, r);
     vec2 brdf = texture(brdfMap, vec2(NV, r)).rg;
-    vec3 spec = pref * (fresn * brdf.x + brdf.y);
+    spec = pref * (fresn * brdf.x + brdf.y);
 
-    vec3 ambient = ((1.0f - kS) * diffuse + spec) * ao;
+    ambient = ((1.0f - kS) * diffuse + spec) * ao_;
 
     vec3 color = ambient + light;
     outColor = vec4(color, 1.0);

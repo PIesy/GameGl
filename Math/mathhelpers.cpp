@@ -1,11 +1,6 @@
 #include "mathhelpers.h"
 #include "mathconstants.h"
 
-constexpr float degToRad(float degrees)
-{
-    return degrees / 180 * pi;
-}
-
 void rotateQuat(glm::fquat& base, float degree, const Vec3& axis)
 {
     float radian = degToRad(degree);

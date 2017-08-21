@@ -65,7 +65,12 @@ void ServiceCluster::Remove(ServiceContainer service)
     services.remove(service);
 }
 
-void ServiceCluster::setMainService(ServiceContainer service)
+void ServiceCluster::SetMainService(ServiceContainer service)
 {
     mainService = service;
+}
+
+Service& ServiceCluster::GetMainService()
+{
+    return mainService.GetService();
 }

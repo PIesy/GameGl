@@ -42,7 +42,6 @@ void GlContext::configureTexture(gl::GlTexture& texture, const TextureParameters
             wrappingType = gl::WrappingType::MirroredRepeat;
     }
 
-    gl::FilterType filterType;
     switch (parameters.sampling)
     {
         case TextureSampling::Linear:
@@ -107,15 +106,18 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
     if (step.frameBufferProperties.frameBufferType == FrameBufferProperties::REUSE_FROM_STEP)
     {
         frameBuffers.emplace_back(gl::GlFrameBufferContainer{});
-        gl::GlFrameBufferContainer& result = frameBuffers[step.frameBufferProperties.stepId];
-        if (result.frameBuffer.GetId() == 0)
+        gl::GlFrameBufferContainer* result = &frameBuffers[step.frameBufferProperties.stepId];
+        if (result->reference != nullptr)
+            result = result->reference;
+        frameBuffers.back().reference = result;
+        if (result->frameBuffer.GetId() == 0)
             gl::setViewport(viewportWidth, viewportHeight);
         else
         {
             TextureInfo info = steps[step.frameBufferProperties.stepId].targets.begin()->texture.info;
             gl::setViewport(info.width, info.height);
         }
-        return result;
+        return *result;
     }
 
     if (targets.empty() || targets.begin()->target == RenderTarget::SCREEN)
@@ -131,7 +133,6 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
     gl::GlFrameBufferContainer& result = frameBuffers.back();
     TextureInfo info = targets.begin()->texture.info;
     TextureParameters parameters = targets.begin()->texture.parameters;
-    GLbitfield clearMask = 0;
     int i = 0;
     bool depthInitialized = false;
     bool stencilInitialized = false;
@@ -143,30 +144,26 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
         switch (target.texture.info.target)
         {
             case TextureBindpoint::Color:
-                clearMask |= GL_COLOR_BUFFER_BIT;
                 drawBuffers.push_back(gl::FrameBufferAttachment::Color + i);
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Color + i, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
                 break;
             case TextureBindpoint::Depth:
                 depthInitialized = true;
-                clearMask |= GL_DEPTH_BUFFER_BIT;
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Depth, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
                 break;
             case TextureBindpoint::Stencil:
-                clearMask |= GL_STENCIL_BUFFER_BIT;
+                stencilInitialized = true;
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::Stencil, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
                 break;
             case TextureBindpoint::DepthStencil:
                 depthInitialized = true;
                 stencilInitialized = true;
-                clearMask |= GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
                 result.frameBuffer.SetTextureToAttachment(gl::FrameBufferAttachment::DepthStencil, LoadTexture(target.texture), target.texture.parameters.useMipLevel);
         }
     }
 
     if (!depthInitialized && state.depthTest)
     {
-        clearMask &= GL_DEPTH_BUFFER_BIT;
         if (info.count == 1)
         {
             result.renderBuffers.emplace_back(gl::GlRenderBuffer{});
@@ -177,8 +174,8 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
         else
         {
             Texture depth = targets.front().texture;
-            depth.info.width = depth.info.width / (int)std::pow(2, depth.parameters.useMipLevel);
-            depth.info.height = depth.info.height / (int)std::pow(2, depth.parameters.useMipLevel);
+            depth.info.width = depth.info.width / (1 << depth.parameters.useMipLevel);
+            depth.info.height = depth.info.height / (1 << depth.parameters.useMipLevel);
             depth.info.target = TextureBindpoint::Depth;
             depth.info.mipmaps = 0;
             depth.info.name = "layeredDepth" + std::to_string(usedDepthTextures++);
@@ -189,7 +186,6 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
 
     if (!stencilInitialized && state.stencilTest)
     {
-        clearMask &= GL_STENCIL_BUFFER_BIT;
         result.renderBuffers.emplace_back(gl::GlRenderBuffer{});
         gl::GlRenderBuffer& stencilBuffer = result.renderBuffers.back();
         stencilBuffer.SetStorage(gl::InternalFormat::Stencil, info.width, info.height);
@@ -204,9 +200,7 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
     if (result.frameBuffer.GetStatus(gl::FrameBufferTarget::Both) != gl::FrameBufferStatus::Complete)
         Logger::Log("Could not create framebuffer");
 
-    gl::setViewport(info.width / (int)std::pow(2, parameters.useMipLevel), info.height / (int)std::pow(2, parameters.useMipLevel));
-    if (clearMask)
-        gl::clear(clearMask);
+    gl::setViewport(info.width / (1 << parameters.useMipLevel), info.height / (1 << parameters.useMipLevel));
     return result;
 }
 
@@ -301,6 +295,24 @@ void GlContext::UpdateState(const RenderingAttributes& attributes)
         {
             state.culling = false;
             gl::disable(GL_CULL_FACE);
+        }
+    }
+
+    // Wireframe
+    if (std::find(attributes.begin(), attributes.end(), RenderingAttribute::WireframeMode) != attributes.end())
+    {
+        if (!state.wireframe)
+        {
+            state.wireframe = true;
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+    }
+    else
+    {
+        if (state.wireframe)
+        {
+            state.wireframe = false;
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
 }

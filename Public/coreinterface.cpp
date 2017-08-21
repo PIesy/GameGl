@@ -1,12 +1,9 @@
 #include "coreinterface.h"
 #include "../Core/engineinitializer.h"
-#include "../Modules/graphicsmodule.h"
-#include "../Modules/resourcesmodule.h"
 #include "../Core/enginecore.h"
-#include "../Resources/filereader.h"
-#include "../Input/sdlinput.h"
-#include "../Platform/Graphics/OpenGL/openglsdl.h"
-#include "../Platform/Storage/defaultstorage.h"
+#include "../Platform/Graphics/OpenGL/opengl_module_provider.h"
+#include "../Platform/Input/SDL2/sdl2_input_provider.h"
+#include "../Platform/Storage/Simple/simple_storage_provider.h"
 
 EngineInitializer makeInit();
 
@@ -15,7 +12,6 @@ CoreInterface::CoreInterface()
     EngineInitializer i = makeInit();
     core = new EngineCore(i);
     initVideo();
-    initResources();
     initStorage();
 }
 
@@ -26,17 +22,12 @@ CoreInterface::~CoreInterface()
 
 EventHandler& CoreInterface::getEventHandler()
 {
-    return core->getEventHandler();
+    return core->GetEventHandler();
 }
 
 GraphicsApi* CoreInterface::Video()
 {
     return video;
-}
-
-ResourcesApi& CoreInterface::Resources()
-{
-    return *resources;
 }
 
 void CoreInterface::Start()
@@ -57,14 +48,8 @@ int CoreInterface::WaitEnd()
 
 void CoreInterface::initVideo()
 {
-    GraphicsModule& graphics = (GraphicsModule&)core->GetModule(Modules::Video);
-    video = graphics.getApi();
-}
-
-void CoreInterface::initResources()
-{
-    ResourcesModule& resources = (ResourcesModule&)core->GetModule(Modules::Storage);
-    this->resources = resources.getApi();
+    ModuleInterface& graphics = core->GetModule(ModuleType::Video);
+    video = dynamic_cast<GraphicsApi*>(&graphics.GetApi());
 }
 
 EngineInterface* CoreInterface::getCore()
@@ -79,15 +64,14 @@ StorageApi& CoreInterface::GetStorage()
 
 void CoreInterface::initStorage()
 {
-    storage = dynamic_cast<StorageApi*>(core->GetModule(Modules::Memory).getApi());
+    storage = dynamic_cast<StorageApi*>(&core->GetModule(ModuleType::Storage).GetApi());
 }
 
 EngineInitializer makeInit()
 {
     EngineInitializer i;
-    i.apis.push_back({new OpenGlSdl(), Modules::Video});
-    i.apis.push_back({new SDLInput(), Modules::Input});
-    i.apis.push_back({new FileReader(), Modules::Storage});
-    i.apis.push_back({new DefaultStorage(), Modules::Memory});
+    i.providers.emplace_back(std::shared_ptr<ModuleProvider>{new OpenGLModuleProvider()});
+    i.providers.emplace_back(std::shared_ptr<ModuleProvider>{new SDL2InputProvider()});
+    i.providers.emplace_back(std::shared_ptr<ModuleProvider>{new SimpleStorageProvider()});
     return i;
 }

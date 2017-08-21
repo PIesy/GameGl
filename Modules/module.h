@@ -5,13 +5,13 @@
 
 class Module: public ModuleInterface
 {
-protected:
-    EngineInterface* engine;
+    ServiceContainer serviceContainer;
+    std::shared_ptr<ApiBase> api;
 public:
-    virtual ~Module() {}
-    void setEngine(EngineInterface& engine);
-    virtual void setApi(ApiBase* api) = 0;
-    virtual ApiBase* getApi() = 0;
+    Module(std::shared_ptr<ApiBase>&& api, const MetaInfo& metaInfo, ModuleType type, ServiceContainer serviceContainer);
+    ApiBase& GetApi() override;
+    ServiceContainer GetServices() override;
+
 };
 
 #endif // MODULE

@@ -1,5 +1,6 @@
 #include "eventshandler.h"
 #include "../../Logger/logger.h"
+#include "../enginecore.h"
 
 void EventListener::listenFor(std::type_index type)
 {
@@ -21,11 +22,6 @@ void EventListener::setHandler(const EventInvokable& handler, const EventFilter&
 {
     this->handler = handler;
     this->filter = filter;
-}
-
-EventHandler::EventHandler()
-{
-    worker.setName("event handler");
 }
 
 int EventHandler::setListener(EventListener listener)
@@ -63,19 +59,7 @@ bool EventHandler::removeListener(int listenerId)
 
 void EventHandler::ThrowEvent(EventInterface* event)
 {
-    worker.setTask(Task([event, this]()
-    {
-        std::unique_ptr<EventInterface> packedEvent(event);
-        try
-        {
-            for(std::pair<const int, EventListener>& listener: listeners.at(getType(*event)))
-                listener.second.Process(packedEvent.get());
-        }
-        catch(std::out_of_range)
-        {
-            Logger::Log(std::string("No listeners registered for ") + getType(*event).name());
-        }
-    }));
+    throwEvent(event, getType(*event));
 }
 
 int EventHandler::createListener(std::type_index type, const EventInvokable& action, const EventFilter& filter)
@@ -89,17 +73,22 @@ int EventHandler::createListener(std::type_index type, const EventInvokable& act
 
 void EventHandler::throwEvent(EventInterface* event, std::type_index type)
 {
-    worker.setTask(Task([event, this, type]()
+    executor.Execute(Task([event, this, type]()
     {
         std::unique_ptr<EventInterface> packedEvent(event);
         try
         {
-            for(std::pair<const int, EventListener>& listener: listeners.at(type))
+            for (std::pair<const int, EventListener>& listener: listeners.at(type))
                 listener.second.Process(packedEvent.get());
         }
-        catch(std::out_of_range)
+        catch (std::out_of_range)
         {
             Logger::Log(std::string("No listeners registered for ") + getType(*event).name());
         }
     }));
+}
+
+EventHandler::EventHandler() : executor(core::core.Get().GetExecutor())
+{
+
 }

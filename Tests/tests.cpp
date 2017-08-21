@@ -10,20 +10,19 @@ public:
 
 void testCc(EventHandler* handler);
 
-void testFunction(TestEvent* event, int* val);
+void testFunction(TestEvent* event);
 
 void eventsHandlerTest()
 {
-    EventHandler* handler = new EventHandler();
-    EventListener listener;
-    Action<TestEvent*> test;
-    int x = 13;
-    test.Bind(testFunction, std::placeholders::_1, &x);
-
-    listener.listenFor<TestEvent>();
-    listener.setHandler(test);
-    handler->setListener(listener);
-    testCc(handler);
+//    EventHandler* handler = new EventHandler();
+//    EventListener listener;
+//    int x = 13;
+//    Action<TestEvent*> test{std::bind(testFunction, std::placeholders::_1)};
+//
+//    listener.listenFor<TestEvent>();
+//    listener.setHandler(test);
+//    handler->setListener(listener);
+//    testCc(handler);
 }
 
 void testCc(EventHandler *handler)
@@ -31,7 +30,7 @@ void testCc(EventHandler *handler)
     handler->ThrowEvent(TestEvent(25));
 }
 
-void testFunction(TestEvent* event, int* val)
+void testFunction(TestEvent* event)
 {
     Logger::Log("Test event cought");
 }

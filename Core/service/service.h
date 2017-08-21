@@ -31,6 +31,7 @@ public:
     void Restart();
     void Wait();
     operator bool();
+    Service& GetService();
     bool operator==(const ServiceContainer& rhs);
 };
 
@@ -41,6 +42,11 @@ public:
     TypedServiceContainer()
     {
         service = std::shared_ptr<Service>(new T());
+    }
+
+    TypedServiceContainer(const TypedServiceContainer<T>& src)
+    {
+        service = src.service;
     }
 
     T* operator->()

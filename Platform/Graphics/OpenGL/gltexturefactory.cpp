@@ -115,7 +115,7 @@ gl::InternalFormat gl::GlTextureFactory::decodeFormat(const TextureInfo& paramet
                         return gl::InternalFormat::RGBA16F;
                     break;
                 case TexturePixelFormat::Float24:
-                    Logger::Log("Unsupported texture format RGB 24 bit per channel using 32 bit instead");
+                    Logger::Log("Unsupported texture format RGB(A) 24 bit per channel using 32 bit instead");
                 case TexturePixelFormat::Float32:
                     if (parameters.channels == 3)
                         return gl::InternalFormat::RGB32F;

@@ -4,14 +4,14 @@
 
 GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 {
-    context.Execute(Task(&GlRenderer::init, this));
+    context.Execute(Task(std::bind(&GlRenderer::init, this)));
 }
 
 void GlRenderer::Start()
 {
     if(terminated)
     {
-        renderTask = Task(&GlRenderer::renderLoop, this);
+        renderTask = Task(std::bind(&GlRenderer::renderLoop, this));
         context.Execute(renderTask);
     }
 }
@@ -87,7 +87,7 @@ void GlRenderer::update()
 
 void GlRenderer::init()
 {
-    gl::setClearColor(0.0, 0.0, 0.0, 0.0);
+    gl::setClearColor(1.0, 0.0, 0.0, 0.0);
     gl::enable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     gl::culling::setFrontFace(GL_CW);
     gl::depthbuffer::enableWrite(GL_TRUE);
@@ -130,10 +130,10 @@ void GlRenderer::render()
                 int bindPoint = 0;
                 for (Texture& genericTexture : step.genericTextures)
                     glContext.LoadTexture(genericTexture).Bind(bindPoint++);
-                if (!meshObject.textures.empty())
+                if (!mesh.mesh.GetTextures().empty())
                 {
-                    for (gl::GlTexture& texture : meshObject.textures)
-                        texture.Bind(bindPoint++);
+                    for (const Texture& texture : mesh.mesh.GetTextures())
+                        glContext.LoadTexture(texture).Bind(bindPoint++);
                 }
 
                 step.prog->Use();

@@ -2,10 +2,12 @@
 #include "../../../Graphics/renderdefs.h"
 #include "../../../Logger/logger.h"
 
-GlShader::GlShader(RenderingContext& context):context(context) {}
+GlShader::GlShader(RenderingContext& context) : context(context) {}
 
-void GlShader::Create(std::string source, ShaderType type)
+void GlShader::Create(const std::string& source, ShaderType type)
 {
+    if (!isValid)
+        return;
     this->type = type;
     GLuint shaderType = convertToGlShaderType(type);
 
@@ -22,6 +24,8 @@ void GlShader::Create(std::string source, ShaderType type)
 
 void GlShader::PrintInfo()
 {
+    if (!isValid)
+        return;;
     Task print([this]
     {
         char buff[4096] = {0};
@@ -32,7 +36,7 @@ void GlShader::PrintInfo()
     context.Execute(print);
 }
 
-ShaderType GlShader::getType() const
+ShaderType GlShader::GetType() const
 {
     return type;
 }
@@ -40,4 +44,11 @@ ShaderType GlShader::getType() const
 GlShader::operator GLuint() const
 {
     return shader;
+}
+
+GlShader::GlShader(GlShader&& src) : context(src.context)
+{
+    src.isValid = false;
+    shader = src.shader;
+    type = src.type;
 }

@@ -6,16 +6,19 @@
 #include <mutex>
 #include <condition_variable>
 #include <fstream>
-#include <ctime>
 #include <string>
+#include <utility>
 
 #define LOG_ENABLED
+
+
+enum class LogMessageSeverity {Error, Warning, Info};
 
 struct LogQueue
 {
     std::mutex mutex;
     std::condition_variable newString;
-    std::queue<std::string> logQueue;
+    std::queue<std::pair<std::string, LogMessageSeverity>> logQueue;
 };
 
 class Logger
@@ -23,27 +26,57 @@ class Logger
 #ifdef LOG_ENABLED
     static Logger logger;
 #endif
+    const LogMessageSeverity lowestSeverity = LogMessageSeverity::Info;
     bool forwardToConsole = true;
     bool terminate = false;
     LogQueue queue;
     std::fstream logfile;
-    std::thread* logThread;
+    std::thread logThread;
     Logger();
     ~Logger();
-    void write(std::string str);
-    void log(std::string str);
+    void write(const std::string& str);
+    void log(const std::string& str, LogMessageSeverity severity);
+    void logLoop();
 public:
-    static void Log(std::string str)
+    static void Log(const std::string& str, LogMessageSeverity severity = LogMessageSeverity::Info)
     {
     #ifdef LOG_ENABLED
         logger.queue.mutex.lock();
-        logger.queue.logQueue.push(str);
-        logger.queue.newString.notify_all();
+        logger.queue.logQueue.push({str, severity});
         logger.queue.mutex.unlock();
+        logger.queue.newString.notify_all();
     #endif
     }
 
-    friend void loggerRoutine(Logger* log, LogQueue* queue);
+    static void LogError(const std::string& str)
+    {
+    #ifdef LOG_ENABLED
+        logger.queue.mutex.lock();
+        logger.queue.logQueue.push({str, LogMessageSeverity::Error});
+        logger.queue.mutex.unlock();
+        logger.queue.newString.notify_all();
+    #endif
+    }
+
+    static void LogWarning(const std::string& str)
+    {
+    #ifdef LOG_ENABLED
+        logger.queue.mutex.lock();
+        logger.queue.logQueue.push({str, LogMessageSeverity::Warning});
+        logger.queue.mutex.unlock();
+        logger.queue.newString.notify_all();
+    #endif
+    }
+
+    static void LogInfo(const std::string& str)
+    {
+    #ifdef LOG_ENABLED
+        logger.queue.mutex.lock();
+        logger.queue.logQueue.push({str, LogMessageSeverity::Info});
+        logger.queue.mutex.unlock();
+        logger.queue.newString.notify_all();
+    #endif
+    }
 };
 
 #endif

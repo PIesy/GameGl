@@ -1,6 +1,14 @@
 #include "module.h"
 
-void Module::setEngine(EngineInterface& engine)
+Module::Module(std::shared_ptr<ApiBase>&& api, const MetaInfo& metaInfo, ModuleType type, ServiceContainer serviceContainer)
+        : ModuleInterface(metaInfo, type), api(api), serviceContainer(serviceContainer) {}
+
+ApiBase& Module::GetApi()
 {
-    this->engine = &engine;
+    return *api;
+}
+
+ServiceContainer Module::GetServices()
+{
+    return serviceContainer;
 }

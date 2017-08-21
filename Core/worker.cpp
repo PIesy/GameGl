@@ -1,12 +1,15 @@
 ﻿#include "worker.h"
 #include "../Logger/logger.h"
+#include "enginecore.h"
 #include <sstream>
 
 void workerController(std::shared_ptr<WorkerData> data);
-void logStatus(std::string message);
+void logStatus(const std::string& message);
 
 Worker::Worker()
 {
+    if (core::core.IsInit())
+        data->core = &core::core.Get();
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
@@ -14,29 +17,19 @@ Worker::Worker()
 
 Worker::Worker(const std::string& name)
 {
-    workerThread = new std::thread(workerController, data);
-    workerId = workerThread->get_id();
+    if (core::core.IsInit())
+        data->core = &core::core.Get();
     data->name = name;
-}
-
-Worker::Worker(TaskList& tasks)
-{
-    data->tasks.ReplaceTaskSource(tasks);
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
 
-Worker::Worker(const Invokable &fun)
+Worker::Worker(const std::string& name, SharedTaskList& taskList)
 {
-    data->tasks.Push(fun);
-    workerThread = new std::thread(workerController, data);
-    workerId = workerThread->get_id();
-}
-
-Worker::Worker(const Invokable& fun, TaskList& tasks)
-{
-    data->tasks.ReplaceTaskSource(tasks);
-    data->tasks.Push(fun);
+    if (core::core.IsInit())
+        data->core = &core::core.Get();
+    data->name = name;
+    data->taskList = taskList;
     workerThread = new std::thread(workerController, data);
     workerId = workerThread->get_id();
 }
@@ -52,6 +45,8 @@ Worker::Worker(Worker&& arg)
 
 Worker::~Worker()
 {
+    if (workerThread == nullptr)
+        return;
     if(workerThread->joinable())
     {
         Terminate();
@@ -60,79 +55,73 @@ Worker::~Worker()
     delete workerThread;
 }
 
-bool Worker::isBusy()
+bool Worker::IsBusy()
 {
-    std::unique_lock<std::mutex> lock(data->mutex, std::defer_lock);
-    return !lock.try_lock();
+    return data->busy;
 }
 
 void Worker::Join()
 {
-    try {
+    try
+    {
         if(workerThread->joinable())
             workerThread->join();
-    } catch (std::system_error){}
-}
-
-void Worker::Wake()
-{
-    data->mutex.lock();
-    data->hasWork.notify_all();
-    data->mutex.unlock();
+    }
+    catch (std::system_error&){}
 }
 
 void Worker::Terminate()
 {
-    data->terminate = true;
-    Wake();
+    data->isRunning = false;
+    data->taskList.Add(Task{[this]
+    {
+       data->terminate = true;
+    }});
 }
 
-void Worker::setTask(const Invokable& fun)
+void Worker::Execute(const Invokable& invokable)
 {
-    data->tasks.Push(fun);
-    Wake();
+    data->taskList.Add(invokable);
 }
 
-void Worker::setName(std::string name)
+void Worker::Execute(Invokable&& invokable)
 {
-    data->name = name;
+    data->taskList.Add(invokable);
+}
+
+bool Worker::IsValid()
+{
+    return data->isRunning;
 }
 
 void workerController(std::shared_ptr<WorkerData> data)
 {
-    TaskData task;
-    std::unique_lock<std::mutex> lock(data->mutex, std::defer_lock);
-
+    if (data->core)
+        core::core.Init(*data->core);
     data->isRunning = true;
     logStatus("Thread \"" + data->name + "\" started id:");
+
     try
     {
+        std::shared_ptr<Invokable> task;
         while(!data->terminate)
         {
-            while(!data->tasks.IsEmpty())
-            {
-                task = data->tasks.Pop();
-                task->Invoke();
-            }
-            if(data->tasks.IsEmpty())
-            {
-                lock.lock();
-                while(data->tasks.IsEmpty() && !data->terminate)
-                    data->hasWork.wait(lock);
-                lock.unlock();
-            }
+            task = data->taskList.GetAndRemove();
+            data->busy = true;
+            task->Invoke();
+            data->busy = false;
         }
     }
-    catch (std::exception e)
+    catch (std::exception& e)
     {
-        Logger::Log(std::string("Error ") + e.what() + " name: " + data->name);
+        Logger::LogError(std::string("Error ") + e.what() + " name: " + data->name);
     }
 
     data->isRunning = false;
     logStatus("Thread \"" + data->name + "\" stopped id:");
 }
 
-void logStatus(std::string message)
+void logStatus(const std::string& message)
 {
     std::stringstream str;
     str << message + " " << std::this_thread::get_id();

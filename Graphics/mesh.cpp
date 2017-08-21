@@ -47,3 +47,18 @@ MeshData& Mesh::GetData()
 {
     return data;
 }
+
+void Mesh::SetTextures(const std::vector<Texture>& textures)
+{
+    Mesh::textures = textures;
+}
+
+const MaterialProperties& Mesh::GetMaterialProperties() const
+{
+    return materialProperties;
+}
+
+void Mesh::SetMaterialProperties(const MaterialProperties& materialProperties)
+{
+    Mesh::materialProperties = materialProperties;
+}

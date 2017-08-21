@@ -5,10 +5,10 @@ void ResolutionNotifier(WindowEvent* event, UiLayer* ui);
 
 UiLayer::UiLayer(EngineInterface* core, Window& window):window(window)
 {
-    Action<MouseEvent*> listener(UiListener, std::placeholders::_1, this);
-    Action<WindowEvent*> resnotifier(ResolutionNotifier, std::placeholders::_1, this);
-    core->getEventHandler().setListener<MouseEvent>(listener);
-    core->getEventHandler().setListener<WindowEvent>(resnotifier);
+    Action<MouseEvent*> listener{std::bind(UiListener, std::placeholders::_1, this)};
+    Action<WindowEvent*> resnotifier{std::bind(ResolutionNotifier, std::placeholders::_1, this)};
+    core->GetEventHandler().setListener<MouseEvent>(listener);
+    core->GetEventHandler().setListener<WindowEvent>(resnotifier);
     initState();
 }
 

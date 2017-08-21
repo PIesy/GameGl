@@ -7,32 +7,18 @@
 class MetaInfo
 {
     std::string name;
-    std::string version;
-    std::time_t timestamp;
+    int primaryVersion;
+    int featureVersion;
 public:
-    MetaInfo(std::string name = "<none>", std::string version = "0.0.0", std::time_t timestamp = time(nullptr));
-    const std::string& getName() const;
-    const std::string& getVersion() const;
-    std::time_t getTimestamp() const;
-    bool operator ==(const MetaInfo& second) const;
+    MetaInfo(const std::string& name = "", int primaryVersion = 0, int featureVersion = 0);
+    const std::string& GetName() const;
+    void SetName(const std::string& name);
+    int GetPrimaryVersion() const;
+    void SetPrimaryVersion(int primaryVersion);
+    int GetFeatureVersion() const;
+    void SetFeatureVersion(int featureVersion);
+    bool operator==(const MetaInfo& rhs) const;
+    bool operator!=(const MetaInfo& rhs) const;
 };
-
-namespace std {
-
-template<>
-struct hash<MetaInfo>
-{
-    using argument_type = MetaInfo;
-    using result_type = std::size_t;
-
-    result_type operator()(const argument_type& s) const
-    {
-        const result_type h1(std::hash<std::string>()(s.getName()));
-
-        return h1;
-    }
-};
-
-}
 #endif // META
 

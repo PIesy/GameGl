@@ -5,31 +5,42 @@
 #include "engineinterface.h"
 #include "enginecoreincludes.h"
 #include "service/service.h"
+#include "../Helpers/shared_thread_local_wrapper.h"
+#include "executor.h"
+#include "threadpool.h"
 
 struct CoreData
 {
-    EngineInterface* core;
-    bool started = false;
+    std::list<Worker> workerList;
+    std::mutex mutex;
+    std::unordered_map<int, std::unique_ptr<ModuleInterface>> modules;
     std::forward_list<ServiceContainer> services;
 };
 
 class EngineCore: public EngineInterface
 {
-    std::unordered_map<int, ModuleInterface*> modules;
-    CoreData data;
-    EventHandler eventHandler;
+    std::unique_ptr<CoreData> data;
+    std::unique_ptr<ThreadPool> threadPool;
+    std::unique_ptr<EventHandler> eventHandler;
+    Worker coreWorker{getClassName<EngineCore>()};
     void initModules();
     void initApis(EngineInitializer initializer);
+    bool isInit = false;
 public:
-    EngineCore(EngineInitializer initializer);
+    explicit EngineCore(const EngineInitializer& initializer);
     ~EngineCore();
-    void RequireModules();
-    void AttachModule(Modules name, ModuleInterface *module);
-    ModuleInterface& GetModule(Modules name);
-    EventHandler& getEventHandler();
+    void AttachModule(ModuleType name, ModuleInterface* module);
+    ModuleInterface& GetModule(ModuleType name);
+    EventHandler& GetEventHandler();
+    Executor& GetExecutor(bool exclusive, const std::string& name) override;
     void Start();
     void Terminate();
     void WaitEnd();
 };
+
+namespace core
+{
+    extern thread_local SharedThreadLocalWrapper<EngineInterface> core;
+}
 
 #endif // ENGINECORE_H

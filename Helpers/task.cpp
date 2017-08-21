@@ -1,8 +1,21 @@
 #include "task.h"
 
-Task::Task(std::function<void()>&& f)
+Task::Task(std::function<void()>&& f) : task(f), isValid(true) {}
+
+Task::Task(const std::function<void()>& f) : task(f), isValid(true) {}
+
+Task& Task::operator=(std::function<void()>&& f)
 {
-    this->task = f;
+    task = f;
+    isValid = true;
+    return *this;
+}
+
+Task& Task::operator=(const std::function<void()>& f)
+{
+    task = f;
+    isValid = true;
+    return *this;
 }
 
 Task* Task::Copy() const
@@ -12,9 +25,9 @@ Task* Task::Copy() const
 
 void Task::Invoke()
 {
-    if(isValid)
+    if (isValid)
     {
-        if(hasFuture)
+        if (hasFuture)
             isValid = false;
         task();
     }
@@ -31,3 +44,4 @@ void Task::WaitTillFinished()
 {
     isInvoked.WaitForStateValue(true);
 }
+

@@ -80,3 +80,8 @@ Mat4 Camera::GetCameraMatrix(const Vec3& lookDirection, const Vec3& verticalDire
 {
     return glm::lookAt(GetPosition(), GetPosition() + lookDirection, verticalDirection);
 }
+
+void Camera::LookAt(const Vec3& point)
+{
+    SetLookDirection(point - GetPosition());
+}

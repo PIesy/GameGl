@@ -1,87 +1,115 @@
 #include "enginecore.h"
-#include "../Modules/graphicsmodule.h"
-#include "../Modules/inputmodule.h"
-#include "../Modules/resourcesmodule.h"
 #include "../Logger/logger.h"
-#include "../Modules/storagemodule.h"
 
-EngineCore::EngineCore(EngineInitializer initializer)
+namespace core
 {
-    initModules();
-    initApis(initializer);
+    thread_local SharedThreadLocalWrapper<EngineInterface> core;
+}
+
+EngineCore::EngineCore(const EngineInitializer& initializer)
+{
+    coreWorker.Execute(Task{[this, initializer]()
+    {
+        core::core.Init(*this);
+        data = std::make_unique<CoreData>();
+        threadPool = std::make_unique<ThreadPool>(ThreadPoolConfig{3, 10});
+        eventHandler = std::make_unique<EventHandler>();
+        data->workerList.emplace_back("dummy");
+        isInit = true;
+        initModules();
+        initApis(initializer);
+    }});
 }
 
 EngineCore::~EngineCore()
 {
     Terminate();
-    for(ServiceContainer& service: data.services)
-        service.Wait();
+    WaitEnd();
 }
 
 void EngineCore::initApis(EngineInitializer initializer)
 {
     ServiceContainer service;
 
-    for (ModuleApiPair& pair : initializer.apis)
+    for (auto& provider : initializer.providers)
     {
-        GetModule(pair.module).setApi(pair.api);
-        service = pair.api->getService();
-        if(service)
-        {
-            data.services.push_front(service);
-            if(data.started)
-                service.Start();
-        }
+        auto module = provider.get()->GetModule();
+        data->services.push_front(module->GetServices());
+        data->modules.emplace(integral(module->GetType()), std::move(module));
     }
 }
 
 void EngineCore::initModules()
 {
-    GraphicsModule* g = new GraphicsModule;
-    InputModule* i = new InputModule;
-    ResourcesModule* r = new ResourcesModule;
-    StorageModule* s = new StorageModule;
-    AttachModule(Modules::Video, g);
-    AttachModule(Modules::Input, i);
-    AttachModule(Modules::Storage, r);
-    AttachModule(Modules::Memory, s);
 }
 
-ModuleInterface& EngineCore::GetModule(Modules name)
+ModuleInterface& EngineCore::GetModule(ModuleType name)
 {
-    return *modules.at(integral(name));
+    Task getModule;
+
+    auto future = getModule.SetTask([this, name]()
+    {
+        return std::ref(data->modules.at(integral(name)));
+    });
+    coreWorker.Execute(getModule);
+
+    std::reference_wrapper<std::unique_ptr<ModuleInterface>> result = future.get();
+    return *result.get().get();
 }
 
-void EngineCore::AttachModule(Modules name, ModuleInterface* module)
+void EngineCore::AttachModule(ModuleType name, ModuleInterface* module)
 {
-    module->setEngine(*this);
-    modules.insert({integral(name), module});
+    coreWorker.Execute(Task{[=]()
+    {
+        data->modules.emplace(integral(name), std::unique_ptr<ModuleInterface>(module));
+    }});
 }
 
-EventHandler& EngineCore::getEventHandler()
+EventHandler& EngineCore::GetEventHandler()
 {
-    return eventHandler;
+    return *eventHandler;
 }
 
 void EngineCore::Start()
 {
-    data.started = true;
-    Logger::Log("Core started");
-    for(ServiceContainer& service: data.services)
-        service.Start();
+    coreWorker.Execute(Task{[this]()
+    {
+        Logger::Log("Core started");
+        for(ServiceContainer& service: data->services)
+            service.Start();
+    }});
 }
 
 void EngineCore::Terminate()
 {
-    for (ServiceContainer& service: data.services)
-        service.Stop();
-//    for (auto& module : modules)
-//        delete module.second;
+    coreWorker.Execute(Task{[this]()
+    {
+        for (ServiceContainer& service: data->services)
+            service.Stop();
+    }});
 }
 
 void EngineCore::WaitEnd()
 {
-    for(ServiceContainer& service: data.services)
-        service.Wait();
-    Logger::Log("Core stopped");
+    Task end{[this]()
+    {
+        for (ServiceContainer& service: data->services)
+            service.Wait();
+        Logger::Log("Core stopped");
+    }};
+
+    coreWorker.Execute(end);
+    end.WaitTillFinished();
+}
+
+Executor& EngineCore::GetExecutor(bool exclusive, const std::string& name)
+{
+    std::lock_guard<std::mutex> guard{data->mutex};
+
+    if (exclusive)
+    {
+        data->workerList.emplace_back(name);
+        return data->workerList.back();
+    }
+    return *threadPool;
 }

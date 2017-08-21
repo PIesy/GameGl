@@ -9,7 +9,7 @@
 
 class GraphicsService: public Service
 {
-    Worker serviceThread;
+    Executor* serviceThread;
     SDL_GLContext parentContext;
     SdlWindow dummyWindow;
     void initContext();
@@ -18,30 +18,32 @@ class GraphicsService: public Service
 public:
     ~GraphicsService();
     GraphicsService();
-    void Start();
-    void Stop();
-    void Restart();
-    void Pause();
-    void Resume();
-    void Wait();
-    SdlGLContext& getContext();
+    void Start() override;
+    void Stop() override;
+    void Restart() override;
+    void Pause() override;
+    void Resume() override;
+    void Wait() override;
+    SdlGLContext& GetContext();
+    Window GetWindow(const std::string& title, int x, int y);
 };
 
 class OpenGlSdl: public GraphicsApi
 {
     SdlGLContext* dummyContext;
     GraphicsService* mainService;
-    ServiceCluster* cluster;
+    ServiceCluster& cluster;
     std::list<GlShader> shaders;
     std::list<GlProgram> programs;
 public:
-    OpenGlSdl();
+    OpenGlSdl(ServiceCluster& service);
+    OpenGlSdl(OpenGlSdl&& src);
+    OpenGlSdl(OpenGlSdl&) = delete;
     ~OpenGlSdl();
-    Window CreateWindow(std::string title, int x, int y);
-    Shader& CreateShader(std::string source, ShaderType type);
+    Window CreateWindow(const std::string& title, int x, int y);
+    Shader& CreateShader(const std::string& source, ShaderType type);
     Program& CreateProgram();
     Renderer& GetRenderer();
-    ServiceContainer getService();
 };
 
 #endif // OPENGLSDL_H

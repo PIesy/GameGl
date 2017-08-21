@@ -8,16 +8,26 @@
 #include "../../../Helpers/sharedstate.h"
 #include "../../../Core/worker.h"
 #include "graphicscontextdata.h"
+#include "../../../Core/enginecore.h"
 
 
-class SdlWindow: public BasicWindow
+class SdlWindow: public BasicWindow, public Service
 {
     SDL_Window* window;
+    Executor* worker;
 public:
+    SdlWindow();
     void Open(std::string name, int width, int height, bool hidden = false);
     void Close();
     WindowSize getSize();
     operator SDL_Window*();
+
+    void Start() override;
+    void Stop() override;
+    void Pause() override;
+    void Resume() override;
+    void Restart() override;
+    void Wait() override;
 };
 
 class SdlGLContext: public RenderingContext
@@ -25,7 +35,7 @@ class SdlGLContext: public RenderingContext
     SharedState<bool> isValid = true;
     SdlWindow window;
     SDL_GLContext context;
-    Worker worker;
+    Executor& executor = core::core.Get().GetExecutor(true, "RenderingContext");
 public:
     SdlGLContext(const SDL_GLContext& context, const SdlWindow& window, GraphicsContextData& data);
     ~SdlGLContext();

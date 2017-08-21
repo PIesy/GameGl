@@ -11,14 +11,17 @@ class GlProgram: public Program
     std::unordered_map<std::string, GlUniform> uniforms;
     RenderingContext& context;
     GLuint program = 0;
+    bool isValid = true;
 public:
     ~GlProgram();
-    GlProgram(RenderingContext& context);
-    void Attach(const Shader& shader);
-    void Detach(const Shader& shader);
-    void Compile();
-    void Use();
-    InvokationResult setUniform(const std::string& name, const UniformValue& value);
+    explicit GlProgram(RenderingContext& context);
+    GlProgram(const GlProgram&) = delete;
+    GlProgram(GlProgram&& src);
+    void Attach(const Shader& shader) override;
+    void Detach(const Shader& shader) override;
+    void Compile() override;
+    void Use() override;
+    InvokationResult SetUniform(const std::string& name, const UniformValue& value) override;
     operator GLuint() const;
 };
 

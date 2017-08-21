@@ -1,6 +1,6 @@
 #ifndef GENERIC_IVOKABLE_H
 #define GENERIC_IVOKABLE_H
-#include "invokable.h"
+#include "../Core/invokable.h"
 #include "type_traits"
 #include <functional>
 #include <memory>

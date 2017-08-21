@@ -38,16 +38,10 @@ constexpr std::type_index getType(T& value)
     return std::type_index(typeid(value));
 }
 
-template<class... Args, class F, class... AllArgs>
-constexpr Action<Args...> getAction(F&& value, AllArgs&&... args)
+template<class R, class... Args>
+constexpr Action<Args...> getAction(std::function<R(Args...)> fun)
 {
-    return Action<Args...>(value, std::forward<AllArgs>(args)...);
-}
-
-template<class ArgPtr>
-constexpr GenericInvokable* generilizeInvokable(Action<ArgPtr> action)
-{
-    return new GenericInvokable(action);
+    return Action<Args...>(fun);
 }
 
 inline void waitIf(const bool& condition, std::mutex& mutex, std::condition_variable& var)
@@ -73,6 +67,13 @@ inline constexpr int signum(T x, std::true_type is_signed) {
 template <typename T>
 inline constexpr int signum(T x) {
     return signum(x, std::is_signed<T>());
+}
+
+template<typename T>
+std::string getClassName()
+{
+    std::type_index typeIndex = typeid(T);
+    return typeIndex.name();
 }
 
 #endif // HELPERS_H

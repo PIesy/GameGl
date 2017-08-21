@@ -1,4 +1,5 @@
 #include "world.h"
+#include "material.h"
 
 bool operator ==(const std::reference_wrapper<Camera>& lhs, const std::reference_wrapper<Camera>& rhs)
 {
@@ -69,37 +70,74 @@ World::World()
     
 }
 
-DrawableWorldObject& World::AddObject(const Mesh& obj, const Vec3& position)
+DrawableWorldObject& World::AddObject(const Mesh& obj, const Vec3& position, const Material& overrideMaterial)
 {
-    DrawableWorldObject drawableObject;
-
-    drawableObject.SetMeshes({obj});
-    drawableObject.SetPosition(position);
-    drawableObjects.push_back(std::move(drawableObject));
-    return drawableObjects.back();
+    return AddObject(std::vector<Mesh>{obj}, position, overrideMaterial);
 }
 
-DrawableWorldObject& World::AddObject(const std::vector<Mesh>& obj, const Vec3& position)
+DrawableWorldObject& World::AddObject(const std::vector<Mesh>& obj, const Vec3& position, const Material& overrideMaterial)
 {
     DrawableWorldObject object;
 
     object.SetMeshes(obj);
     object.SetPosition(position);
+    if (!overrideMaterial.texture.empty())
+    {
+        for (Mesh& mesh : object.GetMeshes())
+        {
+            mesh.SetMaterialProperties(overrideMaterial.properties);
+            mesh.SetTextures(overrideMaterial.texture);
+        }
+    }
     drawableObjects.push_back(std::move(object));
     return drawableObjects.back();
 }
 
-Light& World::AddLight(const Vec3& position, const Vec3& color)
+Light& World::AddPointLight(const Vec3& position, const Vec3& color)
 {
-    Light light;
+    Light light{LightType::Point};
 
     light.SetPosition(position);
     light.SetLightColor(color);
-    lights.push_back(std::move(light));
-    return lights.back();
+    pointLights.push_back(std::move(light));
+    return pointLights.back();
 }
 
-std::list<Light>& World::GetLights()
+Light& World::AddSpotlight(const Vec3& position, const Vec3& color, const Vec3& direction, float angle)
 {
-    return lights;
+    Light light{LightType::Spotlight};
+
+    light.SetPosition(position);
+    light.SetLightColor(color);
+    light.SetDirection(direction);
+    light.SetAngle(angle);
+    spotlights.push_back(std::move(light));
+    return spotlights.back();
+}
+
+Light& World::AddDirectionalLight(const Vec3& color, const Vec3& direction)
+{
+    Light light{LightType::Directional};
+    Vec3 position = -glm::normalize(direction) * (glm::length(worldSize) / 2.0f) + Vec3{worldSize.x / 2, worldSize.y / 2, worldSize.z / 2};
+
+    light.SetPosition(position);
+    light.SetLightColor(color);
+    light.SetDirection(direction);
+    directionalLights.push_back(std::move(light));
+    return directionalLights.back();
+}
+
+std::vector<Light>& World::GetPointLights()
+{
+    return pointLights;
+}
+
+std::vector<Light>& World::GetDirectionalLights()
+{
+    return directionalLights;
+}
+
+std::vector<Light>& World::GetSpotights()
+{
+    return spotlights;
 }

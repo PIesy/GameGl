@@ -10,16 +10,13 @@ class CoreInterface
 {
     EngineInterface* core;
     GraphicsApi* video;
-    ResourcesApi* resources;
     StorageApi* storage;
     void initVideo();
-    void initResources();
     void initStorage();
 public:
     CoreInterface();
     ~CoreInterface();
     GraphicsApi* Video();
-    ResourcesApi& Resources();
     EngineInterface* getCore();
     EventHandler& getEventHandler();
     StorageApi& GetStorage();

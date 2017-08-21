@@ -4,11 +4,15 @@
 
 #include "texturebuilder.h"
 #include <algorithm>
+#include <atomic>
 
-Texture
-TextureBuilder::BuildTexture(TextureType type, TextureBindpoint target, unsigned width, unsigned height, unsigned depth,
+constexpr char NAME_PREFIX[] = "\\|/generated_texture";
+std::atomic_int id{0};
+
+Texture TextureBuilder::BuildTexture(TextureType type, TextureBindpoint target, unsigned width, unsigned height, unsigned depth,
                              unsigned channels, TexturePixelFormat pixelFormat, bool useMipmaps)
 {
+    int current_id = id.fetch_add(1, std::memory_order_relaxed);
     Texture result;
 
     result.info.width = width;
@@ -17,6 +21,7 @@ TextureBuilder::BuildTexture(TextureType type, TextureBindpoint target, unsigned
     result.info.type = type;
     result.info.targetPixelFormat = pixelFormat;
     result.info.channels = channels;
+    result.info.name = std::string(NAME_PREFIX) + std::to_string(current_id);
 
     unsigned minSize = std::min(width, height);
     if (type == TextureType::Tex3D)
@@ -38,6 +43,7 @@ TextureBuilder::BuildTexture(TextureType type, TextureBindpoint target, unsigned
 Texture TextureBuilder::BuildCubemap(TextureBindpoint target, unsigned width, unsigned height, unsigned count,
                                      unsigned channels, TexturePixelFormat pixelFormat, bool useMipmaps)
 {
+    int current_id = id.fetch_add(1, std::memory_order_relaxed);
     Texture result;
 
     result.info.width = width;
@@ -47,6 +53,7 @@ Texture TextureBuilder::BuildCubemap(TextureBindpoint target, unsigned width, un
     result.info.target = target;
     result.info.targetPixelFormat = pixelFormat;
     result.info.channels = channels;
+    result.info.name = std::string(NAME_PREFIX) + std::to_string(current_id);
 
     unsigned minSize = std::min(width, height);
     if (useMipmaps)
@@ -66,6 +73,7 @@ Texture TextureBuilder::BuildCubemap(TextureBindpoint target, unsigned width, un
 Texture TextureBuilder::Build2DTexture(TextureBindpoint target, unsigned width, unsigned height, unsigned count,
                                        unsigned channels, TexturePixelFormat pixelFormat, bool useMipmaps)
 {
+    int current_id = id.fetch_add(1, std::memory_order_relaxed);
     Texture result;
 
     result.info.width = width;
@@ -75,6 +83,7 @@ Texture TextureBuilder::Build2DTexture(TextureBindpoint target, unsigned width, 
     result.info.target = target;
     result.info.targetPixelFormat = pixelFormat;
     result.info.channels = channels;
+    result.info.name = std::string(NAME_PREFIX) + std::to_string(current_id);
 
     unsigned minSize = std::min(width, height);
     if (useMipmaps)

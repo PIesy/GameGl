@@ -9,6 +9,8 @@ GlProgram::GlProgram(RenderingContext& context):context(context)
 
 GlProgram::~GlProgram()
 {
+    if (!isValid)
+        return;
     Task remove([this] { gl::program::erase(program); });
     context.Execute(remove);
     remove.WaitTillFinished();
@@ -16,6 +18,8 @@ GlProgram::~GlProgram()
 
 void GlProgram::Attach(const Shader& shader)
 {
+    if (!isValid)
+        return;
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
     Task attach([&glShader, this] { gl::program::attachShader(program, glShader); });
     context.Execute(attach);
@@ -23,6 +27,8 @@ void GlProgram::Attach(const Shader& shader)
 
 void GlProgram::Detach(const Shader& shader)
 {
+    if (!isValid)
+        return;
     const GlShader& glShader = dynamic_cast<const GlShader&>(shader);
     Task detach([&glShader, this] { gl::program::detachShader(program, glShader); });
     context.Execute(detach);
@@ -35,6 +41,8 @@ GlProgram::operator GLuint() const
 
 void GlProgram::Compile()
 {
+    if (!isValid)
+        return;
     Task task([this]
     {
         gl::program::link(program);
@@ -45,11 +53,15 @@ void GlProgram::Compile()
 
 void GlProgram::Use()
 {
+    if (!isValid)
+        return;
     gl::program::use(program);
 }
 
-InvokationResult GlProgram::setUniform(const std::string& name, const UniformValue& value)
+InvokationResult GlProgram::SetUniform(const std::string& name, const UniformValue& value)
 {
+    if (!isValid)
+        return InvokationResult::ERROR;
     GlUniform uniform;
 
     if (!uniforms.count(name))
@@ -79,4 +91,11 @@ InvokationResult GlProgram::setUniform(const std::string& name, const UniformVal
     });
     context.Execute(setUniform);
     return future.get();
+}
+
+GlProgram::GlProgram(GlProgram&& src) : context(src.context)
+{
+    src.isValid = false;
+    program = src.program;
+    uniforms = std::move(src.uniforms);
 }

@@ -5,7 +5,7 @@
 #ifndef GAMEGL_STORAGE_H
 #define GAMEGL_STORAGE_H
 
-#include "../Api/apibase.h"
+#include "../Core/apibase.h"
 #include "storagedescriptor.h"
 
 class StorageApi: public ApiBase

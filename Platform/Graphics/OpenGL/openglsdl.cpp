@@ -5,15 +5,17 @@
 
 GraphicsService::GraphicsService()
 {
-    serviceThread.setName("Graphics service");
+    serviceThread = &core::core.Get().GetExecutor(true, getClassName<GraphicsService>());
+    if (!SDL_WasInit(SDL_INIT_VIDEO))
+        SDL_Init(SDL_INIT_VIDEO);
     dummyWindow.Open("dummy", 0, 0, true);
-    Task initContext(&GraphicsService::initContext, this);
-    serviceThread.setTask(initContext);
+    Task initContext(std::bind(&GraphicsService::initContext, this));
+    serviceThread->Execute(initContext);
 }
 
 GraphicsService::~GraphicsService()
 {
-    Stop();
+    SDL_GL_DeleteContext(parentContext);
     Wait();
 }
 
@@ -31,22 +33,19 @@ void GraphicsService::Start()
 
 void GraphicsService::Stop()
 {
-    serviceThread.Terminate();
-    SDL_GL_DeleteContext(parentContext);
 }
 
 void GraphicsService::Restart() {}
 
 void GraphicsService::Wait()
 {
-    serviceThread.Join();
 }
 
 void GraphicsService::Pause() {}
 
 void GraphicsService::Resume() {}
 
-SdlGLContext& GraphicsService::getContext()
+SdlGLContext& GraphicsService::GetContext()
 {
     Task getContext;
     auto future = getContext.SetTask([this]
@@ -55,36 +54,45 @@ SdlGLContext& GraphicsService::getContext()
         initGlew();
         gl::registerDebugCallback();
         SDL_GL_MakeCurrent(dummyWindow, parentContext);
-        return result;
+        contexts.emplace_back(result, dummyWindow, *data);
+        return std::ref(contexts.back());
     });
-    serviceThread.setTask(getContext);
-    SDL_GLContext context = future.get();
-    contexts.emplace_back(context, dummyWindow, *data);
-    return contexts.back();
+    serviceThread->Execute(getContext);
+    return future.get();
 }
 
-OpenGlSdl::OpenGlSdl()
+Window GraphicsService::GetWindow(const std::string& title, int x, int y)
 {
-    if(!SDL_WasInit(SDL_INIT_VIDEO))
+    Task openWindow;
+    auto future = openWindow.SetTask([&]
+    {
+        SdlWindow* window = new SdlWindow();
+        window->Open(title, x, y);
+        return window;
+    });
+    serviceThread->Execute(openWindow);
+    return *future.get();
+}
+
+OpenGlSdl::OpenGlSdl(ServiceCluster& service) : cluster(service)
+{
+    if (!SDL_WasInit(SDL_INIT_VIDEO))
         SDL_Init(SDL_INIT_VIDEO);
-    mainService = new GraphicsService();
-    SdlGLContext& dummy = mainService->getContext();
+    mainService = dynamic_cast<GraphicsService*>(&cluster.GetMainService());
+    SdlGLContext& dummy = mainService->GetContext();
     dummyContext = &dummy;
 }
 
 OpenGlSdl::~OpenGlSdl()
 {
-    delete mainService;
 }
 
-Window OpenGlSdl::CreateWindow(std::string title, int x, int y)
+Window OpenGlSdl::CreateWindow(const std::string& title, int x, int y)
 {
-    SdlWindow* window = new SdlWindow();
-    window->Open(title, x, y);
-    return *window;
+    return mainService->GetWindow(title, x, y);
 }
 
-Shader& OpenGlSdl::CreateShader(std::string source, ShaderType type)
+Shader& OpenGlSdl::CreateShader(const std::string& source, ShaderType type)
 {
     shaders.emplace_back(*dummyContext);
     GlShader& shader = shaders.back();
@@ -98,17 +106,18 @@ Program& OpenGlSdl::CreateProgram()
     return programs.back();
 }
 
-ServiceContainer OpenGlSdl::getService()
-{
-    cluster = new ServiceCluster();
-    cluster->setMainService(mainService);
-    return cluster;
-}
-
 Renderer& OpenGlSdl::GetRenderer()
 {
-    SdlGLContext& context = mainService->getContext();
+    SdlGLContext& context = mainService->GetContext();
     GlRenderer* renderer = new GlRenderer(context);
-    cluster->Add(renderer);
+    cluster.Add(renderer);
     return *renderer;
+}
+
+OpenGlSdl::OpenGlSdl(OpenGlSdl&& src) : cluster(src.cluster)
+{
+    dummyContext = src.dummyContext;
+    mainService = src.mainService;
+    programs = std::move(src.programs);
+    shaders = std::move(src.shaders);
 }

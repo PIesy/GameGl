@@ -22,8 +22,8 @@ void initGlew()
     glew_err = glewInit();
     if(glew_err != GLEW_OK)
     {
-        Logger::Log("GLEW ERROR");
-        Logger::Log((const char*)glewGetErrorString(glew_err));
+        Logger::LogError("GLEW ERROR");
+        Logger::LogError((const char*)glewGetErrorString(glew_err));
     }
     glew_err = glGetError();
 }

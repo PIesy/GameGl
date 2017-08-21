@@ -2,18 +2,13 @@
 #define ENGINEINITIALIZER_H
 
 #include "enginedatastructures.h"
-#include "../Api/apibase.h"
+#include "apibase.h"
+#include "module_provider.h"
 #include <vector>
-
-struct ModuleApiPair
-{
-    ApiBase* api;
-    Modules module;
-};
 
 struct EngineInitializer
 {
-    std::vector<ModuleApiPair> apis;
+    std::vector<std::shared_ptr<ModuleProvider>> providers;
 };
 
 #endif // ENGINEINITIALIZER_H

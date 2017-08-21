@@ -4,30 +4,44 @@
 
 #include "programloader.h"
 #include "../../Public/shaderreader.h"
+#include <fstream>
+#include <sstream>
 
-ProgramLoader::ProgramLoader(ResourcesApi& resourcesApi, GraphicsApi& graphicsApi) : resourcesApi(resourcesApi), graphicsApi(graphicsApi) {}
+ProgramLoader::ProgramLoader(GraphicsApi& graphicsApi) : graphicsApi(graphicsApi) {}
 
 Program& ProgramLoader::Load(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
 {
     ShaderReader reader;
     std::string vertexSrc, geomSrc, fragSrc;
     std::vector<std::reference_wrapper<Shader>> shaders;
+    std::stringstream buffer;
 
-    resourcesApi.ReadByTemplate(vertexShaderPath, reader);
-    vertexSrc = reader.getResult();
+    std::ifstream file(vertexShaderPath);
+    buffer << file.rdbuf();
+    vertexSrc = buffer.str();
     shaders.push_back(std::ref(graphicsApi.CreateShader(vertexSrc, ShaderType::VertexShader)));
 
+    buffer.str({});
+    buffer.clear();
     if (!geometryShaderPath.empty())
     {
-        resourcesApi.ReadByTemplate(geometryShaderPath, reader);
-        geomSrc = reader.getResult();
+        file.close();
+        file.clear();
+        file.open(geometryShaderPath);
+        buffer << file.rdbuf();
+        geomSrc = buffer.str();
         shaders.push_back(std::ref(graphicsApi.CreateShader(geomSrc, ShaderType::GeometryShader)));
     }
 
+    buffer.str({});
+    buffer.clear();
     if (!fragmentShaderPath.empty())
     {
-        resourcesApi.ReadByTemplate(fragmentShaderPath, reader);
-        fragSrc = reader.getResult();
+        file.close();
+        file.clear();
+        file.open(fragmentShaderPath);
+        buffer << file.rdbuf();
+        fragSrc = buffer.str();
         shaders.push_back(std::ref(graphicsApi.CreateShader(fragSrc, ShaderType::FragmentShader)));
     }
 

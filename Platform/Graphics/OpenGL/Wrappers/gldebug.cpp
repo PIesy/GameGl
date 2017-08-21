@@ -28,7 +28,7 @@ void gl::registerDebugCallback()
 }
 
 #else
-void printGlError(const std::string&)
+void gl::printGlError(const std::string&)
 {
 }
 
@@ -40,10 +40,8 @@ void gl::registerDebugCallback()
 void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
                    const void*)
 {
-    // ignore non-significant error/warning codes
-    //if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-    std::string logMessage = "OpenGL Debug message " + std::to_string(id) + ": "+ message;
+    std::string logMessage = "GL Debug " + std::to_string(id) + ": "+ message;
+    LogMessageSeverity logSeverity = LogMessageSeverity::Info;
 
     logMessage += " | ";
 
@@ -74,30 +72,39 @@ void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsiz
     switch (type)
     {
         case GL_DEBUG_TYPE_ERROR:
+            logSeverity = LogMessageSeverity::Error;
             logMessage += "Type: Error";
             break;
         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            logSeverity = LogMessageSeverity::Warning;
             logMessage += "Type: Deprecated Behaviour";
             break;
         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            logSeverity = LogMessageSeverity::Warning;
             logMessage += "Type: Undefined Behaviour";
             break;
         case GL_DEBUG_TYPE_PORTABILITY:
+            logSeverity = LogMessageSeverity::Warning;
             logMessage += "Type: Portability";
             break;
         case GL_DEBUG_TYPE_PERFORMANCE:
+            logSeverity = LogMessageSeverity::Warning;
             logMessage += "Type: Performance";
             break;
         case GL_DEBUG_TYPE_MARKER:
+            logSeverity = LogMessageSeverity::Info;
             logMessage += "Type: Marker";
             break;
         case GL_DEBUG_TYPE_PUSH_GROUP:
+            logSeverity = LogMessageSeverity::Info;
             logMessage += "Type: Push Group";
             break;
         case GL_DEBUG_TYPE_POP_GROUP:
+            logSeverity = LogMessageSeverity::Info;
             logMessage += "Type: Pop Group";
             break;
         case GL_DEBUG_TYPE_OTHER:
+            logSeverity = LogMessageSeverity::Info;
             logMessage += "Type: Other";
             break;
     }
@@ -119,5 +126,5 @@ void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsiz
             logMessage += "Severity: notification";
             break;
     }
-    Logger::Log(logMessage);
+    Logger::Log(logMessage, logSeverity);
 }

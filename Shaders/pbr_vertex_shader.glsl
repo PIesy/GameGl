@@ -10,10 +10,9 @@ out vec3 worldPosition;
 out vec3 normalWorldDirection;
 out mat3 normalTransform;
 
-uniform mat4 perspective;
+uniform mat4 pMatrix;
 uniform mat4 rotation;
 uniform mat4 MtoWMatrix;
-uniform mat4 WtoCMatrix;
 
 void main()
 {
@@ -26,5 +25,5 @@ void main()
     normalTransform = mat3(tangentWorld, cross(normalWorldDirection, tangentWorld), normalWorldDirection);
     uvCoords = uv;
 
-    gl_Position =  perspective * WtoCMatrix * vec4(worldPosition, 1.0);
+    gl_Position =  pMatrix * vec4(worldPosition, 1.0);
 }

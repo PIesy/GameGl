@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "Wrappers/gltexture.h"
 #include "Wrappers/glbuffer.h"
-#include "../../../Helpers/sharedthreadlocalwrapper.h"
+#include "../../../Helpers/shared_thread_local_wrapper.h"
 
 
 struct GraphicsContextData

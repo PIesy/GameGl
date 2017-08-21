@@ -23,6 +23,7 @@ struct GlContextState
     bool blend = false;
     bool culling = false;
     bool cullFace = false;
+    bool wireframe = false;
 };
 
 class GlContext

@@ -1,7 +1,7 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include "invokable.h"
+#include "../Core/invokable.h"
 #include <future>
 #include "sharedstate.h"
 
@@ -14,13 +14,10 @@ class Task: public Invokable
     SharedState<bool> isInvoked = false;
 public:
     Task() {}
-    Task(std::function<void()>&& f);
-
-    template<class F>
-    Task(F&& f);
-
-    template<class F, class... Args>
-    Task(F&& f, Args&&... args);
+    explicit Task(std::function<void()>&& f);
+    explicit Task(const std::function<void()>& f);
+    Task& operator=(std::function<void()>&& f);
+    Task& operator=(const std::function<void()>& f);
 
     template<class F>
     auto SetTask(F&& f) -> std::future<typename std::result_of<F()>::type>;
@@ -71,21 +68,6 @@ auto Task::SetTask(F&& f, Args&&... args) -> std::future<typename std::result_of
     isValid = true;
     hasFuture = true;
     return result;
-}
-
-template<class F, class... Args>
-Task::Task(F&& f, Args&&... args)
-{
-    auto bound = std::bind(f, std::forward<Args>(args)...);
-    task = std::function<void()>([bound]() { bound(); });
-    isValid = true;
-}
-
-template<class F>
-Task::Task(F&& f)
-{
-    task = std::function<void()>(f);
-    isValid = true;
 }
 
 #endif // TASK_H

@@ -42,6 +42,8 @@ Texture TextureLoader::Load(const std::string& path, bool useHDR)
 
         tex.data.emplace_back(desc.pointer);
         tex.info = parameters;
+        tex.parameters.wrapping = TextureWrapping::Repeat;
+        tex.parameters.anisotropicFiltering = 16;
     }
 
     return tex;

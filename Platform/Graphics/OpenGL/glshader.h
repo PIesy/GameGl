@@ -9,11 +9,14 @@ class GlShader: public Shader
     RenderingContext& context;
     GLuint shader = 0;
     ShaderType type;
+    bool isValid = true;
 public:
-    GlShader(RenderingContext& context);
-    void Create(std::string source, ShaderType type);
+    explicit GlShader(RenderingContext& context);
+    GlShader(const GlShader&) = delete;
+    GlShader(GlShader&& src);
+    void Create(const std::string& source, ShaderType type);
     void PrintInfo();
-    ShaderType getType() const;    
+    ShaderType GetType() const override;
     operator GLuint() const;
 };
 

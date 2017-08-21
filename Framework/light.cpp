@@ -33,15 +33,55 @@ const Vec3& Light::GetLightColor() const
 void Light::SetLightColor(const Vec3& lightColor)
 {
     Light::lightColor = lightColor;
-    maxDistance = std::sqrt(glm::compMax(lightColor) / 0.01f);
+    maxDistance = std::sqrt(glm::compMax(lightColor) / 0.01f) * 10;
 }
 
 Mat4 Light::GetPerspectiveMatrix() const
 {
-    return glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, maxDistance);
+    if (type == LightType::Point || type == LightType::Spotlight)
+        return glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, maxDistance);
+    return glm::ortho(-500.0f, 500.0f, -500.0f, 500.0f, 0.1f, 2000.0f);
 }
 
 float Light::GetMaxDistance() const
 {
     return maxDistance;
+}
+
+Light::Light(LightType type) : type(type) {}
+
+LightType Light::GetType() const
+{
+    return type;
+}
+
+const Vec3& Light::GetDirection() const
+{
+    return direction;
+}
+
+void Light::SetDirection(const Vec3& direction)
+{
+    Light::direction = direction;
+}
+
+float Light::GetAngle() const
+{
+    return angle;
+}
+
+void Light::SetAngle(float angle)
+{
+    Light::angle = angle;
+}
+
+Mat4 Light::GetTranslationMatrix() const
+{
+    Vec3 up = {0, -1, 0};
+    if (direction == up)
+        up = {0, 0, 1};
+    else if (direction == -up)
+        up = {0, 0, 1};
+
+    return glm::lookAt(GetPosition(), GetPosition() + direction, up);
 }

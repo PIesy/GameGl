@@ -1,73 +1,109 @@
 #include "logger.h"
 #include <iostream>
+#include <ctime>
+#include "../Helpers/helpers.h"
 
 Logger Logger::logger;
 
-void loggerRoutine(Logger* log, LogQueue* queue);
+std::string handleError(const std::string& message);
+std::string handleWarning(const std::string& message);
+std::string handleInfo(const std::string& message);
+std::string getTimestamp();
 
-Logger::Logger()
+Logger::Logger() : logThread(&Logger::logLoop, this)
 {
-    logfile.open("log.txt", std::ios_base::out | std::ios_base::trunc);
-    logThread = new std::thread(loggerRoutine, this, &this->queue);
 }
 
 Logger::~Logger()
 {
     terminate = true;
-    queue.mutex.lock();
     queue.newString.notify_all();
-    queue.mutex.unlock();
-    logThread->join();
-    if(logfile.is_open())
-        logfile.close();
-    delete logThread;
+    logThread.join();
 }
 
-void Logger::write(std::string str)
+void Logger::write(const std::string& str)
 {
     if(logfile.is_open())
-        logfile << str << std::endl;
+        logfile << str << "\n";
     if(forwardToConsole)
-        std::cerr << str << std::endl;
+        std::cerr << str << "\n";
 }
 
-void Logger::log(std::string str)
+void Logger::log(const std::string& str, LogMessageSeverity severity)
+{
+    if (integral(severity) > integral(lowestSeverity))
+        return;
+    std::string message;
+
+    switch (severity)
+    {
+        case LogMessageSeverity::Error:
+            message = handleError(str);
+            break;
+        case LogMessageSeverity::Warning:
+            message = handleWarning(str);
+            break;
+        case LogMessageSeverity::Info:
+            message = handleInfo(str);
+            break;
+    }
+    write(getTimestamp() + message);
+}
+
+std::string handleError(const std::string& message)
+{
+    return "[ERROR] " + message;
+}
+
+std::string handleWarning(const std::string& message)
+{
+    return "[WARNING] " + message;
+}
+
+std::string handleInfo(const std::string& message)
+{
+    return "[INFO] " + message;
+}
+
+std::string getTimestamp()
 {
     time_t rawTime;
     struct tm* formattedTime;
     char buff[21];
 
-    time(&rawTime);
-    formattedTime = localtime(&rawTime);
-    strftime(buff, 21, "[%x-%X]", formattedTime);
-    write(buff + std::string(" ") + str);
+    std::time(&rawTime);
+    formattedTime = std::localtime(&rawTime);
+    std::strftime(buff, 21, "[%x-%X]", formattedTime);
+    return std::string(buff);
 }
 
-void loggerRoutine(Logger* log, LogQueue* queue)
+void Logger::logLoop()
 {
-    std::unique_lock<std::mutex> lock(queue->mutex, std::defer_lock);
+    std::unique_lock<std::mutex> lock(queue.mutex, std::defer_lock);
+    logfile.open("log.txt", std::ios_base::out | std::ios_base::trunc);
 
-    log->log("Logger started");
-    while(!log->terminate)
+    log("Logger started", LogMessageSeverity::Info);
+    while(!terminate)
     {
-        while(!queue->logQueue.empty())
+        if(!queue.logQueue.empty())
         {
             lock.lock();
-            if (!queue->logQueue.empty())
+            while (!queue.logQueue.empty())
             {
-                log->log(queue->logQueue.front());
-                queue->logQueue.pop();
+                auto& pair = queue.logQueue.front();
+                log(pair.first, pair.second);
+                queue.logQueue.pop();
             }
             lock.unlock();
         }
-        if(queue->logQueue.empty())
+        else
         {
             lock.lock();
-            while(queue->logQueue.empty() && !log->terminate)
-                queue->newString.wait(lock);
+            while(queue.logQueue.empty() && !terminate)
+                queue.newString.wait(lock);
             lock.unlock();
         }
     }
 
-    log->log("Logger stopped");
+    log("Logger stopped", LogMessageSeverity::Info);
 }

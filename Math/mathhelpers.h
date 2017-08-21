@@ -2,9 +2,14 @@
 #define MATHHELPERS_H
 
 #include "mathdefines.h"
+#include "mathconstants.h"
 #include <cmath>
 
-constexpr float degToRad(float degrees);
+constexpr float degToRad(float degrees)
+{
+    return degrees / 180 * pi;
+}
+
 void rotateQuat(glm::fquat& base, float degree, const Vec3& axis);
 Mat3 rotationMatrix(const Vec3& axis, float angle);
 Mat4 orthographicProjectionMatrix(const Vec4& bounds, float near, float far);

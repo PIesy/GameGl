@@ -1,28 +1,64 @@
+#include <tuple>
 #include "meta.h"
 
-MetaInfo::MetaInfo(std::string name, std::string version, time_t timestamp)
-{
-    this->name = name;
-    this->version = version;
-    this->timestamp = timestamp;
-}
+MetaInfo::MetaInfo(const std::string& name, int primaryVersion, int featureVersion) :
+        name(name), primaryVersion(primaryVersion), featureVersion(featureVersion) {}
 
-const std::string& MetaInfo::getName() const
+const std::string& MetaInfo::GetName() const
 {
     return name;
 }
 
-const std::string& MetaInfo::getVersion() const
+void MetaInfo::SetName(const std::string& name)
 {
-    return version;
+    MetaInfo::name = name;
 }
 
-std::time_t MetaInfo::getTimestamp() const
+int MetaInfo::GetPrimaryVersion() const
 {
-    return timestamp;
+    return primaryVersion;
 }
 
-bool MetaInfo::operator ==(const MetaInfo& second) const
+void MetaInfo::SetPrimaryVersion(int primaryVersion)
 {
-    return name == second.name && version == second.version && timestamp == second.getTimestamp();
+    MetaInfo::primaryVersion = primaryVersion;
+}
+
+int MetaInfo::GetFeatureVersion() const
+{
+    return featureVersion;
+}
+
+void MetaInfo::SetFeatureVersion(int featureVersion)
+{
+    MetaInfo::featureVersion = featureVersion;
+}
+
+bool MetaInfo::operator==(const MetaInfo& rhs) const
+{
+    return std::tie(name, primaryVersion, featureVersion) == std::tie(rhs.name, rhs.primaryVersion, rhs.featureVersion);
+}
+
+bool MetaInfo::operator!=(const MetaInfo& rhs) const
+{
+    return !(rhs == *this);
+}
+
+namespace std
+{
+
+    template<>
+    struct hash<MetaInfo>
+    {
+        using argument_type = MetaInfo;
+        using result_type = std::size_t;
+
+        result_type operator()(const argument_type& s) const
+        {
+            const result_type h1{std::hash<std::string>()(s.GetName() + std::to_string(s.GetPrimaryVersion()) + std::to_string(s.GetFeatureVersion()))};
+
+            return h1;
+        }
+    };
+
 }

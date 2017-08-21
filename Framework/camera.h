@@ -25,6 +25,7 @@ public:
     void SetAspectRatio(float value);
     Vec3 GetLookDirection() const;
     void SetLookDirection(const Vec3& value);
+    void LookAt(const Vec3& point);
 
     bool operator ==(const Camera& rhs);
 };

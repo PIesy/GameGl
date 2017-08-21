@@ -1,43 +1,40 @@
-//#include "threadpool.h"
+#include "threadpool.h"
 
-//ThreadPool::ThreadPool(const ThreadPoolParams& params)
-//{
-//    this->params = params;
-//    for (int i = 0; i < minThreads; i++)
-//        workers.emplace_back();
-//    freeWorkers.insert(freeWorkers.begin(), workers.begin(), workers.end());
-//}
+void ThreadPool::Execute(const Invokable& invokable)
+{
+    if (allBusy())
+        workers.emplace_back("ThreadPoolThread" + std::to_string(workers.size()), threadPoolList);
+    threadPoolList.Add(invokable);
+}
 
-//ThreadSubset ThreadPool::getSubset(int minThreads, int maxThreads)
-//{
-//    std::lock_guard<std::mutex> lock(mutex);
-//    std::vector<Worker*> workers;
-//    int count = 0;
+void ThreadPool::Execute(Invokable&& invokable)
+{
+    if (allBusy())
+        workers.emplace_back("ThreadPoolThread" + std::to_string(workers.size()), threadPoolList);
+    threadPoolList.Add(invokable);
+}
 
-//    count = freeWorkers.size() < maxThreads ? freeWorkers.size() : maxThreads;
-//    workers.insert(workers.begin(), freeWorkers.begin(), std::advance(freeWorkers.begin(), count));
-//    reservedWorkers.insert(reservedWorkers.begin(), freeWorkers.begin(), std::advance(freeWorkers.begin(), count));
-//    freeWorkers.erase(freeWorkers.begin(), std::advance(freeWorkers.begin(), count));
-//    return ThreadSubset(workers);
-//}
+ThreadPool::ThreadPool(const ThreadPoolConfig& config) : config(config)
+{
+    for (int i = 0; i < this->config.minThreads; i++)
+        workers.emplace_back("ThreadPoolThread" + std::to_string(i), threadPoolList);
+}
 
-//void ThreadPool::Execute(Invokable& action)
-//{
-//    poolTaskList->emplace_back(action.Copy());
-//}
+bool ThreadPool::allBusy()
+{
+    bool result = true;
 
-//void ThreadPool::releaseSubset(std::vector<Workers*>& subset)
-//{
-//    std::lock_guard<std::mutex> lock(mutex);
-//    reservedWorkers.erase(reservedWorkers.begin(), std::advance(reservedWorkers.begin(), count));
-//}
+    for (Worker& worker : workers)
+        result = result && worker.IsBusy();
+    return result;
+}
 
-//ThreadSubset::ThreadSubset(std::vector<Worker*>&& source, ThreadPool& parent):parentPool(parent)
-//{
-//    workers = source;
-//}
+bool ThreadPool::IsValid()
+{
+    return isRunning;
+}
 
-//void ThreadSubset::Release()
-//{
-//    parentPool.releaseSubset(workers);
-//}
+ThreadPool::~ThreadPool()
+{
+    isRunning = false;
+}

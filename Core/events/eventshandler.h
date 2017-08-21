@@ -18,8 +18,10 @@ class Event: public EventInterface
 {
     T payload;
 public:
-    Event(T payload, int hint = -1) { this->payload = payload;
-        SetHint(hint); }
+    Event(T payload, int hint = -1) : payload(payload)
+    {
+        SetHint(hint);
+    }
     virtual ~Event() {}
     const T& getPayload() const { return payload; }
 };
@@ -40,7 +42,7 @@ public:
 
 class EventHandler
 {
-    Worker worker;
+    Executor& executor;
     std::type_index invalidType = typeid(Invalid);
     int currentId = 0;
     std::unordered_map<std::type_index, std::unordered_map<int, EventListener>> listeners;
@@ -54,8 +56,9 @@ public:
     template<typename T>
     void ThrowEvent(T&& event)
     {
+        static std::type_index type = typeid(T);
         EventInterface* copy = new T(event);
-        throwEvent(copy, typeid(T));
+        throwEvent(copy, type);
     }
 
     void ThrowEvent(EventInterface* event);
@@ -64,7 +67,8 @@ public:
     template<typename T>
     int setListener(const EventInvokable& action, const EventFilter& filter = allowAll)
     {
-        return createListener(typeid(T), action, filter);
+        static std::type_index type = typeid(T);
+        return createListener(type, action, filter);
     }
 
     bool removeListener(int listenerId);

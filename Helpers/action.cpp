@@ -4,9 +4,9 @@
 template<>
 void Action<>::Invoke()
 {
-    if(isValid)
+    if (isValid)
     {
-        if(hasFuture)
+        if (hasFuture)
             isValid = false;
         fun();
     }

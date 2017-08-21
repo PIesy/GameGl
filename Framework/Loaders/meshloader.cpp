@@ -43,7 +43,7 @@ Mesh loadMesh(aiMesh* mesh, const aiScene* scene, StorageApi& api, const std::st
     std::string name;
 
     if (mesh->mName.length > 1)
-        name = mesh->mName.C_Str();
+        name = mesh->mName.C_Str() + std::to_string(meshId);
     else
         name = path + std::to_string(meshId);
 
@@ -112,7 +112,7 @@ Texture loadTexture(aiMaterial* material, StorageApi& api)
         aiString str;
         material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
         std::string path = str.C_Str();
-        path = path.substr(3);
+        //path = path.substr(3);
 
         if (!textureData.count(path))
             textureData.emplace(path, loader.Load(path));

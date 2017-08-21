@@ -10,13 +10,14 @@ class ServiceCluster: public Service
     bool started = false;
 public:
     ~ServiceCluster();
-    void Start();
-    void Stop();
-    void Pause();
-    void Resume();
-    void Restart();
-    void Wait();
-    void setMainService(ServiceContainer service);
+    void Start() override;
+    void Stop() override;
+    void Pause() override;
+    void Resume() override;
+    void Restart() override;
+    void Wait() override;
+    void SetMainService(ServiceContainer service);
+    Service& GetMainService();
     void Add(ServiceContainer service);
     void Remove(ServiceContainer service);
 };

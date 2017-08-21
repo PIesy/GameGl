@@ -5,39 +5,42 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
-#include "workerqueueproxy.h"
-#include "../Helpers/invokable.h"
+#include "invokable.h"
+#include "executor.h"
+#include "../Helpers/SharedTaskList.h"
+#include <atomic>
+
+class EngineInterface;
 
 struct WorkerData
 {
-    std::mutex mutex;
+    EngineInterface* core;
     std::condition_variable hasWork;
-    bool terminate = false;
-    WorkerQueueProxy tasks;
-    bool isRunning = false;
+    SharedTaskList taskList;
     std::string name = "";
+    bool terminate = false;
+    std::atomic_bool isRunning{false};
+    std::atomic_bool busy{false};
 };
 
-class Worker
+class Worker: public Executor
 {
     std::thread::id workerId;
     std::shared_ptr<WorkerData> data{new WorkerData()};
     std::thread* workerThread = nullptr;
 public:
     Worker();
-    Worker(const std::string& name);
-    Worker(TaskList& tasks);
-    Worker(const Invokable& fun);
-    Worker(const Invokable& fun, TaskList& tasks);
+    explicit Worker(const std::string& name);
+    Worker(const std::string& name, SharedTaskList& taskList);
     Worker(const Worker&) = delete;
     Worker(Worker&& arg);
     ~Worker();
-    void setTask(const Invokable& fun);
+    void Execute(const Invokable& invokable) override;
+    void Execute(Invokable&& invokable) override;
     void Join();
-    bool isBusy();
-    void Wake();
+    bool IsBusy();
     void Terminate();
-    void setName(std::string name);
+    bool IsValid() override;
 };
 
 #endif // WORKER_H

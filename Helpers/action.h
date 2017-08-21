@@ -1,7 +1,7 @@
 #ifndef ACTION_H
 #define ACTION_H
 
-#include "invokable.h"
+#include "../Core/invokable.h"
 #include "future"
 #include "function_traits.h"
 
@@ -14,46 +14,27 @@ class Action: public TypedInvokable<Args...>
     bool hasFuture = false;
 public:
     Action(){}
-    template<class F, class... AllArgs>
-    Action(F&& f, AllArgs&&... args);
-    template<class F, class... AllArgs>
-    void Bind(F&& f, AllArgs&&... args);
-    template<class F, class... AllArgs>
-    auto FutureBind(F&& f, AllArgs&&... args) -> std::future<typename function_traits<decltype(f)>::result_type>;
+    Action(const std::function<void(Args...)>& fun);
+    Action(std::function<void(Args...)>&& fun);
+
+    template<typename R>
+    Action(const std::function<R(Args...)>& fun);
+
+    template<typename R>
+    Action(std::function<R(Args...)>&& fun);
+
+    template<typename R>
+    std::future<R> Assign(const std::function<R(Args...)>& action);
+
+    template<typename R>
+    std::future<R> Assign(std::function<R(Args...)>&& action);
+
     Action<Args...>* Copy() const;
     void Invoke() {}
+
     void InvokeWithArgs(Args&&... args);
     void operator()();
 };
-
-template<class... Args>
-template<class F, class... AllArgs>
-Action<Args...>::Action(F&& f, AllArgs&&... args)
-{
-    Bind(f, std::forward<AllArgs>(args)...);
-}
-
-template<class... Args>
-template<class F, class... AllArgs>
-void Action<Args...>::Bind(F&& f, AllArgs&&... args)
-{
-    auto bound = std::bind(f, std::forward<AllArgs>(args)...);
-    fun = TypedActionObject([bound](Args&&... args) { bound(std::forward<Args>(args)...); });
-    isValid = true;
-}
-
-template<class... Args>
-template<class F, class... AllArgs>
-auto Action<Args...>::FutureBind(F&& f, AllArgs&&... args) -> std::future<typename function_traits<decltype(f)>::result_type>
-{
-    using ResultType = typename function_traits<decltype(f)>::result_type;
-    auto package = std::make_shared<std::packaged_task<ResultType(Args...)>>(std::bind(f, std::forward<AllArgs>(args)...));
-    std::future<ResultType> result = package->get_future();
-    fun = TypedActionObject([package](Args&&... args) { (*package)(std::forward<Args>(args)...); });
-    isValid = true;
-    hasFuture = true;
-    return result;
-}
 
 template<>
 void Action<>::Invoke();
@@ -79,6 +60,60 @@ template<class... Args>
 Action<Args...>* Action<Args...>::Copy() const
 {
     return new Action<Args...>(*this);
+}
+
+template<class... Args>
+template<typename R>
+Action<Args...>::Action(std::function<R(Args...)>&& action)
+{
+    fun = TypedActionObject([action](Args&&... args) { action(std::forward<Args>(args)...); });
+    isValid = true;
+}
+
+template<class... Args>
+template<typename R>
+Action<Args...>::Action(const std::function<R(Args...)>& action)
+{
+    fun = TypedActionObject([action](Args&&... args) { action(std::forward<Args>(args)...); });
+    isValid = true;
+}
+
+template<class... Args>
+Action<Args...>::Action(std::function<void(Args...)>&& action)
+{
+    fun = TypedActionObject([action](Args&&... args) { action(std::forward<Args>(args)...); });
+    isValid = true;
+}
+
+template<class... Args>
+Action<Args...>::Action(const std::function<void(Args...)>& action)
+{
+    fun = TypedActionObject([action](Args&&... args) { action(std::forward<Args>(args)...); });
+    isValid = true;
+}
+
+template<class... Args>
+template<typename R>
+std::future<R> Action<Args...>::Assign(const std::function<R(Args...)>& action)
+{
+    std::packaged_task<R(Args...)> package{action};
+    auto future = package.get_future();
+    fun = TypedActionObject([package{std::move(package)}](Args&&... args) { package(std::forward<Args>(args)...); });
+    isValid = true;
+    hasFuture = true;
+    return future;
+}
+
+template<class... Args>
+template<typename R>
+std::future<R> Action<Args...>::Assign(std::function<R(Args...)>&& action)
+{
+    std::packaged_task<R(Args...)> package{action};
+    auto future = package.get_future();
+    fun = TypedActionObject([package{std::move(package)}](Args&&... args) { package(std::forward<Args>(args)...); });
+    isValid = true;
+    hasFuture = true;
+    return future;
 }
 
 #endif // ACTION_H

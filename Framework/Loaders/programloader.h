@@ -11,10 +11,9 @@
 
 class ProgramLoader
 {
-    ResourcesApi& resourcesApi;
     GraphicsApi& graphicsApi;
 public:
-    ProgramLoader(ResourcesApi& resourcesApi, GraphicsApi& graphicsApi);
+    explicit ProgramLoader(GraphicsApi& graphicsApi);
     Program& Load(const std::string& vertexShaderPath, const std::string& fragmentShaderPath = "", const std::string& geometryShaderPath = "");
 };
 

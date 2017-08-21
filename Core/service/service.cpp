@@ -46,3 +46,8 @@ bool ServiceContainer::operator==(const ServiceContainer& rhs)
 {
     return service == rhs.service;
 }
+
+Service& ServiceContainer::GetService()
+{
+    return *service;
+}

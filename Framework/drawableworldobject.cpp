@@ -1,4 +1,5 @@
 #include "drawableworldobject.h"
+#include "../Math/mathhelpers.h"
 
 DrawableWorldObject::DrawableWorldObject()
 {
@@ -55,17 +56,24 @@ void DrawableWorldObject::SetWorldRotation(const Mat4& value)
 
 bool DrawableWorldObject::operator==(const DrawableWorldObject& rhs)
 {
-    return rhs.mesh.GetId() == mesh.GetId();
-}
+    if (GetPosition() != rhs.GetPosition())
+        return false;
+    for (Mesh& mesh : meshes)
+    {
+        bool present = false;
+        for (const Mesh& rmesh : rhs.meshes)
+        {
+            if (rmesh.GetId() == mesh.GetId())
+            {
+                present = true;
+                break;
+            }
+        }
+        if (!present)
+            return false;
+    }
 
-RenderFlags DrawableWorldObject::GetRenderFlags() const
-{
-    return renderFlags;
-}
-
-void DrawableWorldObject::SetRenderFlags(RenderFlags renderFlags)
-{
-    DrawableWorldObject::renderFlags = renderFlags;
+    return true;
 }
 
 std::vector<Mesh>& DrawableWorldObject::GetMeshes()
@@ -76,5 +84,35 @@ std::vector<Mesh>& DrawableWorldObject::GetMeshes()
 void DrawableWorldObject::SetMeshes(const std::vector<Mesh>& meshes)
 {
     DrawableWorldObject::meshes = meshes;
+}
+
+int DrawableWorldObject::GetTiling() const
+{
+    return tiling;
+}
+
+void DrawableWorldObject::SetTiling(int tiling)
+{
+    DrawableWorldObject::tiling = tiling;
+}
+
+std::vector<ObjectHint>& DrawableWorldObject::GetHints()
+{
+    return hints;
+}
+
+void DrawableWorldObject::SetHints(const std::vector<ObjectHint>& hints)
+{
+    DrawableWorldObject::hints = hints;
+}
+
+bool DrawableWorldObject::IsAoTiling() const
+{
+    return aoTiling;
+}
+
+void DrawableWorldObject::SetAoTiling(bool aoTiling)
+{
+    DrawableWorldObject::aoTiling = aoTiling;
 }
 
