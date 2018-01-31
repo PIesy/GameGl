@@ -20,18 +20,18 @@ struct Context
 class StepBuilder
 {
 
-    RenderStepWrapper buildPointShadowsStep(World& world, const std::vector<RenderStepWrapper>& dependencies);
-    RenderStepWrapper buildGlobalShadowsStep(World& world, const std::vector<RenderStepWrapper>& dependencies);
-    RenderStepWrapper buildHdrMapBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies, const Context& context);
+    RenderStepWrapper buildPointShadowsStep(World& world, const std::vector<RenderStepWrapper>& dependencies, std::vector<std::reference_wrapper<Shader>> program);
+    RenderStepWrapper buildGlobalShadowsStep(World& world, const std::vector<RenderStepWrapper>& dependencies, std::vector<std::reference_wrapper<Shader>> program);
+    RenderStepWrapper buildHdrMapBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies, const Context& context, std::vector<std::reference_wrapper<Shader>> program);
     RenderStepWrapper buildBrdfBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies);
-    RenderStepWrapper buildPbrRendererStep(World& world, const std::vector<RenderStepWrapper>& dependencies, const Context& context);
+    RenderStepWrapper buildPbrRendererStep(World& world, const std::vector<RenderStepWrapper>& dependencies, const Context& context, std::vector<std::reference_wrapper<Shader>> program);
     RenderStepWrapper buildSkyboxRendererStep(World& world, const std::vector<RenderStepWrapper>& dependencies, const Context& context);
     RenderStepWrapper buildTextureViewerStep(World& world, const std::vector<RenderStepWrapper>& dependencies, const Context& context);
-    RenderStepWrapper buildDiffuseMapBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies);
-    RenderStepWrapper buildSpecularMapBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies);
+    RenderStepWrapper buildDiffuseMapBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies, std::vector<std::reference_wrapper<Shader>> program);
+    RenderStepWrapper buildSpecularMapBuilderStep(World& world, const std::vector<RenderStepWrapper>& dependencies, std::vector<std::reference_wrapper<Shader>> program);
     RenderStepWrapper buildGenericStep(World& world, const std::vector<RenderStepWrapper>& dependencies);
 public:
-    RenderStepWrapper Build(StepNames step, World& world, Program* program, const std::vector<RenderStepWrapper>& dependencies, const Context& context = {});
+    RenderStepWrapper Build(StepNames step, World& world, std::vector<std::reference_wrapper<Shader>> program, const std::vector<RenderStepWrapper>& dependencies, const Context& context = {});
 };
 
 

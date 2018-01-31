@@ -4,6 +4,8 @@
 void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
                    const void*);
 
+const auto logger = Logger::GetLogger("OpenGl");
+
 #define ENGINE_GL_DEBUG_MESSAGES
 
 #ifdef ENGINE_GL_DEBUG_MESSAGES
@@ -13,8 +15,8 @@ void gl::printGlError(const std::string& message)
     GLenum err = glGetError();
     if (err != GL_NO_ERROR)
     {
-        Logger::Log("GL ERROR in "+ message + ":");
-        Logger::Log((const char*) gluErrorString(err));
+        logger.LogError("GL ERROR in "+ message + ":");
+        logger.LogError((const char*) gluErrorString(err));
     }
 }
 
@@ -126,5 +128,5 @@ void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsiz
             logMessage += "Severity: notification";
             break;
     }
-    Logger::Log(logMessage, logSeverity);
+    logger.Log(logMessage, logSeverity);
 }

@@ -7,13 +7,17 @@
 class Service
 {
 public:
-    virtual ~Service() {}
+    virtual ~Service() = default;
     virtual void Start() = 0;
     virtual void Stop() = 0;
     virtual void Pause() = 0;
     virtual void Resume() = 0;
     virtual void Restart() = 0;
     virtual void Wait() = 0;
+    virtual void WaitForStart()
+    {
+
+    };
 };
 
 class ServiceContainer
@@ -23,7 +27,7 @@ protected:
     std::shared_ptr<Service> service;
 public:
     ServiceContainer(Service* service);
-    ServiceContainer() {}
+    ServiceContainer() = default;
     void Start();
     void Stop();
     void Pause();
@@ -41,7 +45,8 @@ class TypedServiceContainer: public ServiceContainer
 public:
     TypedServiceContainer()
     {
-        service = std::shared_ptr<Service>(new T());
+        static_assert(std::is_base_of<Service, T>::value, "T is not a Service");
+        service = std::shared_ptr<Service>(new T{});
     }
 
     TypedServiceContainer(const TypedServiceContainer<T>& src)

@@ -8,13 +8,13 @@
 #include <vector>
 #include "Wrappers/gltexture.h"
 #include "Wrappers/glvertexarray.h"
+#include "../../../Helpers/lock_holder.h"
 
 namespace gl
 {
 
     struct GlMeshObject
     {
-        std::vector<std::reference_wrapper<gl::GlTexture>> textures;
         gl::GlVertexArray vertexArray{0};
     };
 

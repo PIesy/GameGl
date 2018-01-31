@@ -14,10 +14,10 @@ struct RenderStep
     std::list<RenderTarget> targets;
     RenderingAttributes attributes = defaultAttributes;
     FrameBufferProperties frameBufferProperties;
-    Program* prog;
+    std::vector<std::reference_wrapper<Shader>> shaders;
     std::list<Texture> genericTextures;
-    ConfigFunction preConfig = defaultConfig;
-    ConfigFunction postConfig = defaultConfig;
+    ShaderConfiguration preConfig = defaultConfig;
+    ShaderConfiguration postConfig = defaultConfig;
 };
 
 #endif // RENDERSTEP_H

@@ -9,7 +9,7 @@
 
 ProgramLoader::ProgramLoader(GraphicsApi& graphicsApi) : graphicsApi(graphicsApi) {}
 
-Program& ProgramLoader::Load(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
+std::vector<std::reference_wrapper<Shader>> ProgramLoader::Load(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::string& geometryShaderPath)
 {
     ShaderReader reader;
     std::string vertexSrc, geomSrc, fragSrc;
@@ -45,11 +45,6 @@ Program& ProgramLoader::Load(const std::string& vertexShaderPath, const std::str
         shaders.push_back(std::ref(graphicsApi.CreateShader(fragSrc, ShaderType::FragmentShader)));
     }
 
-    Program& program = graphicsApi.CreateProgram();
-
-    for (Shader& shader : shaders)
-        program.Attach(shader);
-    program.Compile();
-    return program;
+    return shaders;
 }
 

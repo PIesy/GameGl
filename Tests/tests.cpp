@@ -8,10 +8,6 @@ public:
     TestEvent(int val, int hint = -1):Event(val, hint) {}
 };
 
-void testCc(EventHandler* handler);
-
-void testFunction(TestEvent* event);
-
 void eventsHandlerTest()
 {
 //    EventHandler* handler = new EventHandler();
@@ -23,14 +19,4 @@ void eventsHandlerTest()
 //    listener.setHandler(test);
 //    handler->setListener(listener);
 //    testCc(handler);
-}
-
-void testCc(EventHandler *handler)
-{
-    handler->ThrowEvent(TestEvent(25));
-}
-
-void testFunction(TestEvent* event)
-{
-    Logger::Log("Test event cought");
 }

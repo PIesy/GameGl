@@ -148,39 +148,31 @@ void main()
     normal = normalize(normal * 2.0f - 1.0f);
     normal = normalize(normalTransform * normal);
 
-    vec3 a;
+    vec3 a = albedo;
     if (albedoTex)
     {
         a = texture(material, vec3(modUv, index)).rgb;
         index++;
     }
-    else
-        a = albedo;
 
-    float m;
+    float m = metallness;
     if (metallnessTex)
     {
         m = texture(material, vec3(modUv, index)).r;
         index++;
     }
-    else
-        m = metallness;
 
-    float r;
+    float r = roughness;
     if (roughnessTex)
     {
         r = texture(material, vec3(modUv, index)).r;
         if (inverseRoughness)
             r = 1.0f - r;
     }
-    else
-        r = roughness;
 
-    float ao_ = 1.0f;
+    float ao_ = ao;
     if (aoTex)
         ao_ = texture(aoMap, aoTiling ? modUv : uvCoords).r;
-    else
-        ao_ = ao;
 
     F0 = mix(F0, a, m);
 
@@ -188,11 +180,11 @@ void main()
     {
         light += calculateLight(normal, viewDirection, F0, lightPositions[i], lightColors[i], a, r, m) * checkShadows(i);
     }
-
-    for (int i = 0; i < directionalLightsCount; ++i)
-    {
-        light += calculateDirectionalLight(normal, viewDirection, F0, directionalLights[i], directionalLightsColor[i], a, r, m) * checkGlobalShadows(i);
-    }
+//
+//    for (int i = 0; i < directionalLightsCount; ++i)
+//    {
+//        light += calculateDirectionalLight(normal, viewDirection, F0, directionalLights[i], directionalLightsColor[i], a, r, m) * checkGlobalShadows(i);
+//    }
 
     vec3 ambient = vec3(0.0f);
 

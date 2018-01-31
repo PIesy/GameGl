@@ -5,6 +5,8 @@
 #include "gltexturefactory.h"
 #include "../../../Logger/logger.h"
 
+const auto logger = Logger::GetLogger(getClassName<gl::GlTextureFactory>());
+
 gl::GlTexture gl::GlTextureFactory::BuildTexture(const TextureInfo& parameters, const std::vector<StoragePointer>& pointers)
 {
     switch(parameters.type)
@@ -13,7 +15,7 @@ gl::GlTexture gl::GlTextureFactory::BuildTexture(const TextureInfo& parameters, 
         case ::TextureType::Cubemap:
             return build2dTexture(parameters, pointers);
         default:
-            Logger::Log("Cant create that texture yet");
+            logger.LogError("Cant create that texture yet");
             return gl::GlTexture();
     }
 }
@@ -115,7 +117,7 @@ gl::InternalFormat gl::GlTextureFactory::decodeFormat(const TextureInfo& paramet
                         return gl::InternalFormat::RGBA16F;
                     break;
                 case TexturePixelFormat::Float24:
-                    Logger::Log("Unsupported texture format RGB(A) 24 bit per channel using 32 bit instead");
+                    logger.LogWarning("Unsupported texture format RGB(A) 24 bit per channel using 32 bit instead");
                 case TexturePixelFormat::Float32:
                     if (parameters.channels == 3)
                         return gl::InternalFormat::RGB32F;
@@ -128,7 +130,7 @@ gl::InternalFormat gl::GlTextureFactory::decodeFormat(const TextureInfo& paramet
             switch (parameters.targetPixelFormat)
             {
                 case TexturePixelFormat::Float8:
-                    Logger::Log("Unsupported texture format Depth 8 bit using 16 bit instead");
+                    logger.LogWarning("Unsupported texture format Depth 8 bit using 16 bit instead");
                 case TexturePixelFormat::Float16:
                     return gl::InternalFormat::Depth16;
                 case TexturePixelFormat::Float24:

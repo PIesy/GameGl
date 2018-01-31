@@ -47,25 +47,15 @@ public:
     Mesh(const MeshData& data, const MeshInfo& info, const std::string& id);
 
     const MeshData& GetData() const;
-
     MeshData& GetData();
-
     const MeshInfo& GetInfo() const;
-
     const std::string& GetId() const;
-
     const std::vector<Texture>& GetTextures() const;
-
     void SetId(const std::string& id);
-
     void AddTexture(Texture& texture);
-
     void AddTexture(Texture&& texture);
-
     void SetTextures(const std::vector<Texture>& textures);
-
     const MaterialProperties& GetMaterialProperties() const;
-
     void SetMaterialProperties(const MaterialProperties& materialProperties);
 };
 

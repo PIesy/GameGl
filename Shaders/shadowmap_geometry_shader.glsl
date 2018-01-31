@@ -6,15 +6,12 @@ layout (triangle_strip, max_vertices = 3) out;
 uniform mat4 tMatrix;
 uniform int baseLayer;
 
-out vec4 position;
-
 void main()
 {
     gl_Layer = baseLayer;
     for (int i = 0; i < 3; ++i)
     {
-        position = gl_in[i].gl_Position;
-        gl_Position = tMatrix * position;
+        gl_Position = tMatrix * gl_in[i].gl_Position;
         EmitVertex();
     }
     EndPrimitive();

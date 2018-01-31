@@ -6,6 +6,8 @@
 #include "../../../../Helpers/helpers.h"
 #include "../../../../Logger/logger.h"
 
+const auto logger = Logger::GetLogger(getClassName<gl::GlFrameBuffer>());
+
 gl::GlFrameBuffer::GlFrameBuffer()
 {
     gl::framebuffer::generate(1, &frameBuffer);
@@ -46,15 +48,15 @@ void gl::GlFrameBuffer::SetTextureToAttachment(gl::FrameBufferAttachment target,
     gl::framebuffer::setTexture(frameBuffer, integral(target), texture.GetId(), level);
 }
 
-gl::GlFrameBuffer::GlFrameBuffer(gl::GlFrameBuffer&& src)
+gl::GlFrameBuffer::GlFrameBuffer(gl::GlFrameBuffer&& src) noexcept
 {
     *this = std::move(src);
 }
 
-gl::GlFrameBuffer& gl::GlFrameBuffer::operator=(gl::GlFrameBuffer&& src)
+gl::GlFrameBuffer& gl::GlFrameBuffer::operator=(gl::GlFrameBuffer&& src) noexcept
 {
     if (frameBuffer)
-        Logger::Log("We have deleted valid framebuffer");
+        logger.LogWarning("We have deleted valid framebuffer");
     gl::framebuffer::erase(1, &frameBuffer);
     frameBuffer = src.frameBuffer;
     src.frameBuffer = 0;
@@ -64,4 +66,11 @@ gl::GlFrameBuffer& gl::GlFrameBuffer::operator=(gl::GlFrameBuffer&& src)
 gl::GlFrameBuffer::~GlFrameBuffer()
 {
     gl::framebuffer::erase(1, &frameBuffer);
+}
+
+void gl::GlFrameBuffer::Blit(gl::GlFrameBuffer& source, int srcX0, int srcY0, int srcX1, int srcY1, int targetX0, int targetY0, int targetX1, int targetY1,
+                             BufferBit buffers, gl::FilterType filterType)
+{
+    gl::framebuffer::blit(source.GetId(), frameBuffer, srcX0, srcY0, srcX1, srcY1,
+                          targetX0, targetY0, targetX1, targetY1, integral(buffers), integral(filterType));
 }

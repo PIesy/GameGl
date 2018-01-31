@@ -1,6 +1,8 @@
 #include "glshader.h"
-#include "../../../Graphics/renderdefs.h"
 #include "../../../Logger/logger.h"
+#include "../../../Helpers/helpers.h"
+
+const auto logger = Logger::GetLogger(getClassName<GlShader>());
 
 GlShader::GlShader(RenderingContext& context) : context(context) {}
 
@@ -9,7 +11,7 @@ void GlShader::Create(const std::string& source, ShaderType type)
     if (!isValid)
         return;
     this->type = type;
-    GLuint shaderType = convertToGlShaderType(type);
+    GLuint shaderType = GL_FRAGMENT_SHADER;
 
     Task create([=]
     {
@@ -31,7 +33,7 @@ void GlShader::PrintInfo()
         char buff[4096] = {0};
         int length;
         glGetShaderInfoLog(shader, 4095, &length, buff);
-        Logger::Log("Shader info: " + std::string(buff));
+        logger.LogDebug("Shader info: " + std::string(buff));
     });
     context.Execute(print);
 }

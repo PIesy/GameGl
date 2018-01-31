@@ -19,27 +19,33 @@ Scene SceneBuilder::BuildScene(World& world, Camera& camera, const std::unordere
             int tiling = obj.GetTiling();
             bool aoTiling = obj.IsAoTiling();
 
-            ConfigFunction c;
-            c = [=](Program& p)
+            ShaderConfiguration c;
+            c = [=]
             {
-                p.SetUniform(camPosition, "camPosition");
-                p.SetUniform(camMat, "WtoCMatrix");
-                p.SetUniform(perspMat, "perspective");
-                p.SetUniform(posMat, "MtoWMatrix");
-                p.SetUniform(rotMat, "rotation");
-                p.SetUniform(pMatrix, "pMatrix");
-                p.SetUniform(tiling, "tilingFactor");
-                p.SetUniform(properties.roughnessMap, "roughnessTex");
-                p.SetUniform(properties.aoMap, "aoTex");
-                p.SetUniform(properties.albedoTexture, "albedoTex");
-                p.SetUniform(properties.metallnessMap, "metallnessTex");
-                p.SetUniform(properties.roughness, "roughness");
-                p.SetUniform(properties.ao, "ao");
-                p.SetUniform(properties.albedo, "albedo");
-                p.SetUniform(properties.metallness, "metallness");
-                p.SetUniform(properties.normalMap, "normalTex");
-                p.SetUniform(properties.inverseRoughness, "inverseRoughness");
-                p.SetUniform(aoTiling, "aoTiling");
+                for (auto& step : steps)
+                {
+                    for (auto& p : step.first.renderStep.shaders)
+                    {
+                        p.get().SetUniform(camPosition, "camPosition");
+                        p.get().SetUniform(camMat, "WtoCMatrix");
+                        p.get().SetUniform(perspMat, "perspective");
+                        p.get().SetUniform(posMat, "MtoWMatrix");
+                        p.get().SetUniform(rotMat, "rotation");
+                        p.get().SetUniform(pMatrix, "pMatrix");
+                        p.get().SetUniform(tiling, "tilingFactor");
+                        p.get().SetUniform(properties.roughnessMap, "roughnessTex");
+                        p.get().SetUniform(properties.aoMap, "aoTex");
+                        p.get().SetUniform(properties.albedoTexture, "albedoTex");
+                        p.get().SetUniform(properties.metallnessMap, "metallnessTex");
+                        p.get().SetUniform(properties.roughness, "roughness");
+                        p.get().SetUniform(properties.ao, "ao");
+                        p.get().SetUniform(properties.albedo, "albedo");
+                        p.get().SetUniform(properties.metallness, "metallness");
+                        p.get().SetUniform(properties.normalMap, "normalTex");
+                        p.get().SetUniform(properties.inverseRoughness, "inverseRoughness");
+                        p.get().SetUniform(aoTiling, "aoTiling");
+                    }
+                }
             };
 
             scene.meshes.emplace_back(mesh, c);

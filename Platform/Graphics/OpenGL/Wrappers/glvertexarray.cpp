@@ -58,7 +58,7 @@ namespace gl {
         gl::vertexarray::bind(vertexArray);
     }
 
-    GlVertexArray::GlVertexArray(GlVertexArray&& src)
+    GlVertexArray::GlVertexArray(GlVertexArray&& src) noexcept
     {
         *this = std::move(src);
     }
@@ -68,7 +68,7 @@ namespace gl {
         gl::vertexarray::erase(1, &vertexArray);
     }
 
-    GlVertexArray& GlVertexArray::operator=(GlVertexArray&& src)
+    GlVertexArray& GlVertexArray::operator=(GlVertexArray&& src) noexcept
     {
         gl::vertexarray::erase(1, &vertexArray);
         vertexArray = src.vertexArray;

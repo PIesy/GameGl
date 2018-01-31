@@ -1,3 +1,4 @@
+#include <bits/unique_ptr.h>
 #include "glbindings.h"
 #include "gldebug.h"
 
@@ -76,12 +77,6 @@ void gl::buffer::erase(int count, GLuint* buffers)
 {
     glDeleteBuffers(count, buffers);
     gl::printGlError("glDeleteBuffers");
-}
-
-void gl::buffer::setData(GLuint target, size_t size, const void *data, GLenum usage)
-{
-    glNamedBufferData(target, size, data, usage);
-    gl::printGlError("glNamedBufferData");
 }
 
 void gl::buffer::updateData(GLuint target, GLintptr offset, size_t size, const void* data)
@@ -289,7 +284,7 @@ GLuint gl::shader::create(GLenum type)
 
 void gl::shader::setSource(GLuint shader, const std::string& source)
 {
-    int size = (int)source.length();
+    auto size = (int)source.length();
     const char* str = source.c_str();
     glShaderSource(shader, 1, &str, &size);
     gl::printGlError("glShaderSource");
@@ -312,6 +307,14 @@ GLuint gl::program::create()
 {
     GLuint result = glCreateProgram();
     gl::printGlError("glCreateProgram");
+    return result;
+}
+
+GLuint gl::program::create(GLenum type, const std::string& source)
+{
+    const char* text = source.c_str();
+    GLuint result = glCreateShaderProgramv(type, 1, &text);
+    gl::printGlError("glCreateShaderProgramv");
     return result;
 }
 
@@ -425,6 +428,30 @@ void gl::program::setUniform4ui(GLuint program, GLuint location, int count, cons
     gl::printGlError("glProgramUniform4uiv");
 }
 
+void gl::program::setUniform1d(GLuint program, GLuint location, int count, const void *value)
+{
+    glProgramUniform1dv(program, location, count, (const GLdouble*)value);
+    gl::printGlError("glProgramUniform1dv");
+}
+
+void gl::program::setUniform2d(GLuint program, GLuint location, int count, const void *value)
+{
+    glProgramUniform2dv(program, location, count, (const GLdouble*)value);
+    gl::printGlError("glProgramUniform2dv");
+}
+
+void gl::program::setUniform3d(GLuint program, GLuint location, int count, const void *value)
+{
+    glProgramUniform3dv(program, location, count, (const GLdouble*)value);
+    gl::printGlError("glProgramUniform3dv");
+}
+
+void gl::program::setUniform4d(GLuint program, GLuint location, int count, const void *value)
+{
+    glProgramUniform4dv(program, location, count, (const GLdouble*)value);
+    gl::printGlError("glProgramUniform4dv");
+}
+
 void gl::program::setUniform2x2f(GLuint program, GLuint location, int count, const void *value)
 {
     glProgramUniformMatrix2fv(program, location, count, GL_FALSE, (const GLfloat*)value);
@@ -485,4 +512,55 @@ void gl::setBlendFunction(GLenum sfactor, GLenum dfactor)
 {
     glBlendFunc(sfactor, dfactor);
     gl::printGlError("glBlendFunc");
+}
+
+GLuint gl::program_pipeline::create()
+{
+    GLuint result = 0;
+    glCreateProgramPipelines(1, &result);
+    gl::printGlError("glCreateProgramPipelines");
+    return result;
+}
+
+void gl::program_pipeline::erase(GLuint programPipeline)
+{
+    glDeleteProgramPipelines(1, &programPipeline);
+    gl::printGlError("glDeleteProgramPipelines");
+}
+
+std::string gl::program_pipeline::getInfoLog(GLuint programPipeline)
+{
+    GLint infoLogLength = 0;
+    glGetProgramPipelineiv(programPipeline, GL_INFO_LOG_LENGTH, &infoLogLength);
+    gl::printGlError("glGetProgramPipelineiv");
+    if (!infoLogLength)
+        return "";
+
+    auto result = std::unique_ptr<char[]>(new char[infoLogLength]);
+    glGetProgramPipelineInfoLog(programPipeline, infoLogLength, nullptr, result.get());
+    return result.get();
+}
+
+void gl::program_pipeline::useProgramStages(GLuint programPipeline, GLbitfield stages, GLuint program)
+{
+    glUseProgramStages(programPipeline, stages, program);
+    gl::printGlError("glUseProgramStages");
+}
+
+void gl::program_pipeline::bindProgramPipeline(GLuint programPipeline)
+{
+    glBindProgramPipeline(programPipeline);
+    gl::printGlError("glBindProgramPipeline");
+}
+
+void gl::program_pipeline::validate(GLuint programPipeline)
+{
+    glValidateProgramPipeline(programPipeline);
+    gl::printGlError("glValidateProgramPipeline");
+}
+
+void gl::program_pipeline::getParameter(GLuint programPipeline, GLenum parameterName, GLint* result)
+{
+    glGetProgramPipelineiv(programPipeline, parameterName, result);
+    gl::printGlError("glGetProgramPipelineiv");
 }

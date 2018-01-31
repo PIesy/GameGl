@@ -19,7 +19,7 @@ class ThreadPool: public Executor
     bool allBusy();
     std::atomic_bool isRunning{true};
 public:
-    virtual ~ThreadPool();
+    ~ThreadPool() override;
     explicit ThreadPool(const ThreadPoolConfig& config);
     void Execute(const Invokable& invokable) override;
     void Execute(Invokable&& invokable) override;

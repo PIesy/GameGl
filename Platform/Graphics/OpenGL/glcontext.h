@@ -14,6 +14,10 @@
 #include "Wrappers/glframebuffer.h"
 #include "../../../Graphics/renderstep.h"
 #include "glframebuffercontainer.h"
+#include "../../../Helpers/lock_holder.h"
+#include "Wrappers/glprogrampipeline.h"
+#include "glprogram.h"
+#include "gl_program_handle.h"
 
 
 struct GlContextState
@@ -26,20 +30,31 @@ struct GlContextState
     bool wireframe = false;
 };
 
+struct GlContextData
+{
+    std::unordered_map<std::string, gl::GlMeshObject> meshes;
+    std::unordered_map<size_t, gl::GlProgramPipeline> programPipelines;
+
+    // Per frame
+    std::vector<LockedResource<gl::GlTexture>> lockedTextures;
+    std::vector<gl::GlFrameBufferContainer> frameBuffers;
+    std::vector<gl::GlTexture> tempTextures;
+};
+
 class GlContext
 {
     GlContextState state;
-    gl::GlTexture emptyTexture;
-    std::unordered_map<std::string, gl::GlMeshObject> meshes;
-    std::vector<gl::GlFrameBufferContainer> frameBuffers;
+    GlContextData data;
     int usedDepthTextures = 0;
 
     void blitFrameBuffers(gl::GlFrameBufferContainer& src, gl::GlFrameBufferContainer& target, const FrameBufferProperties& properties,
                           unsigned width, unsigned height);
     void configureTexture(gl::GlTexture& texture, const TextureParameters& parameters, const TextureInfo& info);
+    gl::GlTexture& acquireLocalTexture(const Texture& texture);
 public:
-    gl::GlTexture& LoadTexture(const Texture& texture);
+    LockedResource<gl::GlTexture> AcquireTexture(const Texture& texture, bool read);
     gl::GlMeshObject& LoadMesh(const Mesh& mesh);
+    gl::GlProgramPipeline& GetProgramPipeline(const std::vector<std::reference_wrapper<Shader>>& programs);
     gl::GlFrameBufferContainer& BuildFrameBuffer(const RenderStep& step, const std::vector<RenderStep>& steps, unsigned viewportWidth, unsigned viewportHeight);
     void UpdateState(const RenderingAttributes& attributes);
     void UpdateFrameBuffer(const RenderingAttributes& attributes);

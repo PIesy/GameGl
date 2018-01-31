@@ -26,7 +26,7 @@ void UiLayer::RemoveElement(Element *element)
 
 void UiLayer::initState()
 {
-    WindowSize size = window.getSize();
+    WindowSize size = window.GetSize();
     state.resolution[0] = size.width;
     state.resolution[1] = size.height;
 }

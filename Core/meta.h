@@ -10,7 +10,7 @@ class MetaInfo
     int primaryVersion;
     int featureVersion;
 public:
-    MetaInfo(const std::string& name = "", int primaryVersion = 0, int featureVersion = 0);
+    explicit MetaInfo(const std::string& name = "", int primaryVersion = 0, int featureVersion = 0);
     const std::string& GetName() const;
     void SetName(const std::string& name);
     int GetPrimaryVersion() const;

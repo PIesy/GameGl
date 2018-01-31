@@ -2,6 +2,8 @@
 #include "../../../Input/inputevents.h"
 #include "../../../Logger/logger.h"
 
+const auto logger = Logger::GetLogger(getClassName<SDLInputService>());
+
 MouseData::Button parseMouseButton(std::uint8_t button);
 
 SDLInputService::SDLInputService(EventHandler& handler):handler(handler)
@@ -12,7 +14,7 @@ SDLInputService::SDLInputService(EventHandler& handler):handler(handler)
 
 void SDLInputService::sdlInputRoutine()
 {
-    Logger::Log("Input service started");
+    logger.LogDebug("Input service started");
     SDL_Event event;
     WindowData w;
     KeyboardData k;
@@ -49,7 +51,7 @@ void SDLInputService::sdlInputRoutine()
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(1ms);
     }
-    Logger::Log("Input service stopped");
+    logger.LogDebug("Input service stopped");
 }
 
 WindowData SDLInputService::parseWindowEvent(SDL_Event& event)

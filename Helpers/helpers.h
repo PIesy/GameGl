@@ -39,7 +39,7 @@ constexpr std::type_index getType(T& value)
 }
 
 template<class R, class... Args>
-constexpr Action<Args...> getAction(std::function<R(Args...)> fun)
+constexpr Action<Args...> makeAction(std::function<R(Args...)> fun)
 {
     return Action<Args...>(fun);
 }
@@ -49,7 +49,7 @@ inline void waitIf(const bool& condition, std::mutex& mutex, std::condition_vari
     if(condition)
     {
         std::unique_lock<std::mutex> lock(mutex);
-        while(condition)
+        while (condition)
             var.wait(lock);
     }
 }

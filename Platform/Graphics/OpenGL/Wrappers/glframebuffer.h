@@ -34,6 +34,24 @@ namespace gl {
         return static_cast<FrameBufferAttachment>(integral(a) + b);
     }
 
+    enum class BufferBit : GLbitfield
+    {
+        Color = GL_COLOR_BUFFER_BIT,
+        Depth = GL_DEPTH_BUFFER_BIT,
+        Stencil = GL_STENCIL_BUFFER_BIT,
+        None = 0
+    };
+
+    constexpr BufferBit operator|(const BufferBit& a, const BufferBit& b)
+    {
+        return static_cast<BufferBit>(integral(a) | integral(b));
+    }
+
+    constexpr BufferBit& operator|=(BufferBit& a, const BufferBit& b)
+    {
+        a = a | b;
+        return a;
+    }
 
     enum class FrameBufferStatus: GLenum
     {
@@ -56,16 +74,18 @@ namespace gl {
         explicit GlFrameBuffer(unsigned id);
         GlFrameBuffer(const GlFrameBuffer&) = delete;
         GlFrameBuffer& operator =(const GlFrameBuffer& src) = delete;
-        GlFrameBuffer(GlFrameBuffer&& src);
-        GlFrameBuffer& operator =(GlFrameBuffer&& src);
-        ~GlFrameBuffer();
+        GlFrameBuffer(GlFrameBuffer&& src) noexcept;
+        GlFrameBuffer& operator =(GlFrameBuffer&& src) noexcept;
+        ~GlFrameBuffer() override;
 
         void Bind(FrameBufferTarget target = FrameBufferTarget::Both);
         void BindRenderBuffer(FrameBufferAttachment target, GlRenderBuffer& renderBuffer);
         void SetDrawBuffers(const std::vector<FrameBufferAttachment>& drawBuffers);
         void SetTextureToAttachment(FrameBufferAttachment target, GlTexture& texture, int level);
+        void Blit(GlFrameBuffer& source, int srcX0, int srcY0, int srcX1, int srcY1,
+                  int targetX0, int targetY0, int targetX1, int targetY1, BufferBit buffers, FilterType filterType);
         FrameBufferStatus GetStatus(FrameBufferTarget target);
-        GLuint GetId() const;
+        GLuint GetId() const override;
     };
 
 }

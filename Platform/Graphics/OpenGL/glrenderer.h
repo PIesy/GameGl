@@ -1,7 +1,6 @@
 #ifndef GL_RENDERER_H
 #define GL_RENDERER_H
 
-#include "../../../Graphics/renderdefs.h"
 #include "../../../Graphics/graphicsclasses.h"
 #include "sdlclasses.h"
 #include "../../../Graphics/renderer.h"
@@ -22,11 +21,12 @@ class GlRenderer: public Renderer
     SdlGLContext& context;
     bool terminated = true;
     bool emptyPath = true;
+    bool firstUse = true;
     Scene currentScene;
     std::queue<Scene> renderQueue;
     std::atomic<ViewportSize> viewportSize;
     Task renderTask;
-    GenericCondition<bool> pause = false;
+    GenericCondition<bool> pause{false};
     GlContext glContext;
 
     void renderLoop();
@@ -36,15 +36,15 @@ class GlRenderer: public Renderer
     void update();
 public:
     explicit GlRenderer(SdlGLContext& context);
-    void Start();
-    void Stop();
-    void Pause();
-    void Resume();
-    void Restart();
-    void Wait();
-    void SetWindow(const Window &window);
-    void Draw(const Scene& path);
-    void SetViewport(int width, int height);
+    void Start() override;
+    void Stop() override;
+    void Pause() override;
+    void Resume() override;
+    void Restart() override;
+    void Wait() override;
+    void SetWindow(Window& window) override;
+    void Draw(const Scene& path) override;
+    void SetViewport(int width, int height) override;
 };
 
 #endif // GL_RENDERER_H

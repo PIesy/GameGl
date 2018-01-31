@@ -3,8 +3,10 @@
 
 namespace core
 {
-    thread_local SharedThreadLocalWrapper<EngineInterface> core;
+    thread_local SharedThreadLocal<EngineInterface> core;
 }
+
+auto logger = Logger::GetLogger(getClassName<EngineCore>());
 
 EngineCore::EngineCore(const EngineInitializer& initializer)
 {
@@ -14,10 +16,7 @@ EngineCore::EngineCore(const EngineInitializer& initializer)
         data = std::make_unique<CoreData>();
         threadPool = std::make_unique<ThreadPool>(ThreadPoolConfig{3, 10});
         eventHandler = std::make_unique<EventHandler>();
-        data->workerList.emplace_back("dummy");
-        isInit = true;
-        initModules();
-        initApis(initializer);
+        initModules(initializer);
     }});
 }
 
@@ -27,7 +26,7 @@ EngineCore::~EngineCore()
     WaitEnd();
 }
 
-void EngineCore::initApis(EngineInitializer initializer)
+void EngineCore::initModules(EngineInitializer initializer)
 {
     ServiceContainer service;
 
@@ -37,10 +36,6 @@ void EngineCore::initApis(EngineInitializer initializer)
         data->services.push_front(module->GetServices());
         data->modules.emplace(integral(module->GetType()), std::move(module));
     }
-}
-
-void EngineCore::initModules()
-{
 }
 
 ModuleInterface& EngineCore::GetModule(ModuleType name)
@@ -57,11 +52,15 @@ ModuleInterface& EngineCore::GetModule(ModuleType name)
     return *result.get().get();
 }
 
-void EngineCore::AttachModule(ModuleType name, ModuleInterface* module)
+void EngineCore::AttachModule(std::shared_ptr<ModuleProvider> provider)
 {
     coreWorker.Execute(Task{[=]()
     {
-        data->modules.emplace(integral(name), std::unique_ptr<ModuleInterface>(module));
+        auto module = provider.get()->GetModule();
+        data->services.push_front(module->GetServices());
+        if (isRunning)
+            data->services.front().Start();
+        data->modules.emplace(integral(module->GetType()), std::move(module));
     }});
 }
 
@@ -74,8 +73,9 @@ void EngineCore::Start()
 {
     coreWorker.Execute(Task{[this]()
     {
-        Logger::Log("Core started");
-        for(ServiceContainer& service: data->services)
+        isRunning = true;
+        logger.LogDebug("Core started");
+        for (ServiceContainer& service: data->services)
             service.Start();
     }});
 }
@@ -86,20 +86,18 @@ void EngineCore::Terminate()
     {
         for (ServiceContainer& service: data->services)
             service.Stop();
+        for (Worker& worker : data->workerList)
+            worker.Terminate();
     }});
 }
 
 void EngineCore::WaitEnd()
 {
-    Task end{[this]()
-    {
-        for (ServiceContainer& service: data->services)
-            service.Wait();
-        Logger::Log("Core stopped");
-    }};
-
-    coreWorker.Execute(end);
-    end.WaitTillFinished();
+    for (ServiceContainer& service: data->services)
+        service.Wait();
+    for (Worker& worker : data->workerList)
+        worker.Join();
+    logger.LogDebug("Core stopped");
 }
 
 Executor& EngineCore::GetExecutor(bool exclusive, const std::string& name)

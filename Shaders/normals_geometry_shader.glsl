@@ -3,8 +3,6 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 4) out;
 
-in vec3 camNormal[];
-
 void main()
 {
     for (int i = 0; i < 3; ++i)

@@ -40,18 +40,17 @@ namespace gl {
         gl::buffer::bind(integral(bindPoint), buffer);
     }
 
-    GlBuffer& GlBuffer::operator=(GlBuffer&& src)
+    GlBuffer& GlBuffer::operator=(GlBuffer&& src) noexcept
     {
         gl::buffer::erase(1, &buffer);
         size = src.size;
         buffer = src.buffer;
-        usageHint = src.usageHint;
         isElementArray = src.isElementArray;
         src.buffer = 0;
         return *this;
     }
 
-    GlBuffer::GlBuffer(GlBuffer&& src)
+    GlBuffer::GlBuffer(GlBuffer&& src) noexcept
     {
         *this = std::move(src);
     }
@@ -75,17 +74,6 @@ namespace gl {
     {
         GlBuffer::isElementArray = isElementArray;
     }
-
-    uint8_t GlBuffer::GetUsageHint() const
-    {
-        return usageHint;
-    }
-
-    void GlBuffer::SetUsageHint(uint8_t usageHint)
-    {
-        GlBuffer::usageHint = usageHint;
-    }
-
 
     BufferFlags operator|(const BufferFlags& a, const BufferFlags& b)
     {

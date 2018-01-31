@@ -2,14 +2,14 @@
 
 void ThreadPool::Execute(const Invokable& invokable)
 {
-    if (allBusy())
+    if (allBusy() && workers.size() < config.maxThreads)
         workers.emplace_back("ThreadPoolThread" + std::to_string(workers.size()), threadPoolList);
     threadPoolList.Add(invokable);
 }
 
 void ThreadPool::Execute(Invokable&& invokable)
 {
-    if (allBusy())
+    if (allBusy() && workers.size() < config.maxThreads)
         workers.emplace_back("ThreadPoolThread" + std::to_string(workers.size()), threadPoolList);
     threadPoolList.Add(invokable);
 }

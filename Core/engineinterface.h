@@ -5,12 +5,13 @@
 #include "events/eventshandler.h"
 
 class ModuleInterface;
+class ModuleProvider;
 
 class EngineInterface
 {
 public:
     virtual ~EngineInterface(){}
-    virtual void AttachModule (ModuleType name, ModuleInterface* module) = 0;
+    virtual void AttachModule (std::shared_ptr<ModuleProvider> provider) = 0;
     virtual ModuleInterface& GetModule (ModuleType name) = 0;
     virtual EventHandler& GetEventHandler() = 0;
     virtual Executor& GetExecutor(bool exclusive = false, const std::string& name = "") = 0;

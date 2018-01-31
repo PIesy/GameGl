@@ -7,7 +7,7 @@
 class Renderer: public Service
 {
 public:
-    virtual void SetWindow(const Window& window) = 0;
+    virtual void SetWindow(Window& window) = 0;
     virtual void Draw(const Scene& path) = 0;
     virtual void SetViewport(int width, int height) = 0;
 };

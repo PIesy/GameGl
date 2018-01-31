@@ -19,12 +19,12 @@ gl::GlRenderBuffer::GlRenderBuffer(GLuint id)
     renderBuffer = id;
 }
 
-gl::GlRenderBuffer::GlRenderBuffer(gl::GlRenderBuffer&& src)
+gl::GlRenderBuffer::GlRenderBuffer(gl::GlRenderBuffer&& src) noexcept
 {
     *this =  std::move(src);
 }
 
-gl::GlRenderBuffer& gl::GlRenderBuffer::operator=(gl::GlRenderBuffer&& src)
+gl::GlRenderBuffer& gl::GlRenderBuffer::operator=(gl::GlRenderBuffer&& src) noexcept
 {
     renderBuffer = src.renderBuffer;
     src.renderBuffer = 0;

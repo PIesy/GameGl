@@ -1,5 +1,5 @@
 #include "glprogram.h"
-#include "../../../Graphics/renderdefs.h"
+#include "../../../Helpers/task.h"
 
 GlProgram::GlProgram(RenderingContext& context):context(context)
 {
@@ -39,7 +39,7 @@ GlProgram::operator GLuint() const
     return program;
 }
 
-void GlProgram::Compile()
+void GlProgram::Finalize()
 {
     if (!isValid)
         return;
@@ -58,10 +58,10 @@ void GlProgram::Use()
     gl::program::use(program);
 }
 
-InvokationResult GlProgram::SetUniform(const std::string& name, const UniformValue& value)
+void GlProgram::SetUniform(const std::string& name, const UniformValue& value)
 {
     if (!isValid)
-        return InvokationResult::ERROR;
+        return;
     GlUniform uniform;
 
     if (!uniforms.count(name))
@@ -73,7 +73,7 @@ InvokationResult GlProgram::SetUniform(const std::string& name, const UniformVal
         context.Execute(uniformLoc);
         GLint loc = futureLocation.get();
         if (loc == -1)
-            return InvokationResult::ERROR;
+            return;
         uniform.count = value.count;
         uniform.horizontalSize = value.horizontalSize;
         uniform.type = value.type;
@@ -90,7 +90,7 @@ InvokationResult GlProgram::SetUniform(const std::string& name, const UniformVal
         return ::setUniform(program, uniform);
     });
     context.Execute(setUniform);
-    return future.get();
+    future.get();
 }
 
 GlProgram::GlProgram(GlProgram&& src) : context(src.context)

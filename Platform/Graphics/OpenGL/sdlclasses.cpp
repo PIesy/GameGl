@@ -1,9 +1,27 @@
 #include "sdlclasses.h"
-#include "../../../Helpers/task.h"
-#include <chrono>
 
+void SdlWindow::Close()
+{
+    std::call_once(openedFlag, [this]
+    {
+        *terminate = true;
+        SDL_DestroyWindow(window);
+    });
+}
 
-void SdlWindow::Open(std::string name, int width, int height, bool hidden)
+WindowSize SdlWindow::GetSize()
+{
+    WindowSize result;
+    SDL_GetWindowSize(window ,&result.width, &result.height);
+    return result;
+}
+
+SdlWindow::operator SDL_Window*()
+{
+    return window;
+}
+
+void SdlWindow::Start()
 {
     Task task{[&]()
     {
@@ -19,49 +37,32 @@ void SdlWindow::Open(std::string name, int width, int height, bool hidden)
         else
             window = SDL_CreateWindow(name.c_str(), 0, 0, width, height,
                                       SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
-
+        opened.SetValue(true);
         //SDL_SetRelativeMouseMode(SDL_TRUE);
     }};
-    worker->Execute(task);
+    worker.Execute(task);
     task.WaitTillFinished();
 
-    using namespace std::chrono_literals;
-    worker->Execute(Task{[]()
+    auto term = terminate;
+    worker.Execute(Task{[term]
+    {
+        while (!*term)
         {
-            while (1)
-            {
-                SDL_PumpEvents();
-                std::this_thread::sleep_for(1ms);
-            }
+            SDL_PumpEvents();
+            using namespace std::chrono_literals;
+            std::this_thread::sleep_for(1ms);
         }
-    });
+    }});
 }
 
-void SdlWindow::Close()
+void SdlWindow::WaitForStart()
 {
-    SDL_DestroyWindow(window);
-}
-
-WindowSize SdlWindow::getSize()
-{
-    WindowSize result;
-    SDL_GetWindowSize(window ,&result.width, &result.height);
-    return result;
-}
-
-SdlWindow::operator SDL_Window*()
-{
-    return window;
-}
-
-void SdlWindow::Start()
-{
-
+    opened.WaitFor(true);
 }
 
 void SdlWindow::Stop()
 {
-
+    Close();
 }
 
 void SdlWindow::Pause()
@@ -76,7 +77,8 @@ void SdlWindow::Resume()
 
 void SdlWindow::Restart()
 {
-
+    Stop();
+    Start();
 }
 
 void SdlWindow::Wait()
@@ -84,19 +86,21 @@ void SdlWindow::Wait()
 
 }
 
-SdlWindow::SdlWindow()
+SdlWindow::~SdlWindow()
 {
-    worker = &core::core.Get().GetExecutor(true, "WindowExec");
+    Close();
 }
 
-SdlGLContext::SdlGLContext(const SDL_GLContext& context, const SdlWindow& window, GraphicsContextData& data) : window(window), context(context)
+SdlWindow::SdlWindow(const std::string& name, int width, int height, bool hidden) : name(name), width(width), height(height), hidden(hidden) {}
+
+SdlGLContext::SdlGLContext(const SDL_GLContext& context, SdlWindow& window, SharedGlContextData& data) : window(&window), context(context)
 {
-    GraphicsContextData* localData = &data;
+    SharedGlContextData* localData = &data;
     executor.Execute(Task([this, localData]
-                        {
-                            SDL_GL_MakeCurrent(this->window, this->context);
-                            globalData.Init(*localData);
-                        }));
+    {
+        SDL_GL_MakeCurrent(*this->window, this->context);
+        sharedGlData.Init(*localData);
+    }));
 }
 
 SdlGLContext::~SdlGLContext()
@@ -109,7 +113,7 @@ void SdlGLContext::Destroy()
     if(isValid.getState())
     {
         isValid.GetOwnership();
-        if(isValid.getState())
+        if (isValid.getState())
             isValid.setState(false);
         isValid.ReleaseOwnership();
     }
@@ -120,22 +124,22 @@ void SdlGLContext::Execute(const Invokable& invokable)
     executor.Execute(invokable);
 }
 
-void SdlGLContext::SetWindow(const Window& window)
+void SdlGLContext::SetWindow(Window& window)
 {
-    this->window = dynamic_cast<const SdlWindow&>(window.getWindow());
+    this->window = &dynamic_cast<SdlWindow&>(window.getWindow());
 }
 
 void SdlGLContext::MakeCurrent()
 {
-    SDL_GL_MakeCurrent(window, context);
+    SDL_GL_MakeCurrent(*window, context);
 }
 
-Window SdlGLContext::getWindow()
+Window SdlGLContext::GetWindow()
 {
-    return window;
+    return Window{*window};
 }
 
 SdlWindow& SdlGLContext::getSdlWindow()
 {
-    return window;
+    return *window;
 }

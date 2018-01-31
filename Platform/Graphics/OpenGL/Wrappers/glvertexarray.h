@@ -13,22 +13,6 @@
 
 namespace gl {
 
-    class GlVertexArray;
-
-    class GlVertexArrayFactory
-    {
-    public:
-        static std::vector<GlVertexArray> CreateVertexArrays(int count)
-        {
-            std::vector<GlVertexArray> result;
-            std::vector<GLuint> ids(count);
-
-            for (GLuint& id : ids)
-                result.emplace_back(id);
-            return result;
-        }
-    };
-
     enum class AttributeTypeFloat : GLenum
     {
         Float = GL_FLOAT,
@@ -43,11 +27,11 @@ namespace gl {
         GLuint vertexArray = 0;
     public:
         GlVertexArray();
-        GlVertexArray(GLuint id);
+        explicit GlVertexArray(GLuint id);
         GlVertexArray(const GlVertexArray&) = delete;
         GlVertexArray& operator =(const GlVertexArray&) = delete;
-        GlVertexArray(GlVertexArray&& src);
-        GlVertexArray& operator =(GlVertexArray&& src);
+        GlVertexArray(GlVertexArray&& src) noexcept;
+        GlVertexArray& operator =(GlVertexArray&& src) noexcept;
         ~GlVertexArray();
 
         void BindElementBuffer(gl::GlBuffer& elementBuffer);

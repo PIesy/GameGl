@@ -8,6 +8,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+const auto logger = Logger::GetLogger(getClassName<MeshLoader>());
+
 std::unordered_map<std::string, Texture> textureData;
 constexpr char INDEX_POSTFIX[] = "index";
 constexpr char VERTEX_POSTFIX[] = "vertex";
@@ -70,7 +72,7 @@ Mesh loadMesh(aiMesh* mesh, const aiScene* scene, StorageApi& api, const std::st
         {
             aiFace& face = mesh->mFaces[i];
             if (face.mNumIndices != 3)
-                Logger::Log("Nontriangular polygon found!");
+                ("Nontriangular polygon found!");
             for (unsigned j = 0; j < face.mNumIndices; j++)
                 indices.push_back(face.mIndices[j]);
         }

@@ -14,7 +14,6 @@ namespace gl
     {
         gl::GlFrameBuffer frameBuffer{0};
         std::vector<gl::GlRenderBuffer> renderBuffers;
-        std::vector<std::reference_wrapper<gl::GlTexture>> textures;
         GlFrameBufferContainer* reference = nullptr;
     };
 

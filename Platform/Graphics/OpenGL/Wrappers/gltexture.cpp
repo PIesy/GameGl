@@ -1,6 +1,8 @@
 #include "gltexture.h"
 #include "../../../../Logger/logger.h"
 
+const auto logger = Logger::GetLogger(getClassName<gl::GlTexture>());
+
 void gl::GlTexture::SetComparisonMode(gl::CompareFunction function, gl::CompareMode mode)
 {
     gl::texture::setParameter(texture, GL_TEXTURE_COMPARE_FUNC, integral(function));
@@ -49,7 +51,7 @@ void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, const v
                                    integral(format), integral(pixelSize), data);
             break;
         default:
-            Logger::Log("Not yet implemented");
+            logger.LogError("Not yet implemented");
             break;
     }
 }
@@ -71,7 +73,7 @@ void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, unsigne
                                    integral(format), integral(pixelSize), data);
             break;
         default:
-            Logger::Log("Not yet implemented");
+            logger.LogError("Not yet implemented");
             break;
     }
 }
@@ -120,12 +122,12 @@ void gl::GlTexture::Allocate(gl::InternalFormat format, unsigned width, unsigned
             gl::texture::allocateStorage(texture, mipmapsCount + 1, integral(format), width, height, depth);
             break;
         default:
-            Logger::Log("Cant create that texture type");
+            logger.LogError("Cant create that texture type");
             break;
     }
 }
 
-gl::GlTexture& gl::GlTexture::operator=(gl::GlTexture&& src)
+gl::GlTexture& gl::GlTexture::operator=(gl::GlTexture&& src) noexcept
 {
     gl::texture::erase(1, &texture);
     width = src.width;
@@ -137,7 +139,7 @@ gl::GlTexture& gl::GlTexture::operator=(gl::GlTexture&& src)
     return *this;
 }
 
-gl::GlTexture::GlTexture(gl::GlTexture&& src)
+gl::GlTexture::GlTexture(gl::GlTexture&& src) noexcept
 {
     *this = std::move(src);
 }

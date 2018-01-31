@@ -7,7 +7,7 @@
 
 struct GlUniform: public UniformValue
 {
-    GLuint location;
+    GLuint location = 0;
 };
 
 InvokationResult setUniform(GLuint program, GlUniform& uniform);

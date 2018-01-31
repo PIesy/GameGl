@@ -2,6 +2,8 @@
 #include "../../Logger/logger.h"
 #include "../enginecore.h"
 
+const auto logger = Logger::GetLogger(getClassName<EventHandler>());
+
 void EventListener::listenFor(std::type_index type)
 {
     this->type = type;
@@ -14,7 +16,7 @@ std::type_index EventListener::getEventType()
 
 void EventListener::Process(EventInterface* event)
 {
-    if(filter(event))
+    if (filter(event))
         handler.InvokeWithArgs(event);
 }
 
@@ -28,10 +30,10 @@ int EventHandler::setListener(EventListener listener)
 {
     std::type_index type = listener.getEventType();
 
-    if(checkListenerType(listener))
+    if (checkListenerType(listener))
         return -1;
     listener_ids.insert({currentId, type});
-    if(!listeners.count(type))
+    if (!listeners.count(type))
     {
         std::unordered_map<int, EventListener> inner;
         listeners.insert({type, inner});
@@ -47,7 +49,7 @@ bool EventHandler::checkListenerType(EventListener listener)
 
 bool EventHandler::removeListener(int listenerId)
 {
-    if(listener_ids.count(listenerId))
+    if (listener_ids.count(listenerId))
     {
         std::type_index type = listener_ids.at(listenerId);
         listeners.at(type).erase(listenerId);
@@ -55,11 +57,6 @@ bool EventHandler::removeListener(int listenerId)
         return true;
     }
     return false;
-}
-
-void EventHandler::ThrowEvent(EventInterface* event)
-{
-    throwEvent(event, getType(*event));
 }
 
 int EventHandler::createListener(std::type_index type, const EventInvokable& action, const EventFilter& filter)
@@ -71,21 +68,24 @@ int EventHandler::createListener(std::type_index type, const EventInvokable& act
     return setListener(listener);
 }
 
-void EventHandler::throwEvent(EventInterface* event, std::type_index type)
+void EventHandler::throwEvent(EventInterface* event, std::type_index type, std::once_flag& flag)
 {
-    executor.Execute(Task([event, this, type]()
+    if (listeners.find(type) != listeners.end())
     {
-        std::unique_ptr<EventInterface> packedEvent(event);
-        try
+        executor.Execute(Task([event, this, type, &flag]()
         {
+            std::unique_ptr<EventInterface> packedEvent(event);
             for (std::pair<const int, EventListener>& listener: listeners.at(type))
                 listener.second.Process(packedEvent.get());
-        }
-        catch (std::out_of_range)
+        }));
+    }
+    else
+    {
+        std::call_once(flag, [event]
         {
-            Logger::Log(std::string("No listeners registered for ") + getType(*event).name());
-        }
-    }));
+            logger.LogDebug(std::string("No listeners registered for ") + getType(*event).name());
+        });
+    }
 }
 
 EventHandler::EventHandler() : executor(core::core.Get().GetExecutor())

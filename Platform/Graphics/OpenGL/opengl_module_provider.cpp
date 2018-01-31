@@ -9,8 +9,8 @@
 std::unique_ptr<ModuleInterface> OpenGLModuleProvider::GetModule()
 {
     MetaInfo meta{"opengl", 0, 0};
-    ServiceContainer container{new GraphicsService()};
-    ServiceCluster* cluster = new ServiceCluster();
+    auto* cluster = new ServiceCluster();
+    ServiceContainer container{new GraphicsService(*cluster)};
 
     cluster->SetMainService(container);
     return std::make_unique<Module>(std::make_shared<OpenGlSdl>(OpenGlSdl{*cluster}), meta, ModuleType::Video, ServiceContainer{cluster});

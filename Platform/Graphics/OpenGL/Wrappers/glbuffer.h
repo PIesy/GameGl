@@ -32,28 +32,25 @@ namespace gl {
 
     class GlBuffer: public GlObject
     {
-        GLuint buffer = 0;
         size_t size = 0;
+        GLuint buffer = 0;
         bool isElementArray = false;
-        uint8_t usageHint = 0;
     public:
         GlBuffer();
         GlBuffer(size_t size, BufferFlags flags, const void* data = nullptr);
-        GlBuffer(GLuint id);
+        explicit GlBuffer(GLuint id);
         GlBuffer(const GlBuffer&) = delete;
         GlBuffer& operator =(const GlBuffer& src) = delete;
-        GlBuffer(GlBuffer&& src);
-        GlBuffer& operator =(GlBuffer&& src);
-        ~GlBuffer();
+        GlBuffer(GlBuffer&& src) noexcept;
+        GlBuffer& operator =(GlBuffer&& src) noexcept;
+        ~GlBuffer() override;
 
         void UpdateData(void* data, size_t size, ptrdiff_t offset = 0);
         void Bind(BufferBindPoint bindPoint);
-        GLuint GetId() const;
+        GLuint GetId() const override;
         size_t GetSize();
         bool IsElementArray() const;
         void SetIsElementArray(bool isElementArray);
-        uint8_t GetUsageHint() const;
-        void SetUsageHint(uint8_t usageHint);
 
     };
 

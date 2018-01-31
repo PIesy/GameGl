@@ -12,9 +12,8 @@ class GraphicsApi: public ApiBase
 public:
     virtual Window CreateWindow(const std::string& title, int x, int y) = 0;
     virtual Shader& CreateShader(const std::string& source, ShaderType type) = 0;
-    virtual Program& CreateProgram() = 0;
     virtual Renderer& GetRenderer() = 0;
-    virtual ~GraphicsApi(){}
+    ~GraphicsApi() override = default;
 };
 
 #endif // GRAPHICSAPI_H

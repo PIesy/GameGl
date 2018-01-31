@@ -3,11 +3,14 @@
 #include <ctime>
 #include "../Helpers/helpers.h"
 
+#ifdef LOG_ENABLED
 Logger Logger::logger;
+#endif
 
-std::string handleError(const std::string& message);
-std::string handleWarning(const std::string& message);
-std::string handleInfo(const std::string& message);
+std::string handleError();
+std::string handleWarning();
+std::string handleInfo();
+std::string handleDebug();
 std::string getTimestamp();
 
 Logger::Logger() : logThread(&Logger::logLoop, this)
@@ -29,7 +32,7 @@ void Logger::write(const std::string& str)
         std::cerr << str << "\n";
 }
 
-void Logger::log(const std::string& str, LogMessageSeverity severity)
+void Logger::log(const std::string& str, const std::string& className, LogMessageSeverity severity)
 {
     if (integral(severity) > integral(lowestSeverity))
         return;
@@ -38,31 +41,39 @@ void Logger::log(const std::string& str, LogMessageSeverity severity)
     switch (severity)
     {
         case LogMessageSeverity::Error:
-            message = handleError(str);
+            message += handleError();
             break;
         case LogMessageSeverity::Warning:
-            message = handleWarning(str);
+            message += handleWarning();
             break;
         case LogMessageSeverity::Info:
-            message = handleInfo(str);
+            message += handleInfo();
             break;
+        case LogMessageSeverity::Debug:
+            message += handleDebug();
     }
+    message += "[" + className + "] " + str;
     write(getTimestamp() + message);
 }
 
-std::string handleError(const std::string& message)
+std::string handleError()
 {
-    return "[ERROR] " + message;
+    return "[ERROR]";
 }
 
-std::string handleWarning(const std::string& message)
+std::string handleWarning()
 {
-    return "[WARNING] " + message;
+    return "[WARNING]";
 }
 
-std::string handleInfo(const std::string& message)
+std::string handleInfo()
 {
-    return "[INFO] " + message;
+    return "[INFO]";
+}
+
+std::string handleDebug()
+{
+    return "[DEBUG]";
 }
 
 std::string getTimestamp()
@@ -82,7 +93,7 @@ void Logger::logLoop()
     std::unique_lock<std::mutex> lock(queue.mutex, std::defer_lock);
     logfile.open("log.txt", std::ios_base::out | std::ios_base::trunc);
 
-    log("Logger started", LogMessageSeverity::Info);
+    log("Logger started", getClassName<Logger>(),LogMessageSeverity::Info);
     while(!terminate)
     {
         if(!queue.logQueue.empty())
@@ -90,8 +101,8 @@ void Logger::logLoop()
             lock.lock();
             while (!queue.logQueue.empty())
             {
-                auto& pair = queue.logQueue.front();
-                log(pair.first, pair.second);
+                auto& item = queue.logQueue.front();
+                log(item.message, item.className, item.severity);
                 queue.logQueue.pop();
             }
             lock.unlock();
@@ -105,5 +116,5 @@ void Logger::logLoop()
         }
     }
 
-    log("Logger stopped", LogMessageSeverity::Info);
+    log("Logger stopped", getClassName<Logger>(), LogMessageSeverity::Info);
 }

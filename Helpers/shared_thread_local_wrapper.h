@@ -6,7 +6,7 @@
 #define GAMEGL_EXTERNTHREADLOCALWRAPPER_H
 
 template<typename T>
-class SharedThreadLocalWrapper
+class SharedThreadLocal
 {
     T* data = nullptr;
 public:
@@ -23,6 +23,11 @@ public:
     T& Get() const
     {
         return *data;
+    }
+
+    T* operator->()
+    {
+        return data;
     }
 };
 

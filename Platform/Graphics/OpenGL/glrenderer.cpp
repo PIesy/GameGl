@@ -1,6 +1,10 @@
 #include "glrenderer.h"
 #include "../../../Logger/logger.h"
 #include "gltexturefactory.h"
+#include "../../../Graphics/graphics_events.h"
+#include "gl_generic.h"
+
+const auto logger = Logger::GetLogger(getClassName<GlRenderer>());
 
 GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 {
@@ -9,9 +13,10 @@ GlRenderer::GlRenderer(SdlGLContext& context):context(context)
 
 void GlRenderer::Start()
 {
-    if(terminated)
+    if (terminated)
     {
         renderTask = Task(std::bind(&GlRenderer::renderLoop, this));
+        pause.SetValue(true);
         context.Execute(renderTask);
     }
 }
@@ -34,12 +39,12 @@ void GlRenderer::Wait()
 
 void GlRenderer::Pause()
 {
-    pause.setValue(true);
+    pause.SetValue(true);
 }
 
 void GlRenderer::Resume()
 {
-    pause.setValue(false);
+    pause.SetValue(false);
 }
 
 void GlRenderer::Draw(const Scene& path)
@@ -47,6 +52,11 @@ void GlRenderer::Draw(const Scene& path)
     std::lock_guard<std::mutex> lock(queueLock);
     if (renderQueue.size() < 3)
         renderQueue.push(path);
+    if (firstUse)
+    {
+        firstUse = false;
+        pause.SetValue(false);
+    }
 }
 
 void GlRenderer::SetViewport(int width, int height)
@@ -54,7 +64,7 @@ void GlRenderer::SetViewport(int width, int height)
     viewportSize = {width, height};
 }
 
-void GlRenderer::SetWindow(const Window& window)
+void GlRenderer::SetWindow(Window& window)
 {
     Stop();
     context.Execute(Task([this, &window] { context.SetWindow(window); context.MakeCurrent(); }));
@@ -64,19 +74,22 @@ void GlRenderer::SetWindow(const Window& window)
 void GlRenderer::renderLoop()
 {
     terminated = false;
-    Logger::Log("Renderer started");
+    logger.LogDebug("Renderer started");
     printContextInfo();
-    viewportSize = context.getWindow().getSize();
-    while(!terminated)
+    viewportSize = context.GetWindow().GetSize();
+    while (!terminated)
     {
-        if(pause)
+        std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+        if (pause)
             pause.WaitFor(false);
         update();
         render();
         draw();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        core::core->GetEventHandler().ThrowEvent(FrameInfoEvent{{duration}, 0});
     }
-    Logger::Log("Renderer stopped");
+    logger.LogDebug("Renderer stopped");
 }
 
 void GlRenderer::update()
@@ -117,32 +130,43 @@ void GlRenderer::render()
             gl::GlFrameBufferContainer& frameBuffer = glContext.BuildFrameBuffer(step, currentScene.path.steps, size.width, size.height);
             frameBuffer.frameBuffer.Bind();
             glContext.UpdateFrameBuffer(step.attributes);
-            step.preConfig(*step.prog);
+            step.preConfig();
 
             for (int id : step.objects)
             {
                 MeshDescriptor& mesh = currentScene.meshes[id];
                 gl::GlMeshObject& meshObject = glContext.LoadMesh(mesh.mesh);
-                mesh.configuration(*step.prog);
-                step.postConfig(*step.prog);
+                mesh.configuration();
+                step.postConfig();
                 meshObject.vertexArray.Bind();
+                gl::GlProgramPipeline& pipeline = glContext.GetProgramPipeline(step.shaders);
+                pipeline.Validate();
 
                 int bindPoint = 0;
+                std::vector<LockedResource<gl::GlTexture>> textureHolder;
                 for (Texture& genericTexture : step.genericTextures)
-                    glContext.LoadTexture(genericTexture).Bind(bindPoint++);
+                {
+                    textureHolder.push_back(glContext.AcquireTexture(genericTexture, true));
+                    textureHolder.back().GetObject().Bind(bindPoint++);
+                }
                 if (!mesh.mesh.GetTextures().empty())
                 {
                     for (const Texture& texture : mesh.mesh.GetTextures())
-                        glContext.LoadTexture(texture).Bind(bindPoint++);
+                    {
+                        textureHolder.push_back(glContext.AcquireTexture(texture, true));
+                        textureHolder.back().GetObject().Bind(bindPoint++);
+                    }
                 }
 
-                step.prog->Use();
+                pipeline.Bind();
+                //logger.LogDebug(std::string("Pipeline Info:") + pipeline.GetInfo());
                 gl::drawElements(GL_TRIANGLES, mesh.mesh.GetInfo().indexCount, GL_UNSIGNED_INT, nullptr);
-                gl::program::use(0);
+                pipeline.Unbind();
             }
             glContext.UpdateFrameState(frameBuffer, step.attributes);
         }
         glContext.ClearFrameState();
+        emptyPath = true;
     }
 }
 

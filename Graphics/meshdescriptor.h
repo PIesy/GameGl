@@ -10,9 +10,9 @@
 struct MeshDescriptor
 {
     Mesh mesh;
-    ConfigFunction configuration;
+    ShaderConfiguration configuration;
 
-    MeshDescriptor(const Mesh& mesh, const ConfigFunction& configuration) : mesh(mesh), configuration(configuration) {}
+    MeshDescriptor(const Mesh& mesh, const ShaderConfiguration& configuration) : mesh(mesh), configuration(configuration) {}
     MeshDescriptor() {}
 };
 

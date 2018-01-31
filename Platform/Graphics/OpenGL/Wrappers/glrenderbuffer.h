@@ -11,7 +11,7 @@
 
 namespace gl {
 
-    class GlRenderBuffer : GlObject
+    class GlRenderBuffer : public GlObject
     {
         GLuint renderBuffer = 0;
     public:
@@ -19,9 +19,9 @@ namespace gl {
         explicit GlRenderBuffer(GLuint id);
         GlRenderBuffer(const GlRenderBuffer&) = delete;
         GlRenderBuffer& operator=(const GlRenderBuffer&) = delete;
-        GlRenderBuffer(GlRenderBuffer&& src);
-        GlRenderBuffer& operator=(GlRenderBuffer&& src);
-        ~GlRenderBuffer();
+        GlRenderBuffer(GlRenderBuffer&& src) noexcept;
+        GlRenderBuffer& operator=(GlRenderBuffer&& src) noexcept;
+        ~GlRenderBuffer() override;
 
         void SetStorage(gl::InternalFormat internalFormat, unsigned width, unsigned height);
 

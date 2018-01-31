@@ -27,7 +27,7 @@ class Worker: public Executor
 {
     std::thread::id workerId;
     std::shared_ptr<WorkerData> data{new WorkerData()};
-    std::thread* workerThread = nullptr;
+    std::unique_ptr<std::thread> workerThread;
 public:
     Worker();
     explicit Worker(const std::string& name);

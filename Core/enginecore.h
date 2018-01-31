@@ -23,24 +23,23 @@ class EngineCore: public EngineInterface
     std::unique_ptr<ThreadPool> threadPool;
     std::unique_ptr<EventHandler> eventHandler;
     Worker coreWorker{getClassName<EngineCore>()};
-    void initModules();
-    void initApis(EngineInitializer initializer);
-    bool isInit = false;
+    void initModules(EngineInitializer initializer);
+    bool isRunning = false;
 public:
     explicit EngineCore(const EngineInitializer& initializer);
     ~EngineCore();
-    void AttachModule(ModuleType name, ModuleInterface* module);
-    ModuleInterface& GetModule(ModuleType name);
-    EventHandler& GetEventHandler();
+    void AttachModule(std::shared_ptr<ModuleProvider> provider) override;
+    ModuleInterface& GetModule(ModuleType name) override;
+    EventHandler& GetEventHandler() override;
     Executor& GetExecutor(bool exclusive, const std::string& name) override;
-    void Start();
-    void Terminate();
-    void WaitEnd();
+    void Start() override;
+    void Terminate() override;
+    void WaitEnd() override;
 };
 
 namespace core
 {
-    extern thread_local SharedThreadLocalWrapper<EngineInterface> core;
+    extern thread_local SharedThreadLocal<EngineInterface> core;
 }
 
 #endif // ENGINECORE_H

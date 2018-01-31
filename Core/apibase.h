@@ -6,10 +6,8 @@
 
 class ApiBase
 {
-protected:
-    EngineInterface* engine;
 public:
-    virtual ~ApiBase() {}
+    virtual ~ApiBase() = default;
 };
 
 #endif // APIBASE

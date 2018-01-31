@@ -6,11 +6,13 @@
 void workerController(std::shared_ptr<WorkerData> data);
 void logStatus(const std::string& message);
 
+const auto logger = Logger::GetLogger(getClassName<Worker>());
+
 Worker::Worker()
 {
     if (core::core.IsInit())
         data->core = &core::core.Get();
-    workerThread = new std::thread(workerController, data);
+    workerThread = std::make_unique<std::thread>(workerController, data);
     workerId = workerThread->get_id();
 }
 
@@ -20,7 +22,7 @@ Worker::Worker(const std::string& name)
     if (core::core.IsInit())
         data->core = &core::core.Get();
     data->name = name;
-    workerThread = new std::thread(workerController, data);
+    workerThread = std::make_unique<std::thread>(workerController, data);
     workerId = workerThread->get_id();
 }
 
@@ -30,17 +32,15 @@ Worker::Worker(const std::string& name, SharedTaskList& taskList)
         data->core = &core::core.Get();
     data->name = name;
     data->taskList = taskList;
-    workerThread = new std::thread(workerController, data);
+    workerThread = std::make_unique<std::thread>(workerController, data);
     workerId = workerThread->get_id();
 }
 
 Worker::Worker(Worker&& arg)
 {
     workerId = arg.workerId;
-    workerThread = arg.workerThread;
-    arg.workerThread = nullptr;
-    data = arg.data;
-    arg.data = nullptr;
+    workerThread = std::move(arg.workerThread);
+    data = std::move(arg.data);
 }
 
 Worker::~Worker()
@@ -52,7 +52,6 @@ Worker::~Worker()
         Terminate();
         workerThread->detach();
     }
-    delete workerThread;
 }
 
 bool Worker::IsBusy()
@@ -114,7 +113,7 @@ void workerController(std::shared_ptr<WorkerData> data)
     }
     catch (std::exception& e)
     {
-        Logger::LogError(std::string("Error ") + e.what() + " name: " + data->name);
+        logger.LogError(std::string("Error ") + e.what() + " | thread name: " + data->name);
     }
 
     data->isRunning = false;
@@ -125,5 +124,5 @@ void logStatus(const std::string& message)
 {
     std::stringstream str;
     str << message + " " << std::this_thread::get_id();
-    Logger::Log(str.str());
+    logger.LogDebug(str.str());
 }

@@ -19,9 +19,9 @@ public:
     GlProgram(GlProgram&& src);
     void Attach(const Shader& shader) override;
     void Detach(const Shader& shader) override;
-    void Compile() override;
+    void Finalize() override;
     void Use() override;
-    InvokationResult SetUniform(const std::string& name, const UniformValue& value) override;
+    void SetUniform(const std::string& name, const UniformValue& value) override;
     operator GLuint() const;
 };
 

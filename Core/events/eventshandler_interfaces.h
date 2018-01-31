@@ -6,11 +6,11 @@
  */
 class EventInterface
 {
-    int hint;
+    int hint = 0;
 public:
     virtual void SetHint(int hint) { this->hint = hint; }
     virtual int GetHint() const { return hint; }
-    virtual ~EventInterface() {}
+    virtual ~EventInterface() = default;
 };
 
 #endif // EVENTSHANDLER_INTERFACES

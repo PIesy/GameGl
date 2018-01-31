@@ -3,13 +3,8 @@
 
 struct Size
 {
-    int width;
-    int height;
-};
-
-struct Size3d: public Size
-{
-    int depth;
+    int width = 0;
+    int height = 0;
 };
 
 #endif // SIZE_H

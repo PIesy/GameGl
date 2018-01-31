@@ -1,6 +1,5 @@
 #version 430
 
-in vec4 position;
 in vec3 rawPos;
 
 uniform sampler2D hdrMap;

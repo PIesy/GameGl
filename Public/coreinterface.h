@@ -3,7 +3,6 @@
 
 #include "apis.h"
 #include "../Core/engineinterface.h"
-#include "../Graphics/renderdefs.h"
 #include "../Storage/storageapi.h"
 
 class CoreInterface

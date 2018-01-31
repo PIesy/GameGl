@@ -13,7 +13,7 @@ class Task: public Invokable
     bool hasFuture = false;
     SharedState<bool> isInvoked = false;
 public:
-    Task() {}
+    Task() = default;
     explicit Task(std::function<void()>&& f);
     explicit Task(const std::function<void()>& f);
     Task& operator=(std::function<void()>&& f);
@@ -28,9 +28,9 @@ public:
     template<class F, class... Args>
     auto SetTask(F&& f, Args&&... args) -> std::future<typename std::result_of<F(Args...)>::type>;
 
-    Task* Copy() const;
-    void Invoke();
-    void operator()();
+    Task* Copy() const override;
+    void Invoke() override;
+    void operator()() override;
     void WaitTillFinished();
 };
 

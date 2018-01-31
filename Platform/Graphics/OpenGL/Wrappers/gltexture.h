@@ -89,12 +89,12 @@ namespace gl {
         unsigned depth;
     public:
         GlTexture();
-        GlTexture(TextureType type);
+        explicit GlTexture(TextureType type);
         GlTexture(GLuint id, TextureType type);
         GlTexture(const GlTexture&) = delete;
         GlTexture& operator=(const GlTexture&) = delete;
-        GlTexture(GlTexture&& src);
-        GlTexture& operator=(GlTexture&& src);
+        GlTexture(GlTexture&& src) noexcept;
+        GlTexture& operator=(GlTexture&& src) noexcept;
         ~GlTexture();
 
         void Bind(int textureUnit = 0);

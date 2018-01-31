@@ -7,19 +7,27 @@
 #include <string>
 #include "../../../Helpers/sharedstate.h"
 #include "../../../Core/worker.h"
-#include "graphicscontextdata.h"
+#include "graphics_context_data.h"
 #include "../../../Core/enginecore.h"
+#include "../../../Helpers/genericcondition.h"
 
 
 class SdlWindow: public BasicWindow, public Service
 {
-    SDL_Window* window;
-    Executor* worker;
+    SDL_Window* window = nullptr;
+    Executor& worker = core::core.Get().GetExecutor(true, getClassName<SdlWindow>());
+    std::shared_ptr<std::atomic_bool> terminate{new std::atomic_bool{false}};
+    GenericCondition<bool> opened{false};
+    std::string name;
+    int width;
+    int height;
+    bool hidden;
+    std::once_flag openedFlag;
 public:
-    SdlWindow();
-    void Open(std::string name, int width, int height, bool hidden = false);
-    void Close();
-    WindowSize getSize();
+    SdlWindow(const std::string& name, int width, int height, bool hidden);
+    ~SdlWindow() override;
+    void Close() override;
+    WindowSize GetSize() override;
     operator SDL_Window*();
 
     void Start() override;
@@ -28,22 +36,23 @@ public:
     void Resume() override;
     void Restart() override;
     void Wait() override;
+    void WaitForStart() override;
 };
 
 class SdlGLContext: public RenderingContext
 {
     SharedState<bool> isValid = true;
-    SdlWindow window;
+    SdlWindow* window;
     SDL_GLContext context;
-    Executor& executor = core::core.Get().GetExecutor(true, "RenderingContext");
+    Executor& executor = core::core.Get().GetExecutor(true, getClassName<SdlGLContext>());
 public:
-    SdlGLContext(const SDL_GLContext& context, const SdlWindow& window, GraphicsContextData& data);
-    ~SdlGLContext();
-    void Destroy();
-    void Execute(const Invokable& invokable);
-    void SetWindow(const Window& window);
-    void MakeCurrent();
-    Window getWindow();
+    SdlGLContext(const SDL_GLContext& context, SdlWindow& window, SharedGlContextData& data);
+    ~SdlGLContext() override;
+    void Destroy() override;
+    void Execute(const Invokable& invokable) override;
+    void SetWindow(Window& window) override;
+    void MakeCurrent() override;
+    Window GetWindow() override;
     SdlWindow& getSdlWindow();
 };
 

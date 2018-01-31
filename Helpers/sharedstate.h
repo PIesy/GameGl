@@ -40,7 +40,7 @@ public:
         if(!*isStateChanged)
         {
             std::unique_lock<std::mutex> lock(*mutex);
-            while(!*isStateChanged)
+            while (!*isStateChanged)
                 stateChanged->wait(lock);
             *isStateChanged = false;
         }
@@ -51,7 +51,7 @@ public:
         if(*state != value)
         {
             std::unique_lock<std::mutex> lock(*mutex);
-            while(*state != value)
+            while (*state != value)
                 stateChanged->wait(lock);
         }
     }
