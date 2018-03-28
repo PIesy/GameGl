@@ -13,6 +13,8 @@
 
 namespace gl {
 
+    constexpr GLuint DEFAULT_FRAMEBUFFER = 0;
+
     enum class FrameBufferTarget: GLenum
     {
         Read = GL_READ_FRAMEBUFFER,

@@ -6,9 +6,9 @@
 class Executor
 {
 public:
-    virtual ~Executor() {};
-    virtual void Execute(const Invokable& invokable) = 0;
-    virtual void Execute(Invokable&& invokable) = 0;
+    virtual ~Executor() = default;
+    virtual bool Execute(const Invokable& invokable) = 0;
+    virtual bool Execute(Invokable&& invokable) = 0;
     virtual bool IsValid() = 0;
 };
 

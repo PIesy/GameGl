@@ -51,4 +51,11 @@ public:
     }
 };
 
+template<typename T>
+class LocalResource : public LockedResource<T>
+{
+public:
+    explicit LocalResource(T& object) : LockedResource<T>(object) {}
+};
+
 #endif //GAMEGL_LOCK_HOLDER_H

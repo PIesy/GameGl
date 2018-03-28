@@ -99,7 +99,7 @@ class RenderingContext
 {
 public:
     virtual ~RenderingContext() = default;
-    virtual void Execute(const Invokable& invokable) = 0;
+    virtual bool Execute(const Invokable& invokable) = 0;
     virtual void Destroy() = 0;
     virtual void SetWindow(Window& window) = 0;
     virtual void MakeCurrent() = 0;

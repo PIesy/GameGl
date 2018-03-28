@@ -57,8 +57,6 @@ std::pair<SceneBuilder, SceneBuilder> initSceneBuilders(World& world);
 void buildPistolWorld(ResourcesHelper& helper, StorageApi& api);
 void pistolWorldAnimation(World& world);
 
-Program& prepareProgram2(CoreInterface* engine);
-
 int main()
 {
     CoreInterface engine;
@@ -70,6 +68,7 @@ int main()
     //engine.getEventHandler().setListener<FrameInfoEvent>(makeAction(std::function<void(FrameInfoEvent*)>{printFrameTime}));
 
     Renderer& renderer = engine.Video()->GetRenderer();
+    Renderer& backupRenderer = engine.Video()->GetRenderer();
     Action<WindowEvent*> setViewport{std::bind(updateViewport, std::placeholders::_1, &renderer)};
     engine.getEventHandler().setListener<WindowEvent>(setViewport, [](EventInterface* e) { return e->GetHint() == integral(WindowData::Type::Resize); });
     Window window = engine.Video()->CreateWindow("Hello", windowSizeX, windowSizeY);
@@ -109,15 +108,13 @@ int main()
     buildPistolWorld(helper, engine.GetStorage());
     std::pair<SceneBuilder, SceneBuilder> builders1 = initSceneBuilders(pistolWorld);
 
+
     renderer.Draw(builders1.first.BuildScene(pistolWorld, *cam1));
     int frames = 0;
     while (!stop)
     {
-        if (frames < 6000)
-        {
-            pistolWorldAnimation(pistolWorld);
-            renderer.Draw(builders1.second.BuildScene(pistolWorld, *cam1));
-        }
+        pistolWorldAnimation(pistolWorld);
+        renderer.Draw(builders1.second.BuildScene(pistolWorld, *cam1));
         frames++;
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }

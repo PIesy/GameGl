@@ -14,10 +14,7 @@ GLuint gl::GlTexture::GetId() const
     return texture;
 }
 
-gl::GlTexture::GlTexture()
-{
-
-}
+gl::GlTexture::GlTexture() = default;
 
 gl::GlTexture::GlTexture(TextureType type)
 {
@@ -33,8 +30,11 @@ gl::GlTexture::GlTexture(GLuint texture, TextureType type)
 
 void gl::GlTexture::Bind(int textureUnit)
 {
-    gl::texture::setActiveTexture(GL_TEXTURE0 + textureUnit);
-    gl::texture::bind(integral(type), texture);
+    if (texture != 0)
+    {
+        gl::texture::setActiveTexture(GL_TEXTURE0 + textureUnit);
+        gl::texture::bind(integral(type), texture);
+    }
 }
 
 void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, const void* data, unsigned int mipmapLevel)
@@ -57,8 +57,8 @@ void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, const v
 }
 
 
-void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, unsigned xOffset, unsigned yOffset, unsigned zOffset, const void* data, unsigned int levels,
-                         unsigned int mipmapLevel)
+void gl::GlTexture::Load(SourceFormat format, SourcePixelSize pixelSize, unsigned xOffset, unsigned yOffset, unsigned zOffset,
+                         const void* data, unsigned int levels, unsigned int mipmapLevel)
 {
     switch (type)
     {

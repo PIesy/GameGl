@@ -1,17 +1,23 @@
 #include "threadpool.h"
 
-void ThreadPool::Execute(const Invokable& invokable)
+bool ThreadPool::Execute(const Invokable& invokable)
 {
+    if (!isRunning)
+        return false;
     if (allBusy() && workers.size() < config.maxThreads)
         workers.emplace_back("ThreadPoolThread" + std::to_string(workers.size()), threadPoolList);
     threadPoolList.Add(invokable);
+    return true;
 }
 
-void ThreadPool::Execute(Invokable&& invokable)
+bool ThreadPool::Execute(Invokable&& invokable)
 {
+    if (!isRunning)
+        return false;
     if (allBusy() && workers.size() < config.maxThreads)
         workers.emplace_back("ThreadPoolThread" + std::to_string(workers.size()), threadPoolList);
     threadPoolList.Add(invokable);
+    return true;
 }
 
 ThreadPool::ThreadPool(const ThreadPoolConfig& config) : config(config)

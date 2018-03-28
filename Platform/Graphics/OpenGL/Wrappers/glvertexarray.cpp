@@ -8,7 +8,7 @@ namespace gl {
 
     GlVertexArray::GlVertexArray()
     {
-        gl::vertexarray::generate(1, &vertexArray);
+        gl::vertex_array::generate(1, &vertexArray);
     }
 
     GlVertexArray::GlVertexArray(GLuint id)
@@ -18,44 +18,44 @@ namespace gl {
 
     void GlVertexArray::BindElementBuffer(gl::GlBuffer& elementBuffer)
     {
-        gl::vertexarray::bindElementBuffer(vertexArray, elementBuffer.GetId());
+        gl::vertex_array::bindElementBuffer(vertexArray, elementBuffer.GetId());
     }
 
     void GlVertexArray::BindBuffer(gl::GlBuffer& buffer, unsigned index, ptrdiff_t offset, int size)
     {
-        gl::vertexarray::bindVertexBuffer(vertexArray, index, buffer.GetId(), offset, size);
+        gl::vertex_array::bindVertexBuffer(vertexArray, index, buffer.GetId(), offset, size);
     }
 
     void GlVertexArray::UnbindBuffer(unsigned index)
     {
-        gl::vertexarray::bindVertexBuffer(vertexArray, index, 0, 0, 0);
+        gl::vertex_array::bindVertexBuffer(vertexArray, index, 0, 0, 0);
     }
 
     void GlVertexArray::EnableAttribute(unsigned index)
     {
-        gl::vertexarray::enableVertexAttribute(vertexArray, index);
+        gl::vertex_array::enableVertexAttribute(vertexArray, index);
     }
 
     void GlVertexArray::DisableAttribute(unsigned index)
     {
-        gl::vertexarray::disableVertexAttribute(vertexArray, index);
+        gl::vertex_array::disableVertexAttribute(vertexArray, index);
     }
 
     void GlVertexArray::SetAttributeFormat(unsigned index, int size, AttributeTypeFloat type, unsigned offset,
                                            bool normalized)
     {
-        gl::vertexarray::setVertexAttributeFormat(vertexArray, index, size, integral(type), (unsigned char) normalized,
+        gl::vertex_array::setVertexAttributeFormat(vertexArray, index, size, integral(type), (unsigned char) normalized,
                                                   offset);
     }
 
     void GlVertexArray::LinkBuffer(unsigned attributeIndex, unsigned bufferIndex)
     {
-        gl::vertexarray::bindBufferToAttribute(vertexArray, attributeIndex, bufferIndex);
+        gl::vertex_array::bindBufferToAttribute(vertexArray, attributeIndex, bufferIndex);
     }
 
     void GlVertexArray::Bind()
     {
-        gl::vertexarray::bind(vertexArray);
+        gl::vertex_array::bind(vertexArray);
     }
 
     GlVertexArray::GlVertexArray(GlVertexArray&& src) noexcept
@@ -65,12 +65,12 @@ namespace gl {
 
     GlVertexArray::~GlVertexArray()
     {
-        gl::vertexarray::erase(1, &vertexArray);
+        gl::vertex_array::erase(1, &vertexArray);
     }
 
     GlVertexArray& GlVertexArray::operator=(GlVertexArray&& src) noexcept
     {
-        gl::vertexarray::erase(1, &vertexArray);
+        gl::vertex_array::erase(1, &vertexArray);
         vertexArray = src.vertexArray;
         src.vertexArray = 0;
         return *this;

@@ -34,9 +34,9 @@ size_t GlProgramHandle::GetHandle() const
 
 void GlProgramHandle::SetUniform(const std::string& name, const UniformValue& value)
 {
-    GlUniformNew uniform;
+    GlUniform uniform;
 
-    if (!uniforms.count(name))
+    if (uniforms.find(name) == uniforms.end())
     {
         GLint loc = sharedGlData->programMap.GetWrite(handle).GetObject().GetUniformLocation(name);
         if (loc < 0)
@@ -54,7 +54,7 @@ void GlProgramHandle::SetUniform(const std::string& name, const UniformValue& va
     setUniform(uniform);
 }
 
-void GlProgramHandle::setUniform(GlUniformNew& uniform)
+void GlProgramHandle::setUniform(GlUniform& uniform)
 {
     if ((uniform.horizontalSize < 1 || uniform.verticalSize < 1) || (uniform.horizontalSize > 4 || uniform.verticalSize > 4))
     {

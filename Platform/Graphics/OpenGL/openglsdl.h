@@ -1,8 +1,6 @@
 #ifndef OPENGLSDL_H
 #define OPENGLSDL_H
 
-#include "glprogram.h"
-#include "glshader.h"
 #include "glrenderer.h"
 #include "graphics_context_data.h"
 #include "../../../Core/service/service_cluster.h"

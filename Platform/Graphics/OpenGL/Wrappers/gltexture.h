@@ -15,7 +15,8 @@ namespace gl {
         Tex1dArray = GL_TEXTURE_1D_ARRAY,
         TexCube = GL_TEXTURE_CUBE_MAP,
         TexCubeArray = GL_TEXTURE_CUBE_MAP_ARRAY,
-        Tex3d = GL_TEXTURE_3D
+        Tex3d = GL_TEXTURE_3D,
+        Undefined = 0
     };
 
     enum class SourceFormat : GLenum
@@ -83,10 +84,10 @@ namespace gl {
     class GlTexture
     {
         GLuint texture = 0;
-        TextureType type;
-        unsigned width;
-        unsigned height;
-        unsigned depth;
+        TextureType type = TextureType::Undefined;
+        unsigned width = 0;
+        unsigned height = 0;
+        unsigned depth = 0;
     public:
         GlTexture();
         explicit GlTexture(TextureType type);

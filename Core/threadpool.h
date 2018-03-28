@@ -21,8 +21,8 @@ class ThreadPool: public Executor
 public:
     ~ThreadPool() override;
     explicit ThreadPool(const ThreadPoolConfig& config);
-    void Execute(const Invokable& invokable) override;
-    void Execute(Invokable&& invokable) override;
+    bool Execute(const Invokable& invokable) override;
+    bool Execute(Invokable&& invokable) override;
     bool IsValid() override;
 };
 

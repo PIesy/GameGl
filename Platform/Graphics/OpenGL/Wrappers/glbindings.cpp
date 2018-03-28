@@ -1,59 +1,59 @@
-#include <bits/unique_ptr.h>
+#include <memory>
 #include "glbindings.h"
 #include "gldebug.h"
 
 
 //vertex array
 
-void gl::vertexarray::generate(int count, GLuint* vertexArrays)
+void gl::vertex_array::generate(int count, GLuint* vertexArrays)
 {
     glCreateVertexArrays(count, vertexArrays);
     gl::printGlError("glGenVertexArrays");
 }
 
-void gl::vertexarray::bind(GLuint vertexArray)
+void gl::vertex_array::bind(GLuint vertexArray)
 {
     glBindVertexArray(vertexArray);
     gl::printGlError("glBindVertexArray");
 }
 
-void gl::vertexarray::erase(int count, GLuint* vertexArrays)
+void gl::vertex_array::erase(int count, GLuint* vertexArrays)
 {
     glDeleteVertexArrays(count, vertexArrays);
     gl::printGlError("glDeleteVertexArrays");
 }
 
-void gl::vertexarray::disableVertexAttribute(GLuint target, GLuint index)
+void gl::vertex_array::disableVertexAttribute(GLuint target, GLuint index)
 {
     glDisableVertexArrayAttrib(target, index);
     gl::printGlError("glDisableVertexArrayAttrib");
 }
 
-void gl::vertexarray::setVertexAttributeFormat(GLuint target, GLuint index, int size, GLenum type, GLboolean normalized, GLuint offset)
+void gl::vertex_array::setVertexAttributeFormat(GLuint target, GLuint index, int size, GLenum type, GLboolean normalized, GLuint offset)
 {
     glVertexArrayAttribFormat(target, index, size, type, normalized, offset);
     gl::printGlError("glVertexArrayAttribFormat");
 }
 
-void gl::vertexarray::enableVertexAttribute(GLuint target, GLuint index)
+void gl::vertex_array::enableVertexAttribute(GLuint target, GLuint index)
 {
     glEnableVertexArrayAttrib(target, index);
     gl::printGlError("glEnableVertexArrayAttrib");
 }
 
-void gl::vertexarray::bindElementBuffer(GLuint target, GLuint buffer)
+void gl::vertex_array::bindElementBuffer(GLuint target, GLuint buffer)
 {
     glVertexArrayElementBuffer(target, buffer);
     gl::printGlError("glVertexArrayElementBuffer");
 }
 
-void gl::vertexarray::bindVertexBuffer(GLuint target, GLuint bindingIndex, GLuint buffer, GLintptr offset, GLsizei stride)
+void gl::vertex_array::bindVertexBuffer(GLuint target, GLuint bindingIndex, GLuint buffer, GLintptr offset, GLsizei stride)
 {
     glVertexArrayVertexBuffer(target, bindingIndex, buffer, offset, stride);
     gl::printGlError("glVertexArrayVertexBuffer");
 }
 
-void gl::vertexarray::bindBufferToAttribute(GLuint target, GLuint attributeIndex, GLuint bindingIndex)
+void gl::vertex_array::bindBufferToAttribute(GLuint target, GLuint attributeIndex, GLuint bindingIndex)
 {
     glVertexArrayAttribBinding(target, attributeIndex, bindingIndex);
     gl::printGlError("glVertexArrayAttribBinding");
@@ -514,6 +514,11 @@ void gl::setBlendFunction(GLenum sfactor, GLenum dfactor)
     gl::printGlError("glBlendFunc");
 }
 
+void gl::flush()
+{
+    glFlush();
+}
+
 GLuint gl::program_pipeline::create()
 {
     GLuint result = 0;
@@ -563,4 +568,24 @@ void gl::program_pipeline::getParameter(GLuint programPipeline, GLenum parameter
 {
     glGetProgramPipelineiv(programPipeline, parameterName, result);
     gl::printGlError("glGetProgramPipelineiv");
+}
+
+GLsync gl::sync::createFence()
+{
+    return glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+}
+
+void gl::sync::erase(GLsync sync)
+{
+    glDeleteSync(sync);
+}
+
+void gl::sync::clientWait(GLsync sync, GLbitfield flags, uint64_t timeout)
+{
+    glClientWaitSync(sync, flags, timeout);
+}
+
+void gl::sync::wait(GLsync sync, GLbitfield flags, uint64_t timeout)
+{
+    glWaitSync(sync, flags, timeout);
 }

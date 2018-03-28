@@ -19,9 +19,10 @@ class GlRenderer: public Renderer
 
     std::mutex queueLock;
     SdlGLContext& context;
-    bool terminated = true;
+    std::atomic_bool terminated{true};
     bool emptyPath = true;
     bool firstUse = true;
+    bool redraw = false;
     Scene currentScene;
     std::queue<Scene> renderQueue;
     std::atomic<ViewportSize> viewportSize;
@@ -31,7 +32,9 @@ class GlRenderer: public Renderer
 
     void renderLoop();
     void init();
+    bool fetchScene();
     void render();
+    void renderMesh(MeshDescriptor& mesh, RenderStep& step);
     void draw();
     void update();
 public:

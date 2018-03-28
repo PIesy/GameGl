@@ -119,9 +119,9 @@ void SdlGLContext::Destroy()
     }
 }
 
-void SdlGLContext::Execute(const Invokable& invokable)
+bool SdlGLContext::Execute(const Invokable& invokable)
 {
-    executor.Execute(invokable);
+    return executor.Execute(invokable);
 }
 
 void SdlGLContext::SetWindow(Window& window)

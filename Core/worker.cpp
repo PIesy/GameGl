@@ -16,7 +16,6 @@ Worker::Worker()
     workerId = workerThread->get_id();
 }
 
-
 Worker::Worker(const std::string& name)
 {
     if (core::core.IsInit())
@@ -36,7 +35,7 @@ Worker::Worker(const std::string& name, SharedTaskList& taskList)
     workerId = workerThread->get_id();
 }
 
-Worker::Worker(Worker&& arg)
+Worker::Worker(Worker&& arg) noexcept
 {
     workerId = arg.workerId;
     workerThread = std::move(arg.workerThread);
@@ -78,14 +77,20 @@ void Worker::Terminate()
     }});
 }
 
-void Worker::Execute(const Invokable& invokable)
+bool Worker::Execute(const Invokable& invokable)
 {
+    if (data->terminate)
+        return false;
     data->taskList.Add(invokable);
+    return true;
 }
 
-void Worker::Execute(Invokable&& invokable)
+bool Worker::Execute(Invokable&& invokable)
 {
+    if (data->terminate)
+        return false;
     data->taskList.Add(invokable);
+    return true;
 }
 
 bool Worker::IsValid()
@@ -103,7 +108,7 @@ void workerController(std::shared_ptr<WorkerData> data)
     try
     {
         std::shared_ptr<Invokable> task;
-        while(!data->terminate)
+        while(!(data->terminate && data->taskList.IsEmpty()))
         {
             task = data->taskList.GetAndRemove();
             data->busy = true;

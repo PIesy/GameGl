@@ -11,7 +11,7 @@
 #include "../../../Graphics/graphicsclasses.h"
 #include "Wrappers/glprogram.h"
 
-struct GlUniformNew: public UniformValue
+struct GlUniform: public UniformValue
 {
     GLuint location = 0;
 };
@@ -20,8 +20,8 @@ class GlProgramHandle : public Shader
 {
     size_t handle;
     ShaderType type;
-    std::unordered_map<std::string, GlUniformNew> uniforms;
-    void setUniform(GlUniformNew& uniform);
+    std::unordered_map<std::string, GlUniform> uniforms;
+    void setUniform(GlUniform& uniform);
 public:
     GlProgramHandle(const std::string& source, ShaderType type);
     GlProgramHandle(const GlProgramHandle& source) = default;

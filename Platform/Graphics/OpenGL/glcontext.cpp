@@ -13,11 +13,17 @@ const auto logger = Logger::GetLogger(getClassName<GlContext>());
 
 LockedResource<gl::GlTexture> GlContext::AcquireTexture(const Texture& texture, bool read)
 {
+    using namespace std::string_literals;
     if (sharedGlData.Get().textureMap.Contains(texture.info.name))
-        return sharedGlData.Get().textureMap.GetRead(texture.info.name);
+        return sharedGlData.Get().textureMap.Get(texture.info.name, read);
+    if (read && texture.data.empty())
+    {
+        static gl::GlTexture emptyTex{};
+        return LocalResource<gl::GlTexture>{emptyTex};
+    }
 
-    sharedGlData.Get().textureMap.Put(texture.info.name, gl::GlTextureFactory::BuildTexture(texture.info, texture.data));
-    auto result = sharedGlData.Get().textureMap.Get(texture.info.name, read);
+    auto result = sharedGlData.Get().textureMap.PutAndLock(texture.info.name, gl::GlTextureFactory::BuildTexture(texture.info, texture.data), read);
+    logger.LogDebug("Created texture with name: "s + texture.info.name);
 
     configureTexture(result.GetObject(), texture.parameters, texture.info);
     if (texture.info.target == TextureBindpoint::Depth)
@@ -34,7 +40,7 @@ gl::GlProgramPipeline& GlContext::GetProgramPipeline(const std::vector<std::refe
     {
         const auto& glHandle = dynamic_cast<const GlProgramProxy&>(handle);
         wrapper.emplace_back(glHandle.GetProgram());
-        id = (id ^ (glHandle.GetHandle() << 1)) >> 1;
+        id = (id ^ (glHandle.GetHandle() << 1u)) >> 1u;
     }
     if (data.programPipelines.count(id))
         return data.programPipelines.at(id);
@@ -99,11 +105,12 @@ gl::GlMeshObject& GlContext::LoadMesh(const Mesh& mesh)
                               gl::BufferFlags::DynamicStorage, mesh.GetData().vertices};
 
     result.vertexArray.BindElementBuffer(elementBuffer);
-    result.vertexArray.BindBuffer(vertexBuffer, 0, 0, sizeof(Vertex));
+    const unsigned bufferIndex = 0;
+    result.vertexArray.BindBuffer(vertexBuffer, bufferIndex, 0, sizeof(Vertex));
     for (unsigned i = 0; i < 5; ++i)
     {
         result.vertexArray.EnableAttribute(i);
-        result.vertexArray.LinkBuffer(i, 0);
+        result.vertexArray.LinkBuffer(i, bufferIndex);
     }
     result.vertexArray.SetAttributeFormat(0, 3, gl::AttributeTypeFloat::Float, offsetof(Vertex, coords));
     result.vertexArray.SetAttributeFormat(1, 4, gl::AttributeTypeFloat::Float, offsetof(Vertex, color));
@@ -194,8 +201,8 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
         else
         {
             Texture depth = targets.front().texture;
-            depth.info.width = depth.info.width / (1 << depth.parameters.useMipLevel);
-            depth.info.height = depth.info.height / (1 << depth.parameters.useMipLevel);
+            depth.info.width = depth.info.width / (1u << depth.parameters.useMipLevel);
+            depth.info.height = depth.info.height / (1u << depth.parameters.useMipLevel);
             depth.info.target = TextureBindpoint::Depth;
             depth.info.mipmaps = 0;
             depth.info.targetPixelFormat = TexturePixelFormat::Float24;
@@ -219,7 +226,7 @@ gl::GlFrameBufferContainer& GlContext::BuildFrameBuffer(const RenderStep& step, 
     if (result.frameBuffer.GetStatus(gl::FrameBufferTarget::Both) != gl::FrameBufferStatus::Complete)
         logger.LogError("Could not create framebuffer");
 
-    gl::setViewport(info.width / (1 << parameters.useMipLevel), info.height / (1 << parameters.useMipLevel));
+    gl::setViewport(info.width / (1u << parameters.useMipLevel), info.height / (1u << parameters.useMipLevel));
     return result;
 }
 
@@ -242,7 +249,6 @@ void GlContext::UpdateState(const RenderingAttributes& attributes)
             gl::disable(GL_DEPTH_TEST);
         }
     }
-
 
     // Blend
     if (std::find(attributes.begin(), attributes.end(), RenderingAttribute::Blend) != attributes.end())
@@ -379,6 +385,8 @@ void GlContext::blitFrameBuffers(gl::GlFrameBufferContainer& src, gl::GlFrameBuf
 
 void GlContext::UpdateFrameState(gl::GlFrameBufferContainer& frameBuffer, const RenderingAttributes& attributes)
 {
+    if (!data.lockedTextures.empty())
+        gl::flush();
     if (!data.lockedTextures.empty() && std::find(attributes.begin(), attributes.end(), RenderingAttribute::UpdateMipmaps) != attributes.end())
     {
         for (auto& tex : data.lockedTextures)

@@ -16,7 +16,6 @@
 #include "glframebuffercontainer.h"
 #include "../../../Helpers/lock_holder.h"
 #include "Wrappers/glprogrampipeline.h"
-#include "glprogram.h"
 #include "gl_program_handle.h"
 
 

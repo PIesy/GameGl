@@ -4,11 +4,15 @@
 #include "resources_helper.h"
 #include "Framework/Loaders/textureloader.h"
 #include "Framework/Loaders/meshloader.h"
+#include "Logger/logger.h"
+
+const auto logger = Logger::GetLogger("ResourcesHelper");
 
 void ResourcesHelper::Init(StorageApi& api)
 {
     loadTextures(api);
     loadMeshes(api);
+    logger.LogInfo("Rejoice! All resources are loaded.");
 }
 
 void ResourcesHelper::loadTextures(StorageApi& api)

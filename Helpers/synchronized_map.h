@@ -15,83 +15,89 @@ class SynchronizedMap
     mutable std::shared_timed_mutex accessMutex;
     std::unordered_map<K, std::unique_ptr<std::shared_timed_mutex>> objectLocks{};
     std::unordered_map<K, V> objects{};
-public:
-    void Put(K&& key, V&& value)
-    {
-        accessMutex.lock();
 
+    void put(const K& key, V&& value)
+    {
         objects.emplace(key, std::move(value));
         objectLocks.emplace(key, std::make_unique<std::shared_timed_mutex>());
-        accessMutex.unlock();
     }
 
+    void put(const K& key, const V& value)
+    {
+        objects.emplace(key, value);
+        objectLocks.emplace(key, std::make_unique<std::shared_timed_mutex>());
+    }
+
+    LockedResource<V> get(const K& key, bool read)
+    {
+        if (read)
+            return ReadLockHolder<V>{objects[key], *objectLocks.at(key)};
+        return WriteLockHolder<V>{objects[key], *objectLocks.at(key)};
+    }
+public:
     void Put(const K& key, V&& value)
     {
-        accessMutex.lock();
+        std::unique_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        objects.emplace(key, std::move(value));
-        objectLocks.emplace(key, std::make_unique<std::shared_timed_mutex>());
-        accessMutex.unlock();
+        put(key, std::move(value));
     }
 
     void Put(const K& key, const V& value)
     {
-        accessMutex.lock();
+        std::unique_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        objects.emplace(key, std::move(value));
-        objectLocks.emplace(key, std::make_unique<std::shared_timed_mutex>());
-        accessMutex.unlock();
+        put(key, value);
+    }
+
+    LockedResource<V> PutAndLock(const K& key, V&& value, bool read)
+    {
+        std::unique_lock<std::shared_timed_mutex> guard{accessMutex};
+
+        put(key, std::move(value));
+        return get(key, read);
+    }
+
+    LockedResource<V> PutAndLock(const K& key, const V& value, bool read)
+    {
+        std::unique_lock<std::shared_timed_mutex> guard{accessMutex};
+
+        put(key, value);
+        return get(key, read);
     }
     
     LockedResource<V> GetRead(const K& key)
     {
-        accessMutex.lock_shared();
+        std::shared_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        auto result = ReadLockHolder<V>{objects.at(key), *objectLocks.at(key)};
-        accessMutex.unlock_shared();
-        return std::move(result);
+        return ReadLockHolder<V>{objects.at(key), *objectLocks.at(key)};
     }
 
     LockedResource<V> GetWrite(const K& key)
     {
-        accessMutex.lock_shared();
+        std::shared_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        auto result = WriteLockHolder<V>{objects[key], *objectLocks.at(key)};
-        accessMutex.unlock_shared();
-        return std::move(result);
+        return WriteLockHolder<V>{objects[key], *objectLocks.at(key)};
     }
 
     LockedResource<V> Get(const K& key, bool read)
     {
-        accessMutex.lock_shared();
+        std::shared_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        if (read)
-        {
-            auto result = ReadLockHolder<V>{objects[key], *objectLocks.at(key)};
-            accessMutex.unlock_shared();
-            return std::move(result);
-        }
-        auto result = WriteLockHolder<V>{objects[key], *objectLocks.at(key)};
-        accessMutex.unlock_shared();
-        return std::move(result);
+        return get(key, read);
     }
 
     const V& Get(const K& key) const
     {
-        accessMutex.lock_shared();
+        std::shared_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        auto& result = objects.at(key);
-        accessMutex.unlock_shared();
-        return result;
+        return objects.at(key);
     }
 
     bool Contains(const K& key) const
     {
-        accessMutex.lock_shared();
+        std::shared_lock<std::shared_timed_mutex> guard{accessMutex};
 
-        bool result = objects.count(key) != 0;
-        accessMutex.unlock_shared();
-        return result;
+        return objects.find(key) != objects.end();
     }
 };
 

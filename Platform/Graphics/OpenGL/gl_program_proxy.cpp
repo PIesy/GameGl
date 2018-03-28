@@ -21,8 +21,8 @@ void GlProgramProxy::SetUniform(const std::string& name, const UniformValue& val
     {
         handle.SetUniform(name, value);
     }};
-    context.Execute(setUniform);
-    setUniform.WaitTillFinished();
+    if (context.Execute(setUniform))
+        setUniform.WaitTillFinished();
 }
 
 GlProgramProxy::GlProgramProxy(GlProgramHandle handle, SdlGLContext& context) : handle(std::move(handle)), context(context) {}

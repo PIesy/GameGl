@@ -49,7 +49,7 @@ public:
     SdlGLContext(const SDL_GLContext& context, SdlWindow& window, SharedGlContextData& data);
     ~SdlGLContext() override;
     void Destroy() override;
-    void Execute(const Invokable& invokable) override;
+    bool Execute(const Invokable& invokable) override;
     void SetWindow(Window& window) override;
     void MakeCurrent() override;
     Window GetWindow() override;

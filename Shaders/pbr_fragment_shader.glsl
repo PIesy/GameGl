@@ -27,6 +27,7 @@ uniform bool normalTex = false;
 uniform bool inverseRoughness = false;
 uniform bool noIbl = false;
 uniform bool noShadows = false;
+uniform bool noGlobalShadows = false;
 
 uniform vec3 lightPositions[256];
 uniform vec3 lightColors[256];
@@ -125,7 +126,7 @@ float checkShadows(int i)
 
 float checkGlobalShadows(int i)
 {
-    if (noShadows)
+    if (noGlobalShadows)
         return 1.0f;
     vec4 projection = directionalLightsMatrices[i] * vec4(worldPosition, 1.0f);
     projection.xyz = projection.xyz * 0.5f + 0.5f;
@@ -180,11 +181,11 @@ void main()
     {
         light += calculateLight(normal, viewDirection, F0, lightPositions[i], lightColors[i], a, r, m) * checkShadows(i);
     }
-//
-//    for (int i = 0; i < directionalLightsCount; ++i)
-//    {
-//        light += calculateDirectionalLight(normal, viewDirection, F0, directionalLights[i], directionalLightsColor[i], a, r, m) * checkGlobalShadows(i);
-//    }
+
+    for (int i = 0; i < directionalLightsCount; ++i)
+    {
+        light += calculateDirectionalLight(normal, viewDirection, F0, directionalLights[i], directionalLightsColor[i], a, r, m) * checkGlobalShadows(i);
+    }
 
     vec3 ambient = vec3(0.0f);
 

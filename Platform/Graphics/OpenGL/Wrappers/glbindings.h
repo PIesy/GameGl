@@ -8,7 +8,7 @@
 namespace gl
 {
 
-    namespace vertexarray
+    namespace vertex_array
     {
         void generate(int count, GLuint* vertexArrays);
         void bind(GLuint vertexArray);
@@ -131,6 +131,14 @@ namespace gl
         void getParameter(GLuint programPipeline, GLenum parameterName, GLint* result);
     }
 
+    namespace sync
+    {
+        GLsync createFence();
+        void erase(GLsync sync);
+        void clientWait(GLsync sync, GLbitfield flags, uint64_t timeout);
+        void wait(GLsync sync, GLbitfield flags, uint64_t timeout);
+    }
+
     void drawElements(GLenum mode, size_t count, GLenum type, const void* indices);
     void setViewport(unsigned width, unsigned height, int offsetX = 0, int offsetY = 0);
     void clear(GLbitfield mask);
@@ -138,7 +146,7 @@ namespace gl
     void setBlendFunction(GLenum sfactor, GLenum dfactor);
     void enable(GLenum capability);
     void disable(GLenum capability);
-
+    void flush();
 }
 
 #endif // GLBINDINGS_H

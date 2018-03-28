@@ -135,7 +135,7 @@ RenderStepWrapper StepBuilder::buildPbrRendererStep(World& world, const std::vec
         step.genericTextures.push_back(wrapper.renderStep.targets.front().texture);
     step.targets.push_back(RenderTarget(hdrTexture));
     result.renderStep = step;
-    result.processor = [program](World& world, RenderStep& step, unsigned baseStepId, int invocationId, AdditionalStepParameters& parameters)
+    result.processor = [program, dependencies](World& world, RenderStep& step, unsigned baseStepId, int invocationId, AdditionalStepParameters& parameters)
     {
         if (!parameters.customAttributes.empty())
             step.attributes = parameters.customAttributes;
@@ -148,6 +148,7 @@ RenderStepWrapper StepBuilder::buildPbrRendererStep(World& world, const std::vec
             lightColors.push_back(light.GetLightColor());
             lightFarPlanes.push_back(light.GetMaxDistance());
         }
+
         std::vector<Vec3> directionalLights;
         std::vector<Vec3> directionalLightsColor;
         std::vector<Mat4> directionalTranslationMatrices;

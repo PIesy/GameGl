@@ -14,11 +14,10 @@ class EngineInterface;
 
 struct WorkerData
 {
-    EngineInterface* core;
-    std::condition_variable hasWork;
+    EngineInterface* core = nullptr;
     SharedTaskList taskList;
     std::string name = "";
-    bool terminate = false;
+    std::atomic_bool terminate{false};
     std::atomic_bool isRunning{false};
     std::atomic_bool busy{false};
 };
@@ -33,10 +32,10 @@ public:
     explicit Worker(const std::string& name);
     Worker(const std::string& name, SharedTaskList& taskList);
     Worker(const Worker&) = delete;
-    Worker(Worker&& arg);
-    ~Worker();
-    void Execute(const Invokable& invokable) override;
-    void Execute(Invokable&& invokable) override;
+    Worker(Worker&& arg) noexcept;
+    ~Worker() override;
+    bool Execute(const Invokable& invokable) override;
+    bool Execute(Invokable&& invokable) override;
     void Join();
     bool IsBusy();
     void Terminate();
